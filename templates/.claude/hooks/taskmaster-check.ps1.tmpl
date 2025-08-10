@@ -1,0 +1,165 @@
+#!/usr/bin/env pwsh
+# Task Master AI Availability Check and Integration
+# This hook ensures Task Master is available and configured
+
+param(
+    [string]$Command = "check"
+)
+
+$ErrorActionPreference = "Stop"
+
+# Configuration
+$TASKMASTER_CLI = "{{TASKMASTER_CLI}}"
+$PROJECT_NAME = "{{PROJECT_NAME}}"
+
+function Test-TaskMasterAvailable {
+    try {
+        # Check if task-master CLI is available
+        $result = & $TASKMASTER_CLI --version 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            return $false
+        }
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+function Test-TaskMasterProject {
+    try {
+        # Check if current directory has Task Master initialized
+        if (-not (Test-Path ".taskmaster")) {
+            return $false
+        }
+        
+        # Check if tasks.json exists
+        if (-not (Test-Path ".taskmaster/tasks/tasks.json")) {
+            return $false
+        }
+        
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+function Initialize-TaskMaster {
+    Write-Host "🚀 Initializing Task Master for $PROJECT_NAME..." -ForegroundColor Cyan
+    
+    # Initialize Task Master
+    & $TASKMASTER_CLI init -y
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to initialize Task Master"
+    }
+    
+    # Set models
+    & $TASKMASTER_CLI models --set-main opus
+    & $TASKMASTER_CLI models --set-fallback sonnet
+    
+    Write-Host "✅ Task Master initialized successfully" -ForegroundColor Green
+}
+
+function Get-CurrentTask {
+    try {
+        $nextTask = & $TASKMASTER_CLI next --json 2>$null | ConvertFrom-Json
+        return $nextTask
+    }
+    catch {
+        return $null
+    }
+}
+
+function Get-TaskById {
+    param([string]$TaskId)
+    try {
+        $task = & $TASKMASTER_CLI show $TaskId --json 2>$null | ConvertFrom-Json
+        return $task
+    }
+    catch {
+        return $null
+    }
+}
+
+function Create-TaskFromRequest {
+    param(
+        [string]$Title,
+        [string]$Description,
+        [string]$Type = "feature",
+        [int]$Priority = 2
+    )
+    
+    $taskJson = @{
+        title = $Title
+        description = $Description
+        type = $Type
+        priority = $Priority
+        status = "todo"
+    } | ConvertTo-Json
+    
+    $result = $taskJson | & $TASKMASTER_CLI create --json
+    return $result | ConvertFrom-Json
+}
+
+# Main execution
+switch ($Command) {
+    "check" {
+        # Check Task Master availability
+        if (-not (Test-TaskMasterAvailable)) {
+            Write-Error "❌ TASK MASTER NOT AVAILABLE!"
+            Write-Host "`nTask Master AI is required for BMAD workflows." -ForegroundColor Red
+            Write-Host "Please install it with:" -ForegroundColor Yellow
+            Write-Host "  npm install -g task-master-ai" -ForegroundColor Cyan
+            Write-Host "`nOr if using npx:" -ForegroundColor Yellow
+            Write-Host "  npm install task-master-ai" -ForegroundColor Cyan
+            exit 1
+        }
+        
+        # Check project initialization
+        if (-not (Test-TaskMasterProject)) {
+            Write-Warning "⚠️ Task Master not initialized in this project"
+            Write-Host "Initializing now..." -ForegroundColor Yellow
+            Initialize-TaskMaster
+        }
+        
+        Write-Host "✅ Task Master is available and configured" -ForegroundColor Green
+        
+        # Show current task status
+        $current = Get-CurrentTask
+        if ($current) {
+            Write-Host "`n📋 Current Task: $($current.title)" -ForegroundColor Cyan
+            Write-Host "   ID: $($current.id) | Status: $($current.status) | Priority: $($current.priority)"
+        } else {
+            Write-Host "`n📋 No tasks currently assigned" -ForegroundColor Gray
+        }
+    }
+    
+    "init" {
+        Initialize-TaskMaster
+    }
+    
+    "current" {
+        $current = Get-CurrentTask
+        if ($current) {
+            $current | ConvertTo-Json -Depth 10
+        } else {
+            Write-Host "No current task" -ForegroundColor Gray
+        }
+    }
+    
+    "create" {
+        # Used by workflows to create tasks automatically
+        $title = $env:TASK_TITLE
+        $description = $env:TASK_DESCRIPTION
+        if ($title) {
+            $task = Create-TaskFromRequest -Title $title -Description $description
+            Write-Host "✅ Created task: $($task.id) - $($task.title)" -ForegroundColor Green
+        }
+    }
+    
+    default {
+        Write-Error "Unknown command: $Command"
+        exit 1
+    }
+}

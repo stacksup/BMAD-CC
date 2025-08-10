@@ -16,7 +16,36 @@ Capture STORY_ID/title/desc.
   - backend: http://localhost:{{BACKEND_PORT}}/health (retry)
   - frontend: http://localhost:{{FRONTEND_PORT}}
 
-## 2) SM → 3) PO → 4) User → 5) Dev → 6) QA → 7) Docs → 8) Learnings → 9) Git
+## 2) SM → 3) PO → 4) User → 5) Dev → 6) QA
+
+Follow standard story development flow as per story-cycle.
+
+## 7) Documentation Updates
+
+**Load Documentation Agent:**
+```
+Load the doc-agent to ensure comprehensive documentation updates.
+```
+
+**Automatic Documentation:**
+```bash
+# Run documentation updater
+./.claude/hooks/documentation-updater.ps1 -Action update \
+    -TaskId "$STORY_ID" \
+    -TaskTitle "$STORY_TITLE" \
+    -ChangeType "feature"
+```
+
+**Documentation Checklist:**
+- [ ] CHANGELOG.md updated with task completion
+- [ ] README.md updated if new features/dependencies
+- [ ] Story notes created in docs/story-notes/
+- [ ] API documentation updated if endpoints changed
+- [ ] Docker documentation updated if containers modified
+
+## 8) Learnings → 9) Git
+
+Capture lessons and commit changes with proper documentation.
 
 ## 10) Docker Verify & Restart
 - Build:
