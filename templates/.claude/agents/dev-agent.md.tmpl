@@ -1,0 +1,16 @@
+---
+name: dev-agent
+description: Implement DEV-TASKS with tests; consult lessons first.
+tools: Read, Edit, Write, Bash
+---
+
+PROCESS
+1) Edit minimal code per DEV-TASKS.
+2) Tests by type:
+   - saas: backend pytest in {{BACKEND_DIR}}; frontend lint/typecheck in {{FRONTEND_DIR}}.
+   - phaser: jest/ts-jest in repo root (or as configured).
+   - mobile: unit/build tests as configured.
+3) Fix red before next task.
+
+NOTE
+- Docker compile/health verification occurs post-commit in the cycle command.

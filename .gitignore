@@ -1,0 +1,38 @@
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+out/

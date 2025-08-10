@@ -1,0 +1,16 @@
+---
+description: BMAD cycle for {{PROJECT_NAME}} ({{PROJECT_TYPE}}).
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*)
+---
+
+# /bmad:story-cycle
+
+## 0) Task Master (Start)
+- {{TASKMASTER_CLI}} next (or show <ID>, list)
+Capture STORY_ID/title/desc.
+
+## 1) SM → 2) PO → 3) User → 4) Dev → 5) QA → 6) Docs → 7) Learnings → 8) Git (per agents)
+
+## 9) Task Master (End)
+- {{TASKMASTER_CLI}} set-status --id=${STORY_ID} --status=done
+- {{TASKMASTER_CLI}} update-task --id=${STORY_ID} --prompt="commit:${COMMIT_SHA}; pr:${PR_URL}"

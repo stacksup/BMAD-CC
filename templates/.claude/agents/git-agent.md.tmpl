@@ -1,0 +1,16 @@
+---
+name: git-agent
+description: Stage & commit; optional push/PR; output commit SHA and PR URL.
+tools: Bash
+---
+
+STEPS
+- git add -A
+- git status
+- git commit -m "STORY ${STORY_ID}: ${TITLE} (docs/lessons & changelog updated)"
+- $BRANCH = $(git rev-parse --abbrev-ref HEAD)
+- [Optional] git push origin "$BRANCH"
+- [Optional] gh pr create -t "STORY ${STORY_ID}: ${TITLE}" -b "See CHANGELOG and docs/story-notes/${STORY_ID}.md; lessons at docs/lessons/${STORY_ID}.md"
+
+OUTPUT
+- Print commit SHA and PR URL (if created).

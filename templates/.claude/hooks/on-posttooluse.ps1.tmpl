@@ -1,0 +1,14 @@
+$ErrorActionPreference = "SilentlyContinue"
+Set-Location -Path (Get-Location)
+
+if (Test-Path "{{FRONTEND_DIR}}\package.json") {
+  Push-Location "{{FRONTEND_DIR}}"
+  try { npm run -s lint | Out-Host } catch {}
+  try { npm run -s typecheck | Out-Host } catch {}
+  Pop-Location
+}
+
+if (Test-Path "{{BACKEND_DIR}}") {
+  try { python --version | Out-Host } catch {}
+}
+exit 0
