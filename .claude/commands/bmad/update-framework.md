@@ -19,10 +19,7 @@ if (Test-Path "scripts\update-framework.ps1") {
     
     # Download and run update script directly from GitHub
     try {
-        $updateScript = Invoke-RestMethod -Uri "https://raw.githubusercontent.com/YOUR_USERNAME/BMAD-CC/main/scripts/update-framework.ps1"
-        
-        # Replace YOUR_USERNAME with actual GitHub username in the script
-        $updateScript = $updateScript -replace "YOUR_USERNAME", "YOUR_ACTUAL_GITHUB_USERNAME"
+        $updateScript = Invoke-RestMethod -Uri "https://raw.githubusercontent.com/stacksup/BMAD-CC/main/scripts/update-framework.ps1"
         
         # Execute the update script
         Invoke-Expression $updateScript

@@ -49,7 +49,7 @@ Write-Host "🔍 Checking GitHub for updates..." -ForegroundColor Yellow
 
 try {
     # Get latest commit hash as version
-    $githubApi = "https://api.github.com/repos/YOUR_USERNAME/BMAD-CC/commits/main"
+    $githubApi = "https://api.github.com/repos/stacksup/BMAD-CC/commits/main"
     $response = Invoke-RestMethod -Uri $githubApi -ErrorAction Stop
     $latestVersion = $response.sha.Substring(0, 8)
     $latestMessage = $response.commit.message.Split("`n")[0]
@@ -81,13 +81,13 @@ Write-Host "📦 Applying updates..." -ForegroundColor Cyan
 # Simple approach: Download specific files we know we need
 $filesToUpdate = @(
     @{ 
-        url = "https://raw.githubusercontent.com/YOUR_USERNAME/BMAD-CC/main/templates/.claude/agents/learnings-agent.md.tmpl"
+        url = "https://raw.githubusercontent.com/stacksup/BMAD-CC/main/templates/.claude/agents/learnings-agent.md.tmpl"
         dest = ".claude\agents\learnings-agent.md"
         desc = "Learnings Agent"
         backup = $true
     },
     @{ 
-        url = "https://raw.githubusercontent.com/YOUR_USERNAME/BMAD-CC/main/templates/docs/lessons/README.md.tmpl"
+        url = "https://raw.githubusercontent.com/stacksup/BMAD-CC/main/templates/docs/lessons/README.md.tmpl"
         dest = "docs\lessons\README.md"
         desc = "Lessons System README"
         backup = $false
@@ -254,8 +254,8 @@ if (-not (Test-Path "docs\lessons")) {
     
     # Download key lesson files
     $lessonFiles = @(
-        "https://raw.githubusercontent.com/YOUR_USERNAME/BMAD-CC/main/templates/docs/lessons/index.md.tmpl",
-        "https://raw.githubusercontent.com/YOUR_USERNAME/BMAD-CC/main/templates/scripts/lessons/search-lessons.ps1.tmpl"
+        "https://raw.githubusercontent.com/stacksup/BMAD-CC/main/templates/docs/lessons/index.md.tmpl",
+        "https://raw.githubusercontent.com/stacksup/BMAD-CC/main/templates/scripts/lessons/search-lessons.ps1.tmpl"
     )
     
     $lessonFiles | ForEach-Object {
