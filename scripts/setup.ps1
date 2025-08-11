@@ -47,6 +47,12 @@ New-Item -ItemType Directory -Force -Path (Join-Path $claudeDir "agents") | Out-
 New-Item -ItemType Directory -Force -Path (Join-Path $claudeDir "commands\bmad") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $claudeDir "hooks") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\lessons") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\lessons\templates") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\lessons\project-implementation") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\lessons\bmad-workflow") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\lessons\technology-patterns") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\lessons\troubleshooting") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "scripts\lessons") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\story-notes") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\templates") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\validation") | Out-Null
@@ -68,6 +74,8 @@ function Apply-Template {
     "{{BACKEND_PORT}}"       = "$BackendPort"
     "{{DOCKER_COMPOSE_FILE}}"= $DockerComposeFile
     "{{TASKMASTER_CLI}}"     = $TaskmasterCLI
+    "{{DATE}}"               = (Get-Date -Format "yyyy-MM-dd")
+    "{{AGENT_NAME}}"         = "System Setup"
   }
 
   foreach ($k in $map.Keys) {
@@ -147,7 +155,20 @@ $map = @(
   
   @{ src = Join-Path $templatesRoot "data\elicitation-methods.md.tmpl";       dst = Join-Path $ProjectDir "docs\data\elicitation-methods.md" },
   @{ src = Join-Path $templatesRoot "data\brainstorming-techniques.md.tmpl"; dst = Join-Path $ProjectDir "docs\data\brainstorming-techniques.md" },
-  @{ src = Join-Path $templatesRoot "data\technical-preferences.md.tmpl";     dst = Join-Path $ProjectDir "docs\data\technical-preferences.md" }
+  @{ src = Join-Path $templatesRoot "data\technical-preferences.md.tmpl";     dst = Join-Path $ProjectDir "docs\data\technical-preferences.md" },
+
+  # Lessons Learned System Templates
+  @{ src = Join-Path $templatesRoot "docs\lessons\index.md.tmpl";             dst = Join-Path $ProjectDir "docs\lessons\index.md" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\templates\project-lesson.md.tmpl";     dst = Join-Path $ProjectDir "docs\lessons\templates\project-lesson.md.tmpl" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\templates\workflow-lesson.md.tmpl";    dst = Join-Path $ProjectDir "docs\lessons\templates\workflow-lesson.md.tmpl" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\templates\technology-lesson.md.tmpl";  dst = Join-Path $ProjectDir "docs\lessons\templates\technology-lesson.md.tmpl" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\templates\troubleshooting-lesson.md.tmpl"; dst = Join-Path $ProjectDir "docs\lessons\templates\troubleshooting-lesson.md.tmpl" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\project-implementation\metadata.json.tmpl"; dst = Join-Path $ProjectDir "docs\lessons\project-implementation\metadata.json" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\bmad-workflow\metadata.json.tmpl";     dst = Join-Path $ProjectDir "docs\lessons\bmad-workflow\metadata.json" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\technology-patterns\metadata.json.tmpl"; dst = Join-Path $ProjectDir "docs\lessons\technology-patterns\metadata.json" },
+  @{ src = Join-Path $templatesRoot "docs\lessons\troubleshooting\metadata.json.tmpl";   dst = Join-Path $ProjectDir "docs\lessons\troubleshooting\metadata.json" },
+  @{ src = Join-Path $templatesRoot "scripts\lessons\search-lessons.ps1.tmpl";           dst = Join-Path $ProjectDir "scripts\lessons\search-lessons.ps1" },
+  @{ src = Join-Path $templatesRoot ".claude\hooks\lesson-extraction-gate.ps1.tmpl";    dst = Join-Path $claudeDir "hooks\lesson-extraction-gate.ps1" }
 )
 
 foreach ($item in $map) { if (Test-Path $item.src) { Apply-Template -TemplatePath $item.src -DestPath $item.dst } }

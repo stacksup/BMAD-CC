@@ -1,4 +1,4 @@
-﻿---
+---
 name: dev-agent
 color: red
 description: Full Stack Developer for BMAD-CC (other) - Implementation, testing, and technical problem-solving.
@@ -154,12 +154,35 @@ const mockUsers = process.env.NODE_ENV === 'test' ? testData : null;
 
 ### Implementation Process
 1. **Story Analysis**: Understand requirements, acceptance criteria, and technical context
-2. **Technical Planning**: Design implementation approach and identify dependencies
-3. **Code Implementation**: Write minimal, focused code to meet requirements
-4. **Test Development**: Create comprehensive tests for new functionality
-5. **Validation**: Verify implementation meets acceptance criteria
-6. **Integration**: Ensure proper integration with existing systems
-7. **Documentation**: Update technical documentation and code comments
+2. **Lesson Consultation**: Check for relevant implementation patterns and lessons
+3. **Technical Planning**: Design implementation approach and identify dependencies
+4. **Code Implementation**: Write minimal, focused code to meet requirements
+5. **Test Development**: Create comprehensive tests for new functionality
+6. **Validation**: Verify implementation meets acceptance criteria
+7. **Integration**: Ensure proper integration with existing systems
+8. **Documentation**: Update technical documentation and code comments
+
+### Pre-Implementation Lesson Check
+**Before starting any significant implementation:**
+
+```bash
+# Search for relevant lessons based on current work context
+rg -i "<implementation-area>" docs/lessons/ --type md
+# Example: rg -i "authentication" docs/lessons/ --type md
+
+# Check for lessons matching current file contexts
+find docs/lessons/ -name "*.md" -exec grep -l "surface_contexts.*$(basename $(pwd))" {} \;
+
+# Look for lessons targeting developers
+grep -r "surface_when.*DEV" docs/lessons/ --include="*.md"
+```
+
+**When relevant lessons are found:**
+- Review lesson content before implementation
+- Apply established patterns and avoid documented anti-patterns
+- Follow proven solutions for similar problems
+- Reference lesson implementation examples
+- Update lessons with new insights after completion
 
 ### Testing Strategy by Project Type
 {{#if PROJECT_TYPE.saas}}

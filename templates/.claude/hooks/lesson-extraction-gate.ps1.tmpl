@@ -1,0 +1,304 @@
+#!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+    Quality gate to ensure lessons are extracted from story completion
+.DESCRIPTION
+    This hook validates that lessons have been extracted during story completion
+    and ensures the lessons learned system is being used effectively.
+.PARAMETER EventType
+    The event that triggered this hook (e.g., story-completion, pre-git-commit)
+.PARAMETER StoryId
+    The story ID being completed (optional)
+#>
+
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$EventType,
+    [string]$StoryId = $null
+)
+
+$ErrorActionPreference = "Stop"
+
+# Configuration
+$LessonsDir = "docs/lessons"
+$IndexFile = "$LessonsDir/index.md"
+$MinutesThreshold = 120  # 2 hours - lessons should be created within this timeframe
+
+Write-Host "🔍 Lesson Extraction Quality Gate - $EventType" -ForegroundColor Cyan
+
+# Function to check if lessons directory exists
+function Test-LessonsSystemSetup {
+    if (-not (Test-Path $LessonsDir)) {
+        Write-Host "⚠️  Lessons directory not found. Lessons system may not be initialized." -ForegroundColor Yellow
+        return $false
+    }
+    
+    if (-not (Test-Path $IndexFile)) {
+        Write-Host "⚠️  Lessons index not found. Lessons system may not be initialized." -ForegroundColor Yellow
+        return $false
+    }
+    
+    return $true
+}
+
+# Function to find recent lesson files
+function Get-RecentLessons {
+    param([int]$Minutes = 120)
+    
+    $cutoffTime = (Get-Date).AddMinutes(-$Minutes)
+    $recentLessons = @()
+    
+    if (Test-Path $LessonsDir) {
+        Get-ChildItem -Path $LessonsDir -Recurse -Include "*.md" -Exclude "index.md", "README.md" | 
+            Where-Object { $_.LastWriteTime -gt $cutoffTime } |
+            ForEach-Object {
+                $recentLessons += [PSCustomObject]@{
+                    Name = $_.BaseName
+                    Path = $_.FullName.Replace((Get-Location).Path + "\", "")
+                    LastModified = $_.LastWriteTime
+                    Category = if ($_.Directory.Name -match "(project-implementation|bmad-workflow|technology-patterns|troubleshooting)") { $_.Directory.Name } else { "unknown" }
+                }
+            }
+    }
+    
+    return $recentLessons | Sort-Object LastModified -Descending
+}
+
+# Function to analyze story notes for lesson extraction opportunities
+function Test-StoryLessonOpportunities {
+    $storyNotesPattern = "docs/story-notes/*.md"
+    $opportunities = @()
+    
+    if (Test-Path "docs/story-notes/") {
+        Get-ChildItem -Path "docs/story-notes/" -Include "*.md" | ForEach-Object {
+            $content = Get-Content $_.FullName -Raw
+            
+            # Look for indicators that lessons should be extracted
+            $indicators = @(
+                "challenge",
+                "problem", 
+                "issue",
+                "error",
+                "fix",
+                "solution",
+                "performance",
+                "optimization",
+                "anti-pattern",
+                "learned",
+                "discovery"
+            )
+            
+            $foundIndicators = @()
+            foreach ($indicator in $indicators) {
+                if ($content -match $indicator) {
+                    $foundIndicators += $indicator
+                }
+            }
+            
+            if ($foundIndicators.Count -gt 2) {
+                $opportunities += [PSCustomObject]@{
+                    File = $_.Name
+                    Path = $_.FullName.Replace((Get-Location).Path + "\", "")
+                    Indicators = $foundIndicators -join ", "
+                    LastModified = $_.LastWriteTime
+                }
+            }
+        }
+    }
+    
+    return $opportunities
+}
+
+# Function to check if lesson index was recently updated
+function Test-LessonIndexUpdated {
+    param([int]$Minutes = 60)
+    
+    if (-not (Test-Path $IndexFile)) {
+        return $false
+    }
+    
+    $indexLastModified = (Get-Item $IndexFile).LastWriteTime
+    $cutoffTime = (Get-Date).AddMinutes(-$Minutes)
+    
+    return $indexLastModified -gt $cutoffTime
+}
+
+# Function to validate lesson quality
+function Test-LessonQuality {
+    param([string]$LessonPath)
+    
+    $issues = @()
+    
+    if (-not (Test-Path $LessonPath)) {
+        return @("File not found")
+    }
+    
+    $content = Get-Content $LessonPath -Raw
+    
+    # Check for required YAML frontmatter
+    if ($content -notmatch '^---\s*\n.*\n---') {
+        $issues += "Missing YAML frontmatter"
+    }
+    
+    # Check for required sections
+    $requiredSections = @(
+        "## Context & Trigger",
+        "## Problem Description", 
+        "## Solution Implementation",
+        "## Impact Assessment"
+    )
+    
+    foreach ($section in $requiredSections) {
+        if ($content -notmatch [regex]::Escape($section)) {
+            $issues += "Missing required section: $section"
+        }
+    }
+    
+    # Check for code examples
+    if ($content -notmatch "```") {
+        $issues += "Missing code examples"
+    }
+    
+    # Check for metadata fields
+    $requiredMetadata = @("id", "title", "category", "tags", "surface_when", "surface_contexts")
+    foreach ($field in $requiredMetadata) {
+        if ($content -notmatch "$field\s*:") {
+            $issues += "Missing metadata field: $field"
+        }
+    }
+    
+    return $issues
+}
+
+# Main quality gate logic
+function Invoke-LessonExtractionGate {
+    Write-Host "Checking lessons system setup..." -ForegroundColor Gray
+    
+    $systemReady = Test-LessonsSystemSetup
+    if (-not $systemReady) {
+        Write-Host "ℹ️  Lessons system not fully initialized. Consider running setup to enable lesson extraction." -ForegroundColor Blue
+        Write-Host "✅ Gate passed - lesson extraction optional when system not initialized." -ForegroundColor Green
+        return
+    }
+    
+    Write-Host "Analyzing recent lesson activity..." -ForegroundColor Gray
+    $recentLessons = Get-RecentLessons -Minutes $MinutesThreshold
+    
+    Write-Host "Checking for lesson extraction opportunities..." -ForegroundColor Gray  
+    $opportunities = Test-StoryLessonOpportunities
+    
+    # Report findings
+    if ($recentLessons.Count -gt 0) {
+        Write-Host "✅ Found $($recentLessons.Count) recent lesson(s):" -ForegroundColor Green
+        foreach ($lesson in $recentLessons) {
+            Write-Host "   📚 $($lesson.Name) [$($lesson.Category)]" -ForegroundColor White
+            Write-Host "      $($lesson.Path)" -ForegroundColor Gray
+        }
+        
+        # Validate lesson quality
+        Write-Host "Validating lesson quality..." -ForegroundColor Gray
+        $qualityIssues = @()
+        foreach ($lesson in $recentLessons) {
+            $issues = Test-LessonQuality -LessonPath $lesson.Path
+            if ($issues.Count -gt 0) {
+                $qualityIssues += [PSCustomObject]@{
+                    Lesson = $lesson.Name
+                    Issues = $issues
+                }
+            }
+        }
+        
+        if ($qualityIssues.Count -eq 0) {
+            Write-Host "✅ All recent lessons meet quality standards." -ForegroundColor Green
+        } else {
+            Write-Host "⚠️  Quality issues found in lessons:" -ForegroundColor Yellow
+            foreach ($issue in $qualityIssues) {
+                Write-Host "   📚 $($issue.Lesson):" -ForegroundColor White
+                foreach ($problem in $issue.Issues) {
+                    Write-Host "      - $problem" -ForegroundColor Red
+                }
+            }
+        }
+    } else {
+        Write-Host "⚠️  No recent lessons found in the last $([math]::Round($MinutesThreshold/60, 1)) hours." -ForegroundColor Yellow
+    }
+    
+    if ($opportunities.Count -gt 0) {
+        Write-Host "💡 Potential lesson extraction opportunities found:" -ForegroundColor Yellow
+        foreach ($opp in $opportunities) {
+            Write-Host "   📝 $($opp.File)" -ForegroundColor White
+            Write-Host "      Indicators: $($opp.Indicators)" -ForegroundColor Gray
+            Write-Host "      Path: $($opp.Path)" -ForegroundColor Gray
+        }
+        
+        if ($recentLessons.Count -eq 0) {
+            Write-Host ""
+            Write-Host "🤔 Consider extracting lessons from these story notes." -ForegroundColor Cyan
+            Write-Host "   Use the learnings-agent to create lessons from implementation challenges." -ForegroundColor Gray
+            
+            # Check environment variable to see if we should enforce
+            if ($env:BMAD_ENFORCE_LESSON_EXTRACTION -eq "1") {
+                Write-Host "❌ Lesson extraction required but not completed." -ForegroundColor Red
+                Write-Host "   Set BMAD_ENFORCE_LESSON_EXTRACTION=0 to make this optional." -ForegroundColor Gray
+                exit 1
+            }
+        }
+    }
+    
+    # Check if lesson index was updated
+    if ($recentLessons.Count -gt 0) {
+        $indexUpdated = Test-LessonIndexUpdated -Minutes 30
+        if (-not $indexUpdated) {
+            Write-Host "⚠️  Lesson index may not reflect recent lesson additions." -ForegroundColor Yellow
+            Write-Host "   Consider updating docs/lessons/index.md with new lessons." -ForegroundColor Gray
+        } else {
+            Write-Host "✅ Lesson index appears to be up to date." -ForegroundColor Green
+        }
+    }
+    
+    Write-Host ""
+    Write-Host "📊 Lesson Extraction Summary:" -ForegroundColor Cyan
+    Write-Host "   Recent lessons: $($recentLessons.Count)" -ForegroundColor White
+    Write-Host "   Extraction opportunities: $($opportunities.Count)" -ForegroundColor White
+    Write-Host "   Quality issues: $($qualityIssues.Count)" -ForegroundColor White
+    
+    # Final gate decision
+    if ($env:BMAD_ENFORCE_LESSON_EXTRACTION -eq "1" -and $recentLessons.Count -eq 0 -and $opportunities.Count -gt 0) {
+        Write-Host ""
+        Write-Host "❌ Quality gate failed: Lesson extraction required but not completed." -ForegroundColor Red
+        Write-Host "   Extract lessons using the learnings-agent before proceeding." -ForegroundColor Red
+        exit 1
+    }
+    
+    Write-Host ""
+    Write-Host "✅ Lesson extraction quality gate passed." -ForegroundColor Green
+    
+    if ($recentLessons.Count -eq 0 -and $opportunities.Count -gt 0) {
+        Write-Host "💡 Tip: Consider extracting lessons to improve team knowledge for future stories." -ForegroundColor Blue
+    }
+}
+
+# Execute based on event type
+switch ($EventType) {
+    "story-completion" {
+        Write-Host "Validating lesson extraction for story completion..." -ForegroundColor Cyan
+        Invoke-LessonExtractionGate
+    }
+    "pre-git-commit" {
+        Write-Host "Quick lesson extraction check before commit..." -ForegroundColor Cyan
+        $recentLessons = Get-RecentLessons -Minutes 30
+        if ($recentLessons.Count -gt 0) {
+            Write-Host "✅ Recent lesson activity detected." -ForegroundColor Green
+        }
+    }
+    "quality-gate" {
+        Write-Host "Full lesson extraction quality assessment..." -ForegroundColor Cyan
+        Invoke-LessonExtractionGate
+    }
+    default {
+        Write-Host "ℹ️  Unknown event type: $EventType" -ForegroundColor Blue
+        Write-Host "   Supported events: story-completion, pre-git-commit, quality-gate" -ForegroundColor Gray
+    }
+}
+
+Write-Host "🏁 Lesson extraction gate completed." -ForegroundColor Green
