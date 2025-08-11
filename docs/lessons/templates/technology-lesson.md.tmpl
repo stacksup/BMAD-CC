@@ -1,0 +1,356 @@
+---
+id: TECH-###-descriptive-title
+title: "Technology Pattern Title"
+category: technology-patterns
+tags: [technology, pattern, architecture]
+project_type: [{{PROJECT_TYPE}}, other]
+difficulty: intermediate
+impact: high
+created: {{DATE}}
+updated: {{DATE}}
+author: {{AGENT_NAME}}
+surface_when: ["ARCHITECT", "DEV", "QA"]
+surface_contexts: ["src/*", "config/*", "infrastructure/*"]
+related_lessons: []
+confidence: 0.95
+usage_count: 0
+success_rate: 1.0
+technology_stack: [{{TECH_STACK}}]
+architecture_layer: ["frontend", "backend", "database", "infrastructure"]
+---
+
+# Technology Pattern Title
+
+## Technology Context & Application
+
+**When This Pattern Applies:**
+- Describe specific technology scenarios where this pattern is valuable
+- Include architecture decisions, scalability requirements, or integration needs
+- Specify technology stack, project size, or performance requirements
+
+**Technology Problem Indicators:**
+- List symptoms that suggest this pattern is needed
+- Include performance bottlenecks, scalability issues, or maintenance problems
+- Describe error patterns or architectural limitations
+
+**Technology Stack Requirements:**
+- {{FRONTEND_TECH}} for frontend implementation
+- {{BACKEND_TECH}} for backend services
+- {{DATABASE_TECH}} for data persistence
+- {{INFRASTRUCTURE_TECH}} for deployment and operations
+
+## Technology Problem Analysis
+
+### Anti-Pattern: Problematic Technology Approach
+```javascript
+// WRONG: Ineffective technology implementation
+const problematicApproach = {
+  // Example showing common technology mistakes
+  config: {
+    // Poor configuration practices
+    database: {
+      connectionLimit: 1, // Too restrictive
+      timeout: 30000      // Too long for user experience
+    }
+  },
+  // Code that demonstrates the technology problem
+  implementation: function() {
+    // Inefficient or problematic approach
+  }
+};
+```
+
+**Technology Issues:**
+- List specific technical problems with the anti-pattern
+- Include performance, security, scalability, or maintainability concerns
+- Explain why this approach creates technical debt or operational issues
+
+### Technical Root Cause Analysis
+1. **Architecture Issues**: Fundamental design problems
+2. **Configuration Problems**: Incorrect setup or optimization
+3. **Integration Challenges**: Compatibility or communication issues
+4. **Scalability Limitations**: Constraints that prevent growth
+
+## Recommended Technology Solution
+
+### Optimal Technology Pattern
+```javascript
+// CORRECT: Effective technology implementation
+const recommendedPattern = {
+  config: {
+    // Optimized configuration
+    database: {
+      connectionLimit: 20,     // Appropriate for load
+      timeout: 5000,          // Reasonable timeout
+      retryAttempts: 3,       // Resilience
+      ssl: true               // Security
+    },
+    cache: {
+      ttl: 3600,              // 1 hour cache
+      maxSize: '100mb'        // Memory management
+    }
+  },
+  
+  // Implementation following best practices
+  implementation: async function(data) {
+    try {
+      // Proper error handling and resource management
+      const result = await this.processWithRetry(data);
+      return result;
+    } catch (error) {
+      // Appropriate error handling
+      throw new TechnologyError('Processing failed', error);
+    }
+  }
+};
+```
+
+### Architecture Implementation
+
+**Infrastructure Setup:**
+```yaml
+# Docker configuration example
+version: '3.8'
+services:
+  app:
+    build: .
+    environment:
+      - NODE_ENV=production
+      - DB_CONNECTION_LIMIT=20
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+      - cache
+  
+  database:
+    image: postgres:14
+    environment:
+      - POSTGRES_DB={{PROJECT_NAME}}
+      - POSTGRES_CONNECTION_LIMIT=100
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  cache:
+    image: redis:7
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+```
+
+**Backend Service Implementation:**
+```javascript
+// Service layer with proper technology patterns
+class TechnologyService {
+  constructor(config) {
+    this.config = config;
+    this.db = new DatabaseConnection(config.database);
+    this.cache = new CacheManager(config.cache);
+    this.metrics = new MetricsCollector();
+  }
+  
+  async processRequest(request) {
+    const startTime = Date.now();
+    
+    try {
+      // Check cache first
+      const cached = await this.cache.get(request.cacheKey);
+      if (cached) {
+        this.metrics.incrementCacheHit();
+        return cached;
+      }
+      
+      // Process request with database
+      const result = await this.db.query(request.query, request.params);
+      
+      // Cache result for future requests
+      await this.cache.set(request.cacheKey, result, this.config.cache.ttl);
+      
+      this.metrics.recordProcessingTime(Date.now() - startTime);
+      return result;
+      
+    } catch (error) {
+      this.metrics.incrementError(error.type);
+      throw error;
+    }
+  }
+}
+```
+
+**Frontend Integration:**
+```javascript
+// Frontend code that efficiently uses the backend pattern
+class TechnologyClient {
+  constructor(apiUrl) {
+    this.apiUrl = apiUrl;
+    this.requestCache = new Map();
+    this.retryCount = 3;
+  }
+  
+  async fetchWithCaching(endpoint, options = {}) {
+    const cacheKey = `${endpoint}:${JSON.stringify(options)}`;
+    
+    // Check client-side cache
+    if (this.requestCache.has(cacheKey)) {
+      const cached = this.requestCache.get(cacheKey);
+      if (Date.now() - cached.timestamp < 60000) { // 1 minute
+        return cached.data;
+      }
+    }
+    
+    // Make request with retry logic
+    const data = await this.requestWithRetry(endpoint, options);
+    
+    // Cache successful response
+    this.requestCache.set(cacheKey, {
+      data,
+      timestamp: Date.now()
+    });
+    
+    return data;
+  }
+}
+```
+
+## Implementation Guidelines
+
+### Technology Setup Checklist
+- [ ] Infrastructure components properly configured
+- [ ] Database connections optimized for expected load
+- [ ] Caching strategy implemented at appropriate layers
+- [ ] Security measures configured (SSL, authentication, authorization)
+- [ ] Monitoring and logging integrated
+- [ ] Error handling and retry logic implemented
+- [ ] Performance optimization applied
+- [ ] Resource management (memory, connections) configured
+
+### Architecture Validation
+- [ ] Scalability requirements met for expected traffic
+- [ ] Performance benchmarks achieved
+- [ ] Security scan passed
+- [ ] Integration tests validate all components work together
+- [ ] Monitoring dashboards show healthy system metrics
+- [ ] Documentation updated with architecture decisions
+
+### Operational Considerations
+- [ ] Deployment automation configured
+- [ ] Backup and recovery procedures tested
+- [ ] Monitoring and alerting configured
+- [ ] Log aggregation and analysis setup
+- [ ] Capacity planning documented
+- [ ] Incident response procedures defined
+
+## Testing & Performance Validation
+
+### Performance Benchmarks
+```javascript
+// Performance testing examples
+describe('Technology Pattern Performance', () => {
+  it('should handle expected concurrent load', async () => {
+    // Load testing with expected traffic
+    const concurrentRequests = 100;
+    const responses = await Promise.all(
+      Array(concurrentRequests).fill().map(() => service.processRequest(testRequest))
+    );
+    
+    responses.forEach(response => {
+      expect(response.responseTime).toBeLessThan(500); // 500ms SLA
+    });
+  });
+  
+  it('should efficiently use caching', async () => {
+    // Cache effectiveness testing
+    await service.processRequest(testRequest);
+    const cachedResponse = await service.processRequest(testRequest);
+    
+    expect(cachedResponse.fromCache).toBe(true);
+    expect(cachedResponse.responseTime).toBeLessThan(50); // Cache hit should be fast
+  });
+});
+```
+
+### Integration Testing
+```javascript
+describe('Technology Stack Integration', () => {
+  it('should work correctly across all system components', async () => {
+    // End-to-end integration testing
+    const frontendRequest = await frontendClient.makeRequest(testData);
+    const backendProcessing = await backendService.processRequest(frontendRequest);
+    const databaseResult = await database.query(backendProcessing.query);
+    
+    expect(databaseResult).toMatchExpectedFormat();
+  });
+});
+```
+
+### Production Validation Checklist
+- [ ] Performance meets SLA requirements under expected load
+- [ ] Error rates are within acceptable thresholds
+- [ ] Cache hit ratios meet efficiency targets
+- [ ] Database query performance is optimized
+- [ ] Memory and CPU usage are within expected ranges
+- [ ] Security scanning shows no critical vulnerabilities
+
+## Impact Assessment
+
+**Performance Improvements:**
+- Quantify response time improvements (e.g., "60% faster API responses")
+- Measure throughput increases (e.g., "3x more concurrent users")
+- Document resource efficiency gains (e.g., "40% reduction in database load")
+
+**Scalability Benefits:**
+- Horizontal scaling capabilities enabled
+- Resource utilization optimization achieved
+- Infrastructure cost reduction realized
+
+**Maintainability Enhancements:**
+- Code complexity reduced through standard patterns
+- Debugging and troubleshooting simplified
+- Technology upgrade path clarified
+
+**Operational Benefits:**
+- Monitoring and observability improved
+- Incident response time reduced
+- System reliability increased
+
+## Technology Evolution & Upgrades
+
+**Version Compatibility:**
+- Document which technology versions this pattern supports
+- Include migration strategies for version upgrades
+- Note breaking changes and upgrade considerations
+
+**Alternative Implementations:**
+- Compare different technology approaches for the same pattern
+- Document trade-offs between technology choices
+- Provide guidance for technology selection
+
+**Future Considerations:**
+- Emerging technologies that might replace current approach
+- Scalability limits of current pattern
+- Performance optimization opportunities
+
+## References & Resources
+
+### Documentation
+- [Official Technology Documentation](https://docs.technology.com/)
+- [Architecture Decision Record](docs/architecture/adr-###.md)
+- [Configuration Reference](docs/configuration/technology-config.md)
+
+### Performance Resources
+- [Benchmarking Results](docs/performance/technology-benchmarks.md)
+- [Optimization Guide](docs/performance/optimization-strategies.md)
+- [Monitoring Dashboard](http://monitoring.internal/dashboard/technology)
+
+### Community & Support
+- [Technology Community Forum](https://community.technology.com/)
+- [Best Practices Guide](https://bestpractices.technology.com/)
+- [Troubleshooting Wiki](https://wiki.technology.com/troubleshooting)
+
+## Related Technology Patterns
+
+- TECH-###: Related architectural pattern
+- LESSON-###: Implementation lesson using this pattern
+- TROUBLE-###: Troubleshooting guide for this technology
+
+---
+
+*This technology pattern optimizes {{ARCHITECTURE_LAYER}} performance and scalability for {{PROJECT_TYPE}} projects.*
