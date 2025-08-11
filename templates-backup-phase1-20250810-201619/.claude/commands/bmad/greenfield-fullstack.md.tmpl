@@ -1,0 +1,429 @@
+---
+description: Greenfield full-stack development workflow for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Complete workflow for new application development.
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
+---
+
+# /bmad:greenfield-fullstack
+
+## GREENFIELD FULL-STACK DEVELOPMENT WORKFLOW
+
+Comprehensive workflow for building new full-stack applications from concept to development. Integrates strategic planning with systematic development execution.
+
+**When to Use:**
+- Building new web applications or SaaS products
+- Creating MVPs or prototypes that need full planning
+- Enterprise applications requiring comprehensive documentation
+- Multi-team projects needing coordination
+- Projects with long-term maintenance expectations
+
+## PHASE 1: STRATEGIC FOUNDATION
+
+### 1A) Business Analyst → Project Brief & Market Context
+**Load Business Analyst Agent:**
+```
+Load the analyst-agent to create foundational project understanding.
+```
+
+**Deliverables:**
+- Project brief with business objectives and context
+- Market research and competitive landscape analysis
+- Target user analysis and needs assessment
+- Success metrics and business case validation
+
+**Optional Enhancement Steps:**
+- Conduct stakeholder brainstorming sessions
+- Deep market research for competitive positioning
+- User persona development and validation
+
+**Output Location:** Save as `docs/project-brief.md`
+
+### 1B) Product Manager → Product Requirements & Strategy  
+**Load Product Manager Agent:**
+```
+Load the pm-agent to define comprehensive product requirements.
+```
+
+**Input:** Project brief from Business Analyst
+**Deliverables:**
+- Complete Product Requirements Document (PRD)
+- Feature prioritization and roadmap planning
+- User stories and acceptance criteria
+- Success metrics and KPIs definition
+- Release planning and milestone definition
+
+**Output Location:** Save as `docs/prd.md`
+
+## PHASE 2: DESIGN & ARCHITECTURE
+
+### 2A) UX Expert → User Experience Design
+**Load UX Expert Agent:**
+```
+Load the ux-agent to design user experience and interfaces.
+```
+
+**Input:** PRD from Product Manager
+**Deliverables:**
+- User experience specification and user journeys
+- Interface wireframes and design specifications
+- Design system and visual standards
+- Accessibility requirements and guidelines
+- Responsive design breakpoints and behaviors
+
+**Optional Enhancement:**
+- User research and validation studies
+- Prototype creation for key user flows
+
+**Output Location:** Save as `docs/ux-design-spec.md`
+
+### 2B) OPTIONAL: AI-Generated UI Foundation
+**Enhanced UX Agent → AI UI Generation:**
+```
+OPTIONAL BUT RECOMMENDED: Generate AI UI prompts for external tools like v0, Lovable, etc.
+Use the ux-agent with generate-ai-frontend-prompt capability.
+```
+
+**Process:**
+1. Generate optimized prompts for AI UI tools
+2. User creates UI foundation in external tool (v0, Lovable, etc.)
+3. Download and integrate generated project structure
+4. Use generated code as foundation for development
+
+**Benefits:**
+- Accelerated UI development with modern patterns
+- Professional design system foundation
+- Component library starting point
+
+### 2C) System Architect → Full-Stack Architecture
+**Load System Architect Agent:**
+```
+Load the architect-agent to design comprehensive system architecture.
+```
+
+**Input:** PRD and UX Design Specifications
+**Deliverables:**
+- Complete full-stack architecture specification
+- Technology stack selection and rationale
+- Database design and data architecture
+- API specifications and service boundaries
+- Frontend architecture and component structure
+- Infrastructure and deployment architecture
+- Security, performance, and scalability planning
+
+**Optional Enhancement:**
+- Technical research for emerging technologies
+- Review and integration of generated UI structure
+- Performance benchmarking and capacity planning
+
+**Output Location:** Save as `docs/fullstack-architecture.md`
+
+## PHASE 3: VALIDATION & INTEGRATION
+
+### 3A) Product Manager → Architecture Integration Review
+**Load Product Manager Agent:**
+```
+If architecture suggests changes to PRD features, update requirements.
+```
+
+**Integration Process:**
+1. Review architecture recommendations against PRD features
+2. Assess if new stories needed or existing stories need modification
+3. Update PRD with any architectural insights or constraints
+4. Re-export complete updated PRD to `docs/prd.md`
+
+### 3B) Product Owner → Comprehensive Validation
+**Load Product Owner Agent:**
+```
+Load the po-agent to validate all strategic planning artifacts.
+```
+
+**Validation Process:**
+- Cross-document consistency verification
+- Requirements completeness assessment  
+- Technical feasibility validation
+- Business objective alignment check
+- Risk assessment and mitigation planning
+
+**Quality Gates:**
+- [ ] Business objectives align with technical architecture
+- [ ] UX design supports product vision and user needs
+- [ ] Architecture enables all required PRD functionality
+- [ ] Success metrics are measurable and realistic
+- [ ] Technical risks identified with mitigation strategies
+- [ ] Development approach is clearly defined
+
+## PHASE 4: DOCKER ENVIRONMENT SETUP
+
+### 4A) Container Architecture Implementation
+**Create Docker environment based on architecture:**
+```bash
+# Check Docker is running
+docker info > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "❌ Docker required for development. Please start Docker Desktop."
+    exit 1
+fi
+
+# Create docker-compose.yml based on project type
+echo "🐳 Setting up Docker environment for {{PROJECT_TYPE}} project..."
+```
+
+**Generate docker-compose.yml:**
+{{#if PROJECT_TYPE.saas}}
+```yaml
+version: '3.8'
+services:
+  frontend:
+    build: ./{{FRONTEND_DIR}}
+    ports:
+      - "{{FRONTEND_PORT}}:{{FRONTEND_PORT}}"
+    volumes:
+      - ./{{FRONTEND_DIR}}:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://localhost:{{BACKEND_PORT}}
+    
+  backend:
+    build: ./{{BACKEND_DIR}}
+    ports:
+      - "{{BACKEND_PORT}}:{{BACKEND_PORT}}"
+    volumes:
+      - ./{{BACKEND_DIR}}:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/{{PROJECT_NAME}}
+    depends_on:
+      - db
+      - redis
+    
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB={{PROJECT_NAME}}
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+```
+{{/if}}
+
+### 4B) Initialize Development Containers
+**Start and validate containers:**
+```bash
+# Build initial images
+docker-compose build
+
+# Start services
+docker-compose up -d
+
+# Validate health
+./.claude/hooks/docker-manager.ps1 health
+
+echo "✅ Docker environment ready for development"
+```
+
+## PHASE 5: DEVELOPMENT PREPARATION
+
+### 5A) Project Structure Guidance
+**For AI-Generated UI Integration:**
+- **Monorepo Setup**: Place generated frontend in `apps/web` or `packages/frontend`
+- **Polyrepo Setup**: Use generated project as frontend repo, create separate backend repo
+- **Hybrid Approach**: Integrate generated components into existing project structure
+
+**Architecture Document Review:**
+- Follow specific setup guidance in `docs/fullstack-architecture.md`
+- Ensure project structure aligns with planned development workflow
+- Validate tooling and build system compatibility
+
+### 5B) Product Owner → Document Sharding
+**Load Product Owner Agent:**
+```
+Shard planning documents for development team consumption.
+```
+
+**Document Sharding Options:**
+- **Option A**: Use PO agent to shard: Load po-agent → ask to shard docs/prd.md
+- **Option B**: Manual approach: Use shard-doc task + docs/prd.md
+- **Output**: Creates `docs/prd/` and `docs/architecture/` folders with focused content
+
+## PHASE 6: DEVELOPMENT EXECUTION
+
+### 6A) Story Creation Cycle
+**Load Scrum Master Agent:**
+```
+Load the sm-agent to create development stories from sharded documentation.
+```
+
+**Story Creation Process:**
+1. **Epic Identification**: Identify major feature epics from sharded PRD
+2. **Story Breakdown**: Create detailed user stories with acceptance criteria
+3. **Task Definition**: Define specific development tasks for each story
+4. **Validation Planning**: Define testing and validation approach
+
+**Story Management:**
+- Stories start in "Draft" status for review
+- Use sharded documentation as context for story creation
+- Ensure stories align with architecture specifications
+
+### 6B) OPTIONAL: Story Review & Approval
+**Load Business Analyst or Product Manager:**
+```
+OPTIONAL: Review draft stories for completeness and alignment.
+NOTE: story-review task coming in future releases.
+```
+
+**Review Process:**
+- Validate story alignment with business objectives
+- Ensure acceptance criteria are testable and complete
+- Confirm story scope is appropriate for development iteration
+- Update story status: Draft → Approved
+
+## PHASE 6: DEVELOPMENT CYCLE EXECUTION
+
+### 6C) Developer Implementation
+**Load Developer Agent (New Chat Session):**
+```
+Load the dev-agent in a fresh session for each story implementation.
+```
+
+**Development Process:**
+1. **Story Analysis**: Understand requirements and acceptance criteria
+2. **Implementation**: Build features according to architecture specifications
+3. **Testing**: Comprehensive testing per project type standards
+4. **Documentation**: Update file lists and implementation notes
+5. **Status Update**: Mark story as "Review" when implementation complete
+
+### 6D) OPTIONAL: QA Engineer Review
+**Load QA Engineer Agent (New Chat Session):**
+```
+OPTIONAL: Load the qa-agent for senior development review and quality assurance.
+```
+
+**QA Process:**
+1. **Code Review**: Senior-level review with mentoring focus
+2. **Quality Enhancement**: Fix issues and strengthen implementation
+3. **Testing Validation**: Ensure comprehensive test coverage
+4. **Status Decision**: 
+   - **QA_APPROVED**: Story complete, update status to "Done"
+   - **NEEDS_DEV_WORK**: Return to developer with specific feedback
+
+### 6E) Development Cycle Completion
+**Address QA Feedback (if needed):**
+```
+If QA identified issues, return to Developer Agent to address remaining items.
+Cycle between Dev and QA until story meets quality standards.
+```
+
+**Iteration Management:**
+- Continue story development cycle for all PRD epics
+- Maintain development momentum and quality standards
+- Track progress against planned milestones
+
+## PHASE 7: PROJECT COMPLETION
+
+### 7A) OPTIONAL: Epic Retrospective
+**Load Product Owner Agent:**
+```
+OPTIONAL: Conduct retrospective after major epic completion.
+NOTE: epic-retrospective task coming in future releases.
+```
+
+**Retrospective Process:**
+- Validate epic completion against original objectives
+- Document lessons learned and process improvements
+- Identify technical debt and future enhancement opportunities
+- Plan next development iteration or project phase
+
+### 7B) Project Success Validation
+**Success Criteria Assessment:**
+- [ ] All planned features implemented and tested
+- [ ] Architecture specifications fulfilled  
+- [ ] User experience requirements met
+- [ ] Performance and quality standards achieved
+- [ ] Documentation complete and current
+
+## PROJECT TYPE SPECIFIC CONSIDERATIONS
+
+{{#if PROJECT_TYPE.saas}}
+### SaaS Development Focus
+- **Multi-Tenant Architecture**: Ensure tenant isolation and data security
+- **Subscription Management**: Implement billing and user management features
+- **API Design**: Create robust APIs for future integrations
+- **Scalability Planning**: Design for growth and performance
+- **Enterprise Features**: Consider admin panels, reporting, and compliance
+{{/if}}
+
+{{#if PROJECT_TYPE.phaser}}
+### Game Development Focus  
+- **Gameplay Mechanics**: Implement core game rules and interactions
+- **Asset Pipeline**: Manage graphics, sounds, and other game assets
+- **Performance Optimization**: Ensure smooth frame rates and responsive controls
+- **Platform Deployment**: Plan for web, mobile, or desktop distribution
+- **Player Progression**: Implement scoring, levels, and achievement systems
+{{/if}}
+
+## WORKFLOW TRANSITION GUIDANCE
+
+### Development Order Recommendations
+**Frontend-Heavy Projects:**
+- Start with frontend project/directory using generated UI foundation
+- Build out component library and user interface
+- Create backend APIs to support frontend functionality
+
+**Backend-Heavy or API-First Projects:**
+- Start with backend service architecture and database design
+- Build robust APIs and business logic
+- Create frontend to consume and display backend functionality
+
+**Balanced Full-Stack Development:**
+- Use monorepo setup for coordinated development
+- Follow story sequence from PRD for feature development
+- Coordinate frontend and backend development for each epic
+
+## SUCCESS METRICS & OUTCOMES
+
+### Planning Quality Metrics
+- **Strategic Alignment**: All deliverables support business objectives
+- **Technical Feasibility**: Architecture enables product vision
+- **Development Readiness**: Team can execute efficiently
+- **Documentation Quality**: Comprehensive and actionable specifications
+
+### Development Efficiency Metrics
+- **Story Completion Rate**: Percentage of stories completed on schedule
+- **Quality Metrics**: Test coverage, defect rates, performance benchmarks  
+- **Team Velocity**: Story points or features completed per iteration
+- **Scope Stability**: Minimal requirement changes during development
+
+### Business Success Metrics
+- **User Adoption**: Usage metrics against projected targets
+- **Performance Goals**: Technical performance against specifications
+- **Business Objectives**: Revenue, engagement, or strategic goal achievement
+- **Stakeholder Satisfaction**: Business and user satisfaction with outcomes
+
+## USAGE EXAMPLES
+
+### Example 1: SaaS Project Management Tool
+```
+Planning Phase: Market research → PRD for PM features → UX design for dashboards → Full-stack architecture
+Development: Story creation → Sprint development → QA review → Feature deployment
+Outcome: Production-ready SaaS application with user management, project tracking, team collaboration
+```
+
+### Example 2: E-commerce Platform
+```
+Planning Phase: Business analysis → Product catalog PRD → Shopping UX design → E-commerce architecture  
+Development: Product management → Shopping cart → Payment processing → Admin panel
+Outcome: Complete e-commerce solution with customer and merchant capabilities
+```
+
+Remember: Greenfield development is an investment in long-term success. Thorough planning and systematic execution create maintainable, scalable applications that deliver business value and user satisfaction.

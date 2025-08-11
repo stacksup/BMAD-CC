@@ -1,0 +1,360 @@
+# {{PROJECT_NAME}} UX Design Specification
+
+**Project Type:** {{PROJECT_TYPE}}  
+**Created:** {{DATE}}  
+**UX Expert:** [Agent Generated]  
+**Version:** 1.0
+
+## Document Overview
+
+### Design Scope
+[Define what aspects of the user experience this document covers - full application, specific features, or design system]
+
+### Related Documents
+- **Project Brief:** `docs/project-brief.md` (User research and business context)
+- **PRD:** `docs/product-requirements-document.md` (Functional requirements)
+- **Architecture Spec:** `docs/architecture-specification.md` (Technical constraints)
+
+## User Experience Strategy
+
+### UX Vision
+[Clear statement of the desired user experience and how it supports business objectives]
+
+### Design Principles
+1. **User-Centered:** [How design prioritizes user needs and goals]
+2. **Accessibility:** [Inclusive design for all users and abilities]
+3. **Consistency:** [Coherent experience across all touchpoints]
+4. **Simplicity:** [Clear, intuitive interactions and information]
+
+### Success Metrics
+- **Usability:** [Task completion rates, error rates, time on task]
+- **User Satisfaction:** [NPS scores, user feedback ratings]
+- **Accessibility:** [WCAG compliance levels and audit results]
+
+## User Research & Analysis
+
+### User Personas (from Project Brief)
+#### Primary Persona: [Persona Name]
+- **Background:** [Demographics, context, and experience level]
+- **Goals:** [What they want to accomplish]
+- **Pain Points:** [Current frustrations and challenges]
+- **Motivations:** [What drives their behavior and decisions]
+- **Technology Comfort:** [Technical skills and device preferences]
+
+#### Secondary Persona: [Additional Persona]
+[Similar breakdown for secondary user types]
+
+### User Journey Analysis
+#### Current State Journey
+[How users currently accomplish their goals without this product]
+
+#### Future State Journey
+[How users will accomplish their goals with this product]
+
+### Task Analysis
+1. **[Primary Task]**
+   - **Frequency:** [How often users perform this task]
+   - **Importance:** [How critical this task is to user success]
+   - **Current Process:** [How users currently do this task]
+   - **Pain Points:** [Where users struggle with current process]
+
+## Information Architecture
+
+### Site Map / Navigation Structure
+```
+Home
+├── [Primary Section]
+│   ├── [Subsection]
+│   └── [Subsection]
+├── [Secondary Section]
+│   ├── [Subsection]
+│   └── [Subsection]
+└── [Utility Section]
+    ├── Profile/Account
+    └── Settings
+```
+
+### Content Strategy
+- **Content Types:** [Different types of content the system will display]
+- **Content Hierarchy:** [How information is organized and prioritized]
+- **Content Relationships:** [How different content pieces connect]
+
+### Navigation Patterns
+- **Primary Navigation:** [Main navigation structure and behavior]
+- **Secondary Navigation:** [Contextual and utility navigation]
+- **Search & Discovery:** [How users find and filter content]
+
+## Interaction Design
+
+### User Workflows
+
+#### Workflow 1: [Primary User Task]
+1. **Entry Point:** [How users start this workflow]
+2. **Key Steps:**
+   - Step 1: [User action and system response]
+   - Step 2: [Next user action and feedback]
+   - Step 3: [Completion and confirmation]
+3. **Success Criteria:** [How users know they succeeded]
+4. **Error Handling:** [How system handles mistakes or failures]
+
+#### Workflow 2: [Secondary User Task]
+[Similar breakdown for additional workflows]
+
+### Interaction Patterns
+- **Data Input:** [Forms, fields, and input validation patterns]
+- **Data Display:** [Tables, cards, lists, and visualization patterns]
+- **Actions:** [Buttons, links, and interactive element patterns]
+- **Feedback:** [Loading states, confirmations, and error messages]
+
+### State Management
+- **Loading States:** [How system communicates processing]
+- **Empty States:** [How to handle lack of content or data]
+- **Error States:** [How to communicate and recover from errors]
+- **Success States:** [How to confirm successful actions]
+
+## Visual Design Specification
+
+### Design System Foundation
+
+#### Color Palette
+```
+Primary Colors:
+- Primary: [Hex code] - [Usage description]
+- Secondary: [Hex code] - [Usage description]
+
+Semantic Colors:
+- Success: [Hex code] - [Usage for success states]
+- Warning: [Hex code] - [Usage for warning states]
+- Error: [Hex code] - [Usage for error states]
+- Info: [Hex code] - [Usage for informational states]
+
+Neutral Colors:
+- Background: [Hex code] - [Primary backgrounds]
+- Surface: [Hex code] - [Cards and containers]
+- Text Primary: [Hex code] - [Primary text]
+- Text Secondary: [Hex code] - [Secondary text]
+```
+
+#### Typography Scale
+```
+Headings:
+- H1: [Font, Size, Weight] - [Usage context]
+- H2: [Font, Size, Weight] - [Usage context]
+- H3: [Font, Size, Weight] - [Usage context]
+
+Body Text:
+- Body Large: [Font, Size, Weight] - [Usage context]
+- Body Medium: [Font, Size, Weight] - [Usage context]
+- Body Small: [Font, Size, Weight] - [Usage context]
+
+Utility:
+- Button Text: [Font, Size, Weight]
+- Caption: [Font, Size, Weight]
+- Code: [Font, Size, Weight]
+```
+
+#### Spacing System
+```
+Base Unit: [8px or 4px]
+Scale: [4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px]
+
+Usage:
+- Component Padding: [Internal spacing guidelines]
+- Section Margins: [Between-section spacing]
+- Element Gaps: [Spacing between related elements]
+```
+
+### Component Specifications
+
+#### Buttons
+- **Primary Button:** [Style, colors, states, usage guidelines]
+- **Secondary Button:** [Style, colors, states, usage guidelines]
+- **Text Button:** [Style, colors, states, usage guidelines]
+- **States:** [Default, hover, active, disabled, loading]
+
+#### Form Elements
+- **Input Fields:** [Style, validation states, helper text]
+- **Select Dropdowns:** [Style, options display, search functionality]
+- **Checkboxes/Radio:** [Style, states, grouping patterns]
+- **File Upload:** [Style, progress indication, error handling]
+
+#### Data Display
+- **Tables:** [Header style, row styling, sorting indicators]
+- **Cards:** [Layout, shadow, borders, content organization]
+- **Lists:** [Item styling, dividers, interactive states]
+- **Charts/Graphs:** [Color usage, legends, responsive behavior]
+
+### Layout & Grid System
+
+#### Responsive Breakpoints
+```
+Mobile: 320px - 768px
+Tablet: 768px - 1024px
+Desktop: 1024px - 1440px
+Large Desktop: 1440px+
+```
+
+#### Grid System
+- **Container:** [Maximum width and centering]
+- **Columns:** [12-column or flexible grid system]
+- **Gutters:** [Spacing between grid columns]
+- **Margins:** [Outer margins on different screen sizes]
+
+## Responsive Design Strategy
+
+### Mobile-First Approach
+- **Core Features:** [Essential functionality on mobile devices]
+- **Navigation:** [Mobile navigation patterns and menu systems]
+- **Content Priority:** [How content is prioritized on smaller screens]
+
+### Device-Specific Considerations
+
+#### Mobile Devices
+- **Touch Targets:** [Minimum touch target sizes and spacing]
+- **Thumb-Friendly:** [Placement of key actions for thumb navigation]
+- **Performance:** [Image optimization and loading strategies]
+
+#### Tablet Devices
+- **Hybrid Navigation:** [Navigation that works for both touch and cursor]
+- **Content Adaptation:** [How content adapts to medium screen sizes]
+- **Orientation:** [Portrait vs landscape layout considerations]
+
+#### Desktop Devices
+- **Cursor Interactions:** [Hover states and cursor-based interactions]
+- **Keyboard Navigation:** [Tab order and keyboard shortcuts]
+- **Multi-Column Layouts:** [Taking advantage of wider screens]
+
+## Accessibility Standards
+
+### WCAG Compliance Level
+**Target:** [AA or AAA compliance level with rationale]
+
+### Accessibility Features
+- **Keyboard Navigation:** [Full keyboard accessibility for all features]
+- **Screen Reader Support:** [ARIA labels, roles, and descriptions]
+- **Color Contrast:** [Meeting contrast ratio requirements]
+- **Focus Management:** [Clear focus indicators and logical tab order]
+
+### Inclusive Design Considerations
+- **Motor Impairments:** [Large touch targets, easy-to-use controls]
+- **Visual Impairments:** [High contrast, scalable text, screen reader support]
+- **Cognitive Load:** [Clear navigation, consistent patterns, helpful messaging]
+
+## Content & Microcopy Guidelines
+
+### Voice & Tone
+- **Brand Voice:** [Personality traits that define how we communicate]
+- **Tone Variations:** [How tone adapts for different contexts]
+- **Writing Principles:** [Clear, concise, helpful communication]
+
+### UI Text Standards
+
+#### Button Labels
+- **Actions:** [Save, Cancel, Submit, Delete - when to use each]
+- **Navigation:** [Next, Back, Continue - navigation patterns]
+- **Destructive Actions:** [Clear warnings for irreversible actions]
+
+#### Error Messages
+- **Format:** [Structure for clear, actionable error messages]
+- **Tone:** [Helpful and non-blaming error communication]
+- **Recovery:** [Clear steps to fix the error]
+
+#### Help Text
+- **Field Help:** [When and how to provide field-level guidance]
+- **Contextual Help:** [Progressive disclosure of help information]
+- **Placeholder Text:** [When and how to use placeholder text effectively]
+
+## Animation & Transitions
+
+### Animation Principles
+- **Purpose-Driven:** [Animations that enhance usability]
+- **Performance:** [Smooth 60fps animations and optimization]
+- **Accessibility:** [Respecting motion preferences and disabilities]
+
+### Transition Specifications
+- **Page Transitions:** [How users move between major sections]
+- **Component States:** [How components change state smoothly]
+- **Loading Animations:** [Progress indication and skeleton screens]
+- **Micro-Interactions:** [Small delightful interactions that provide feedback]
+
+### Motion Guidelines
+- **Duration:** [Timing for different types of animations]
+- **Easing:** [Animation curves that feel natural]
+- **Choreography:** [How multiple animations coordinate]
+
+## Design System Implementation
+
+### Component Library Structure
+```
+/components
+  /atoms (buttons, inputs, labels)
+  /molecules (form groups, search bars)
+  /organisms (headers, forms, data tables)
+  /templates (page layouts)
+  /pages (specific page implementations)
+```
+
+### Design Token Structure
+- **Colors:** [How colors are defined and referenced]
+- **Typography:** [Font and text style token system]
+- **Spacing:** [Margin and padding token system]
+- **Sizing:** [Width, height, and icon size tokens]
+
+### Style Guide Maintenance
+- **Documentation:** [How design system is documented]
+- **Updates:** [Process for evolving the design system]
+- **Implementation:** [How developers use design specifications]
+
+## Prototyping & Testing Strategy
+
+### Prototyping Approach
+- **Low-Fidelity:** [Wireframes and concept validation]
+- **High-Fidelity:** [Interactive prototypes for user testing]
+- **Development Handoff:** [Specifications and assets for implementation]
+
+### User Testing Plan
+1. **Usability Testing:** [Task-based testing with target users]
+2. **A/B Testing:** [Design variation testing for optimization]
+3. **Accessibility Testing:** [Testing with assistive technologies]
+4. **Performance Testing:** [Design impact on loading and responsiveness]
+
+### Success Metrics
+- **Task Success Rate:** [Percentage of users completing key tasks]
+- **Time to Complete:** [Average time for key user workflows]
+- **User Satisfaction:** [Post-task satisfaction scores]
+- **Error Recovery:** [How quickly users recover from mistakes]
+
+## Implementation Guidelines
+
+### Development Handoff
+- **Asset Delivery:** [How design assets are provided to developers]
+- **Specification Format:** [How design specifications are documented]
+- **Review Process:** [How implementation is validated against design]
+
+### Quality Assurance
+- **Design Review:** [Process for reviewing implemented designs]
+- **Cross-Browser Testing:** [Ensuring consistent experience across browsers]
+- **Device Testing:** [Validation on actual devices and screen sizes]
+
+### Launch Preparation
+- **Design Validation:** [Final design review before launch]
+- **User Acceptance:** [Stakeholder approval of implemented design]
+- **Analytics Setup:** [Tracking implementation for design success metrics]
+
+---
+
+**Document Control**
+- **Created by:** UX Expert Agent
+- **Review Cycle:** [Design review frequency and stakeholders]
+- **Next Phase:** Development Implementation
+- **Status:** [Draft/Review/Approved/In Development]
+
+### Design Decision Log
+| ID | Date | Decision | Rationale | Impact |
+|----|------|----------|-----------|--------|
+| UXD-001 | {{DATE}} | [Design Decision] | [Why made] | [Expected impact] |
+
+### Document History
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0 | {{DATE}} | UX Agent | Initial UX design specification |

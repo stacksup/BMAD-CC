@@ -9,6 +9,8 @@ allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(
 
 This command analyzes your request and routes it to the most appropriate BMAD workflow for optimal efficiency and results.
 
+**VIBE CEO PHILOSOPHY**: You are the strategic leader with unlimited resources. The orchestrator empowers you with advanced elicitation tools to refine your vision before committing to a workflow. Think big, challenge assumptions, maximize value.
+
 ## 0) INFRASTRUCTURE CHECKS & ROUTING
 
 **CRITICAL: Task Master Availability Check:**
@@ -127,26 +129,85 @@ For new projects or major initiatives:
    - Save validation: docs/validation/project-setup-[date].md
 ```
 
+**Enhanced Intelligence Layer**
+
+### Project Context Analysis
+```bash
+# Document Size Detection
+echo "📊 Analyzing project documents..."
+if [ -f "docs/PRD.md" ]; then
+    PRD_SIZE=$(stat -c%s "docs/PRD.md" 2>/dev/null || stat -f%z "docs/PRD.md" 2>/dev/null || echo 0)
+    if [ $PRD_SIZE -gt 5242880 ]; then  # 5MB
+        echo "📚 Large PRD detected (>5MB) - Document sharding recommended"
+        export BMAD_ENABLE_SHARDING=1
+    fi
+fi
+
+if [ -f "docs/architecture.md" ]; then
+    ARCH_SIZE=$(stat -c%s "docs/architecture.md" 2>/dev/null || stat -f%z "docs/architecture.md" 2>/dev/null || echo 0)
+    if [ $ARCH_SIZE -gt 5242880 ]; then  # 5MB
+        echo "📚 Large architecture document detected - Sharding recommended"
+        export BMAD_ENABLE_SHARDING=1
+    fi
+fi
+
+# Brownfield Detection  
+echo "🔍 Detecting project type..."
+if [ -f "package.json" ] || [ -f "requirements.txt" ] || [ -f "go.mod" ] || [ -d "src/" ]; then
+    if [ ! -f "docs/PRD.md" ] && [ ! -f "docs/product-requirements-document.md" ]; then
+        echo "🏗️ Existing codebase detected without PRD - Brownfield project"
+        export BMAD_BROWNFIELD_MODE=1
+    fi
+fi
+
+# Change Request Detection
+echo "🔍 Checking for pending changes..."
+./.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"
+
+if [ -f "docs/change-request.md" ] || [ -f ".bmad-change-pending" ]; then
+    echo "🔄 Change request detected - Change management activated"
+    export BMAD_CHANGE_MANAGEMENT=1
+    
+    # Check if change validation is complete
+    if [ -f ".bmad-change-pending" ]; then
+        CHANGE_ID=$(cat .bmad-change-pending)
+        echo "⚠️ Pending change: $CHANGE_ID requires validation before proceeding"
+        echo "Run Product Owner change management process to resolve"
+    fi
+fi
+
+# Interactive Enhancement Detection
+if [ "$BMAD_ENABLE_SHARDING" = "1" ] || [ "$BMAD_BROWNFIELD_MODE" = "1" ]; then
+    echo "✨ Enhanced capabilities activated:"
+    [ "$BMAD_ENABLE_SHARDING" = "1" ] && echo "   📄 Document Sharding"
+    [ "$BMAD_BROWNFIELD_MODE" = "1" ] && echo "   🏗️ Brownfield Analysis"
+fi
+```
+
 **Request Classification Process:**
 1. **Analyze Request Characteristics**
    - Complexity and scope assessment
    - Requirements clarity evaluation  
    - Technical change impact analysis
    - Timeline and resource estimation
+   - Document size and brownfield detection
 
-2. **Apply Classification Decision Tree**
+2. **Apply Enhanced Classification Decision Tree**
    ```
    Is this a bug fix or small improvement? → maintenance-cycle
    Clear requirements, no architecture changes? → story-cycle/saas-cycle
-   New project or major enhancement? → greenfield/brownfield workflows
-   Need business/UX/architecture planning? → planning-cycle
+   Existing codebase without clear docs? → brownfield-enhancement
+   Large documents detected (>5MB)? → Enable document sharding
+   New project or major enhancement? → greenfield/planning workflows
+   Need business/UX/architecture planning? → planning-cycle + elicitation
    ```
 
-3. **Route to Appropriate Workflow**
+3. **Route to Appropriate Enhanced Workflow**
    - **Maintenance:** Simple fixes requiring minimal coordination
-   - **Feature Development:** Standard story-based development
-   - **Strategic Planning:** Multi-phase planning followed by development
-   - **Project-Specific:** Specialized workflows for different project types
+   - **Feature Development:** Standard story-based development with validation
+   - **Strategic Planning:** Multi-phase planning with interactive elicitation
+   - **Brownfield Enhancement:** Existing system analysis and improvement
+   - **Document Management:** Sharding for large documents
 
 ## WORKFLOW ROUTING OPTIONS
 
@@ -176,14 +237,32 @@ For new projects or major initiatives:
 - Business/market research needed
 - UX design required
 
-**Process:** Planning Phase (Strategic Agents with Advanced Elicitation) → Document Sharding → Development Phase (Systematic Story Creation)
+**Enhanced Process:** 
+1. **Planning Phase** - Strategic Agents with Interactive Elicitation
+2. **Document Sharding** - If large documents detected (>5MB)
+3. **AI Frontend Generation** - UX Expert creates AI tool prompts
+4. **Development Phase** - Systematic Story Creation with Validation
 
-### Route D: Specialized Project Workflows
+### Route D: Brownfield Enhancement (`/bmad:brownfield-enhancement`)
+**When to Use:**
+- Existing codebase detected (package.json, requirements.txt, etc.)
+- No clear PRD or requirements documentation
+- Legacy system improvements
+- Technical debt management
+- System analysis required
+
+**Enhanced Process:**
+1. **Brownfield Analysis** - Architect performs comprehensive system analysis
+2. **Document Generation** - Create architecture, technical debt, and integration maps
+3. **Enhancement Planning** - Strategic planning based on analysis
+4. **Phased Implementation** - Prioritized improvement roadmap
+
+### Route E: Specialized Project Workflows
 **When to Use:**
 - New application development (`/bmad:greenfield-fullstack`)
-- Existing system enhancement (`/bmad:brownfield-enhancement`) 
 - Service/API development (`/bmad:service-development`)
 - UI/Frontend development (`/bmad:ui-development`)
+- Document management (`/bmad:shard-document` for large docs)
 
 ## ORCHESTRATOR DECISION QUESTIONS
 
@@ -205,6 +284,28 @@ The orchestrator will ask clarifying questions to ensure proper routing:
 - "What's your expected timeline for this work?"
 - "How many people do you expect will be working on this?"
 - "What's the complexity level - simple, moderate, or complex?"
+
+### ADVANCED ELICITATION OPTIONS
+
+**When requirements need refinement, orchestrator offers:**
+
+**Brainstorming Techniques** (`docs/data/brainstorming-techniques.md`):
+- **"Let's explore alternatives"** → SCAMPER method for systematic variations
+- **"What if scenarios"** → Explore different approaches and constraints
+- **"Find the core need"** → Five Whys to drill down to fundamentals
+- **"Think bigger/smaller"** → Scale exploration techniques
+
+**Elicitation Methods** (`docs/data/elicitation-methods.md`):
+- **"Break this down"** → Tree of Thoughts for complex decomposition
+- **"All perspectives"** → Stakeholder Round Table analysis
+- **"Risk assessment"** → Identify potential challenges and mitigation
+- **"Challenge approach"** → Red Team vs Blue Team critical analysis
+
+**Interactive Commands:**
+- Say "brainstorm" to activate creative expansion
+- Say "clarify" for structured elicitation
+- Say "challenge" for critical analysis
+- Say "explore" for alternative approaches
 
 ## ORCHESTRATOR ROUTING LOGIC
 

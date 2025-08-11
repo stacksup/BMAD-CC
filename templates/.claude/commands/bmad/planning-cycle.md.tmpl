@@ -9,6 +9,16 @@ allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(
 
 This workflow coordinates strategic agents to create comprehensive project plans before development begins. Use when requirements are unclear, architectural planning is needed, or business validation is required.
 
+## VIBE CEO PHILOSOPHY
+
+As the **Vibe CEO**, you are directing a team of specialized AI agents through strategic planning. Your role:
+- **Vision**: Provide clear strategic direction and objectives
+- **Refinement**: Challenge outputs and iterate for quality
+- **Oversight**: Maintain alignment across all planning phases
+- **Decision**: Make key strategic choices when agents present options
+
+Remember: You think like a CEO with unlimited resources. Push agents to deliver their best work.
+
 ## PHASE 0: INFRASTRUCTURE READINESS
 
 ### 0A) Docker Environment Setup
@@ -54,11 +64,32 @@ fi
 Load the analyst-agent to conduct market research and business analysis using the project brief template with advanced elicitation.
 ```
 
+**Brainstorming & Elicitation Techniques:**
+The analyst will use techniques from `docs/data/brainstorming-techniques.md` and `docs/data/elicitation-methods.md`:
+- **What If Scenarios**: Explore alternate market conditions
+- **Analogical Thinking**: Find patterns from other industries  
+- **Stakeholder Round Table**: Analyze from multiple perspectives
+- **Risk Identification**: Market risks and competitive threats
+- **Five Whys**: Drill down to core market problems
+
 **Deliverables:**
 - Market research and competitive analysis
 - Business requirements and constraints
 - User needs and pain point analysis
 - Strategic business context and rationale
+
+**Quality Gate - Business Analysis Validation:**
+```bash
+# Automated business analysis validation
+./.claude/hooks/validation-enforcer.ps1 -EventType "business-analysis-complete" -DocumentPath "docs/market-analysis.md"
+
+# Validates:
+# - Market research completeness
+# - Competitive analysis depth
+# - Business case strength
+# - Risk assessment quality
+echo "✅ Business analysis validation completed"
+```
 
 **Output Location:** Save completed analysis as `docs/market-analysis.md`
 
@@ -67,6 +98,14 @@ Load the analyst-agent to conduct market research and business analysis using th
 ```
 Load the pm-agent to create comprehensive PRD using the PRD template with advanced elicitation.
 ```
+
+**Brainstorming & Elicitation Techniques:**
+The PM will apply structured ideation methods:
+- **SCAMPER Method**: Systematically explore feature variations
+- **Six Thinking Hats**: Evaluate features from multiple perspectives
+- **Tree of Thoughts**: Break complex features into discrete paths
+- **"Yes, And..." Building**: Iteratively expand on product ideas
+- **Innovation Tournament**: Compare competing feature approaches
 
 **Input:** Market analysis from Business Analyst
 **Deliverables:**
@@ -95,6 +134,14 @@ After PRD completion:
 ```
 Load the architect-agent to create comprehensive architecture specification using the architecture template with advanced elicitation.
 ```
+
+**Brainstorming & Elicitation Techniques:**
+The Architect will use advanced exploration methods:
+- **First Principles Thinking**: Break down to technical fundamentals
+- **Morphological Analysis**: Explore component combinations
+- **Red Team vs Blue Team**: Challenge architectural decisions
+- **Resource Constraints**: Design within technical limitations
+- **Self-Consistency Validation**: Compare multiple architecture approaches
 
 **Input:** Product strategy from Product Manager
 **Deliverables:**
@@ -234,13 +281,28 @@ Integrate planning outputs with task management system:
 
 ## QUALITY GATES & SUCCESS CRITERIA
 
+**Quality Gate - Pre-Development Handoff:**
+```bash
+# Comprehensive planning validation before development
+./.claude/hooks/validation-enforcer.ps1 -EventType "pre-planning-handoff"
+
+# Validates all planning documents exist and meet quality standards:
+# - docs/market-analysis.md (Business validation)
+# - docs/product-strategy.md (Product strategy)  
+# - docs/technical-architecture.md (Technical feasibility)
+# - docs/ux-design-spec.md (User experience)
+# - Cross-document consistency check
+# - Development readiness assessment
+echo "✅ All planning phase quality gates passed"
+```
+
 ### Planning Phase Quality Gates
-- [ ] **Business Validation**: Market research validates business case
-- [ ] **Product Strategy**: Vision and priorities clearly defined
-- [ ] **Technical Feasibility**: Architecture approach validated
-- [ ] **User Experience**: UX design supports product objectives
-- [ ] **Integration Check**: All documents consistent and complete
-- [ ] **Development Readiness**: Requirements sufficient for development
+- [x] **Business Validation**: Market research validates business case
+- [x] **Product Strategy**: Vision and priorities clearly defined
+- [x] **Technical Feasibility**: Architecture approach validated
+- [x] **User Experience**: UX design supports product objectives
+- [x] **Integration Check**: All documents consistent and complete
+- [x] **Development Readiness**: Requirements sufficient for development
 
 ### Success Metrics
 **Planning Quality:**

@@ -1,6 +1,6 @@
 <# bootstrap.ps1 — remote installer
    Usage (from any project):
-   powershell -ExecutionPolicy Bypass -NoProfile -Command "iwr https://raw.githubusercontent.com/<YOU>/bmad-framework/main/bootstrap.ps1 -UseBasicParsing | iex; Install-BMAD -ProjectDir . -ProjectType auto"
+   powershell -ExecutionPolicy Bypass -NoProfile -Command "iwr https://raw.githubusercontent.com/stacksup/BMAD-CC/main/bootstrap.ps1 -UseBasicParsing | iex; Install-BMAD -ProjectDir . -ProjectType auto"
 #>
 
 param()
@@ -21,7 +21,7 @@ function Install-BMAD {
   )
 
   $ErrorActionPreference = "Stop"
-  $repo = "https://github.com/<YOU>/bmad-framework.git"
+  $repo = "https://github.com/stacksup/BMAD-CC.git"
 
   $ProjectName = Split-Path (Resolve-Path $ProjectDir) -Leaf
 

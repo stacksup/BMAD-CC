@@ -281,14 +281,82 @@ When asked to "validate story draft" or before story handoff to development:
 - Before assigning to developer
 - When story changes significantly
 
-### Create-Next-Story Capability
-When systematically creating stories from documentation:
-1. Extract architecture context from technical documents
-2. Reference PRD sections with anti-hallucination verification
-3. Create comprehensive story following template
-4. Include all technical context needed for implementation
-5. Add source references for all claims
-6. Validate story draft before marking complete
+### Enhanced Story Validation Protocol
+
+**Pre-Handoff Story Scoring:**
+```markdown
+📊 STORY VALIDATION SELF-ASSESSMENT
+════════════════════════════════════════
+
+Before marking story ready for PO review:
+
+| Criterion | Score | Evidence |
+|-----------|-------|----------|
+| **Clarity** | _/2 | User story follows format, business value clear |
+| **Completeness** | _/2 | All sections filled, no TBDs |
+| **Technical Accuracy** | _/2 | All claims reference architecture docs |
+| **Testability** | _/2 | Acceptance criteria are measurable |
+| **Implementation Ready** | _/2 | Developer has everything needed |
+
+**Total Score: _/10**
+
+Minimum score required: 7/10
+
+❌ If score < 7: Revise story before handoff
+✅ If score ≥ 7: Ready for PO validation
+```
+
+**Source Reference Format:**
+```markdown
+When referencing technical details:
+✅ CORRECT: "Use Express router [Source: architecture/backend.md#routing]"
+❌ WRONG: "Use Express router" (no source)
+
+✅ CORRECT: "Call POST /api/users [Source: api-spec.md#user-endpoints]"  
+❌ WRONG: "Call user creation endpoint" (vague)
+
+✅ CORRECT: "Update users table [Source: database/schema.sql#users]"
+❌ WRONG: "Update the database" (unspecified)
+```
+
+### Create-Next-Story Enhancement
+
+```markdown
+## CREATE-NEXT-STORY PROTOCOL
+═══════════════════════════════
+
+Step 1: Context Gathering
+──────────────────────────
+□ Load epic requirements from PRD
+□ Review previous story completion notes
+□ Check architecture for story type:
+  - Backend: Load backend architecture sections
+  - Frontend: Load frontend architecture sections  
+  - Full-stack: Load both architectures
+
+Step 2: Story Drafting
+──────────────────────
+□ Create user story with WHO, WHAT, WHY
+□ Define acceptance criteria (Given-When-Then)
+□ Add technical context with source references
+□ Include error handling requirements
+□ Specify performance requirements
+
+Step 3: Anti-Hallucination Verification
+────────────────────────────────────────
+For each technical claim, verify:
+□ Library exists in package.json/requirements.txt
+□ API endpoint exists in API specification
+□ Database table/field exists in schema
+□ Pattern approved in architecture docs
+□ No dummy data or placeholder logic
+
+Step 4: Story Validation
+──────────────────────
+□ Self-score using validation matrix
+□ If score ≥7/10, proceed to PO
+□ If score <7/10, revise and re-score
+```
 
 ## ESCALATION TRIGGERS
 

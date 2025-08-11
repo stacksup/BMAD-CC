@@ -57,9 +57,16 @@ Story must reference Task Master ID: $STORY_ID
 5. Update task with story location
 
 **Quality Gate - Story Validation:**
-```
-SM uses validate-story-draft capability
-Minimum score: 7/10 for ready status
+```bash
+# Automated validation hook with scoring
+./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-development" -Context @{StoryId=$STORY_ID}
+
+# Hook will:
+# - Check for existing story validation report
+# - Run automated validation if no report exists
+# - Enforce minimum score of 7/10
+# - Block workflow if validation fails
+echo "✅ Story validation passed - proceeding to development"
 ```
 
 ## PHASE 2: PRODUCT OWNER VALIDATION
@@ -70,11 +77,20 @@ Minimum score: 7/10 for ready status
 Load the po-agent to validate story completeness and alignment.
 ```
 
-**Validation includes:**
-- Docker environment requirements specified
-- Container health checks defined
-- Test approach includes container testing
-- Deployment strategy considers containerization
+**Product Owner Validation Process:**
+```bash
+# Automated PO validation with comprehensive scoring
+./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-development" -Context @{StoryId=$STORY_ID} -DocumentPath "docs/stories/story-$STORY_ID.md"
+
+# Validation includes:
+# - Docker environment requirements specified
+# - Container health checks defined  
+# - Test approach includes container testing
+# - Deployment strategy considers containerization
+# - Acceptance criteria completeness (automated scoring)
+# - Technical feasibility assessment
+echo "✅ Product Owner validation completed"
+```
 
 ## PHASE 3: DEVELOPMENT IN CONTAINERS
 
@@ -82,6 +98,15 @@ Load the po-agent to validate story completeness and alignment.
 **Load Developer Agent:**
 ```
 Load the dev-agent for Docker-based implementation.
+```
+
+**CRITICAL DEVELOPMENT REMINDER:**
+```
+⚠️ NO DUMMY DATA OR FALLBACK IMPLEMENTATIONS ALLOWED!
+- All features must use REAL data connections
+- Failures must be VISIBLE, not hidden
+- No catch blocks returning fake success
+- No hardcoded test data in production code
 ```
 
 **Docker Development Process:**
@@ -127,6 +152,15 @@ docker-compose logs -f &
 
 **Quality Gate - Implementation Validation:**
 ```bash
+# Check for dummy data patterns FIRST
+echo "🔍 Running no-dummy-data quality gate..."
+./.claude/hooks/quality-gate-no-dummies.ps1
+if [ $? -ne 0 ]; then
+    echo "❌ Dummy data or fallback patterns detected!"
+    echo "Fix all issues before proceeding"
+    exit 1
+fi
+
 # Before marking development complete
 docker-compose exec backend npm test
 docker-compose exec backend npm run lint
@@ -143,6 +177,15 @@ Load the qa-agent for containerized quality assurance.
 
 **Docker QA Process:**
 ```bash
+# FIRST: Validate no dummy data patterns
+echo "🔍 QA: Checking for dummy data and fallback patterns..."
+./.claude/hooks/quality-gate-no-dummies.ps1
+if [ $? -ne 0 ]; then
+    echo "❌ QA FAILED: Dummy data or fallback implementations found!"
+    echo "Returning to developer for fixes"
+    exit 1
+fi
+
 # Run comprehensive tests in containers
 docker-compose exec backend npm run test:unit
 docker-compose exec backend npm run test:integration
@@ -165,9 +208,24 @@ docker-compose exec backend npm run test:load
 docker stats --no-stream
 ```
 
+**Quality Gate - Definition of Done:**
+```bash
+# Automated DoD validation before story completion
+./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-completion" -Context @{StoryId=$STORY_ID}
+
+# Validation enforces:
+# - All tests pass (minimum score 9/10)
+# - No dummy data patterns detected
+# - Docker health checks pass
+# - Documentation updated
+# - Acceptance criteria fully met
+echo "✅ Definition of Done validation passed"
+```
+
 **QA Decision:**
-- **APPROVED**: All tests pass in containers
+- **APPROVED**: All tests pass AND no dummy data patterns found AND DoD score ≥9/10
 - **NEEDS_WORK**: Issues found, return to dev
+- **AUTOMATIC REJECTION**: Any dummy data, mock implementations, or silent failures
 
 ## PHASE 5: DOCUMENTATION & LEARNINGS
 

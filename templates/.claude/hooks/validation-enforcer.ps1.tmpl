@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
-# BMAD Validation Enforcement Hook for {{PROJECT_NAME}}
-# Enforces quality gates and validation requirements
+# Enhanced BMAD Validation Enforcement Hook for {{PROJECT_NAME}}
+# Comprehensive quality gates and validation automation
 
 param(
     [string]$EventType,
@@ -12,17 +12,30 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Configuration
+# Enhanced Configuration
 $PROJECT_NAME = "{{PROJECT_NAME}}"
 $PROJECT_TYPE = "{{PROJECT_TYPE}}"
 $VALIDATION_DIR = "docs/validation"
+$DISABLE_GATES = $env:BMAD_DISABLE_GATES -eq "1"
+
+# Configurable minimum scores by validation type
 $MIN_SCORES = @{
-    "architecture" = 8
-    "prd" = 8
-    "project-setup" = 7
-    "story-draft" = 7
-    "story-dod" = 9
-    "change-impact" = 7
+    "architecture" = [int]($env:BMAD_ARCH_MIN_SCORE ?? 8)
+    "prd" = [int]($env:BMAD_PRD_MIN_SCORE ?? 8)
+    "project-setup" = [int]($env:BMAD_SETUP_MIN_SCORE ?? 7)
+    "story-draft" = [int]($env:BMAD_STORY_MIN_SCORE ?? 7)
+    "story-dod" = [int]($env:BMAD_DOD_MIN_SCORE ?? 9)
+    "change-impact" = [int]($env:BMAD_CHANGE_MIN_SCORE ?? 7)
+}
+
+# Phase-specific validation phases for automated triggers
+$VALIDATION_PHASES = @{
+    "story-creation" = "story-draft"
+    "story-completion" = "story-dod" 
+    "architecture-design" = "architecture"
+    "requirements-definition" = "prd"
+    "project-initialization" = "project-setup"
+    "scope-change" = "change-impact"
 }
 
 # Ensure validation directory exists
@@ -70,19 +83,147 @@ function Get-ValidationStatus {
     return $null
 }
 
+function Invoke-AutomatedValidation {
+    param(
+        [string]$ValidationType,
+        [string]$DocumentPath,
+        [string]$Identifier = (Get-Date -Format "yyyyMMdd-HHmm")
+    )
+    
+    Write-Host "🔍 Running automated validation for $ValidationType..." -ForegroundColor Cyan
+    
+    if (-not (Test-Path $DocumentPath)) {
+        Write-Warning "⚠️ Document not found for validation: $DocumentPath"
+        return @{Score = 0; Status = "DOCUMENT_NOT_FOUND"; Issues = @("Document not found")}
+    }
+    
+    $content = Get-Content $DocumentPath -Raw
+    $issues = @()
+    $score = 0
+    
+    # Automated scoring based on document type
+    switch ($ValidationType) {
+        "story-draft" {
+            # Story validation scoring
+            if ($content -match "User Story:.*As a.*I want.*So that") { $score += 2 } else { $issues += "Missing proper user story format" }
+            if ($content -match "Acceptance Criteria:.*Given.*When.*Then") { $score += 2 } else { $issues += "Missing testable acceptance criteria" }
+            if ($content -match "\[Source:.*\]") { $score += 2 } else { $issues += "Missing source references for technical claims" }
+            if ($content -notmatch "TODO|TBD|FIXME|\[\]") { $score += 2 } else { $issues += "Contains TODOs or incomplete sections" }
+            if ($content -match "Definition of Done:") { $score += 2 } else { $issues += "Missing Definition of Done" }
+        }
+        
+        "architecture" {
+            # Architecture validation scoring  
+            if ($content -match "System Architecture:|Technical Architecture:") { $score += 2 } else { $issues += "Missing system architecture section" }
+            if ($content -match "Technology Stack:") { $score += 2 } else { $issues += "Missing technology stack specification" }
+            if ($content -match "Security:|Security Architecture:") { $score += 2 } else { $issues += "Missing security considerations" }
+            if ($content -match "Performance:|Scalability:") { $score += 2 } else { $issues += "Missing performance/scalability section" }
+            if ($content -match "NO.FALLBACK|NO-FALLBACK") { $score += 2 } else { $issues += "Missing NO-FALLBACK design principles" }
+        }
+        
+        "prd" {
+            # PRD validation scoring
+            if ($content -match "Product Vision:|Vision:") { $score += 2 } else { $issues += "Missing product vision" }
+            if ($content -match "User Stories:|Requirements:") { $score += 2 } else { $issues += "Missing user requirements section" }
+            if ($content -match "Success Metrics:|Metrics:") { $score += 2 } else { $issues += "Missing success metrics" }
+            if ($content -match "Technical Requirements:") { $score += 2 } else { $issues += "Missing technical requirements" }
+            if ($content -notmatch "TODO|TBD|\[\s\]") { $score += 2 } else { $issues += "Contains incomplete sections" }
+        }
+        
+        default {
+            # Generic document validation
+            if ($content.Length -gt 100) { $score += 3 }
+            if ($content -notmatch "TODO|TBD") { $score += 3 }
+            if ($content -match "##.*") { $score += 2 }
+            if ($content -match "\|.*\|") { $score += 2 } # Has tables
+        }
+    }
+    
+    # Determine status based on score
+    $status = switch ($score) {
+        {$_ -ge 9} { "APPROVED" }
+        {$_ -ge 7} { "CONDITIONAL" }
+        {$_ -ge 5} { "NEEDS_WORK" }
+        default { "REJECTED" }
+    }
+    
+    # Generate validation report
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $reportPath = "$VALIDATION_DIR/$ValidationType-$Identifier.md"
+    
+    $report = @"
+# $ValidationType Validation Report
+
+**Document:** $DocumentPath  
+**Validation Date:** $timestamp  
+**Validator:** Automated BMAD Validation System  
+**Overall Score:** $score/10  
+**Status:** $status
+
+## Scoring Breakdown
+
+$(if ($score -ge 8) { "✅" } else { "❌" }) **Overall Score:** $score/10 (Minimum required: $($MIN_SCORES[$ValidationType]))
+
+## Issues Identified
+
+$(if ($issues.Count -eq 0) { "✅ No issues found" } else { ($issues | ForEach-Object { "❌ $_" }) -join "`n" })
+
+## Validation Decision
+
+$(switch ($status) {
+    "APPROVED" { "✅ **APPROVED** - Document meets all requirements and is ready for next phase." }
+    "CONDITIONAL" { "⚠️ **CONDITIONAL** - Document is acceptable but has minor issues that should be addressed." }
+    "NEEDS_WORK" { "🔄 **NEEDS WORK** - Document requires improvements before proceeding." }
+    "REJECTED" { "❌ **REJECTED** - Document has major issues and requires significant rework." }
+})
+
+---
+*Generated by BMAD Validation Enforcer v3.0*
+"@
+    
+    Set-Content -Path $reportPath -Value $report -Encoding UTF8
+    Write-Host "📋 Validation report saved: $reportPath" -ForegroundColor Gray
+    
+    return @{
+        Score = $score
+        Status = $status
+        Issues = $issues
+        ReportPath = $reportPath
+    }
+}
+
 function Enforce-ValidationGate {
     param(
         [string]$ValidationType,
         [string]$Identifier,
         [string]$RequiredStatus = "APPROVED",
-        [int]$MinScore = 8
+        [int]$MinScore = 8,
+        [string]$DocumentPath = $null
     )
     
+    if ($DISABLE_GATES) {
+        Write-Host "⚠️ Validation gates disabled (BMAD_DISABLE_GATES=1)" -ForegroundColor Yellow
+        return $true
+    }
+    
     $validation = Get-ValidationStatus -ValidationType $ValidationType -Identifier $Identifier
+    
+    # If no validation exists and we have a document path, run automated validation
+    if (-not $validation -and $DocumentPath -and (Test-Path $DocumentPath)) {
+        Write-Host "🤖 Running automated validation..." -ForegroundColor Blue
+        $autoValidation = Invoke-AutomatedValidation -ValidationType $ValidationType -DocumentPath $DocumentPath -Identifier $Identifier
+        $validation = @{
+            Score = $autoValidation.Score
+            Status = $autoValidation.Status
+            File = Split-Path $autoValidation.ReportPath -Leaf
+            Date = Get-Date
+        }
+    }
     
     if (-not $validation) {
         Write-Warning "⚠️ VALIDATION REQUIRED: No $ValidationType validation found for $Identifier"
         Write-Host "Please complete validation before proceeding." -ForegroundColor Yellow
+        Write-Host "Or provide document path for automated validation." -ForegroundColor Gray
         return $false
     }
     
@@ -96,7 +237,7 @@ function Enforce-ValidationGate {
     
     # Check score
     if ($validation.Score -lt $MinScore) {
-        Write-Error "❌ VALIDATION FAILED: $ValidationType score ${validation.Score}/10 is below minimum $MinScore/10"
+        Write-Error "❌ VALIDATION FAILED: $ValidationType score $($validation.Score)/10 is below minimum $MinScore/10"
         Write-Host "Please address validation issues in: $($validation.File)" -ForegroundColor Red
         return $false
     }

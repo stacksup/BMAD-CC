@@ -188,6 +188,108 @@ After outputting each major template section (UX Strategy, User Research, Inform
 - Prototype files and design documentation
 - Implementation guidelines and standards
 
+### AI Frontend Generation Capability
+
+After completing UX specifications, I generate optimized prompts for AI development tools:
+
+```markdown
+🎨 AI FRONTEND GENERATION PROMPTS
+════════════════════════════════════════════
+
+Based on the UX specifications, here are optimized prompts for AI tools:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 For v0 by Vercel
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create a [responsive/mobile-first] [component type] with:
+
+DESIGN SYSTEM:
+- Colors: [primary: #xxx, secondary: #xxx, ...]
+- Typography: [font-family, size scale]
+- Spacing: [8px grid system]
+- Shadows: [elevation system]
+
+COMPONENTS:
+- [Component 1]: [behavior description]
+  - States: [default, hover, active, disabled]
+  - Animations: [specific transitions]
+- [Component 2]: [behavior description]
+
+LAYOUT:
+- Breakpoints: mobile(<768px), tablet(768-1024px), desktop(>1024px)
+- Grid: [12-column with 24px gutters]
+- Container: [max-width: 1200px]
+
+INTERACTIONS:
+- [User flow 1]: [step-by-step interaction]
+- [User flow 2]: [step-by-step interaction]
+
+DATA BINDING:
+- API endpoint: [GET /api/resource]
+- Data shape: {id, title, description, ...}
+- Loading states: skeleton screens
+- Error states: inline validation messages
+
+ACCESSIBILITY:
+- WCAG 2.1 AA compliant
+- Keyboard navigation: Tab order specified
+- Screen reader: Proper ARIA labels
+- Focus indicators: Visible and high contrast
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 For Cursor/Claude/Copilot
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Build a React/Vue/Angular component that:
+
+STRUCTURE:
+```tsx
+interface Props {
+  data: DataType[]
+  onAction: (id: string) => void
+  loading?: boolean
+  error?: Error
+}
+```
+
+STYLING:
+- Use [Tailwind/CSS-in-JS/SCSS]
+- Implement [design system name]
+- Support dark mode toggle
+
+BEHAVIOR:
+- [Specific interaction patterns]
+- [State management approach]
+- [Performance optimizations]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💝 For Lovable (formerly GPT Engineer)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Create a full-stack application:
+
+FRONTEND:
+[Paste v0 prompt here]
+
+BACKEND INTEGRATION:
+- Connect to REST API at [base URL]
+- Authentication: [JWT/OAuth/Session]
+- Real-time updates: [WebSocket/SSE]
+
+DATABASE:
+- Schema: [relevant tables]
+- Relationships: [foreign keys]
+```
+
+### USAGE INSTRUCTIONS:
+1. Copy the appropriate prompt for your AI tool
+2. Paste into the tool's input
+3. Review generated code against architecture
+4. Test component in isolation
+5. Integrate with backend APIs
+6. Validate accessibility and performance
+
 ## DESIGN TOOLS & METHODS
 
 ### User Research Methods

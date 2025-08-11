@@ -1,0 +1,310 @@
+---
+description: BMAD change management workflow for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Systematic handling of scope, requirements, and technical changes.
+allowed-tools: Bash(git:*), Bash(powershell:*), Bash(pwsh:*), Read, Grep, Glob, Edit, Write, Task
+---
+
+# /bmad:change-management
+
+## COMPREHENSIVE CHANGE MANAGEMENT SYSTEM
+
+Systematic process for handling scope changes, requirement evolution, and technical modifications with full impact assessment and stakeholder approval.
+
+## PHASE 0: CHANGE REQUEST INITIATION
+
+### 0A) Automatic Change Detection
+**Trigger Change Detection:**
+```bash
+# Check for pending changes
+./.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"
+
+# Detect changes in key documents
+if [ -f "docs/PRD.md" ]; then
+    ./.claude/hooks/change-detector.ps1 -EventType "prd-updated"
+fi
+
+if [ -f "docs/architecture.md" ]; then
+    ./.claude/hooks/change-detector.ps1 -EventType "architecture-updated"  
+fi
+```
+
+### 0B) Manual Change Request Creation
+**For explicitly requested changes:**
+```bash
+# Create manual change request
+./.claude/hooks/change-detector.ps1 -EventType "manual-change-request" -Context @{
+    Description="User requested change: $USER_CHANGE_DESCRIPTION"
+    Priority="High"
+    ChangeType="Requirements"
+}
+```
+
+## PHASE 1: CHANGE IMPACT ASSESSMENT
+
+### 1A) Load Product Owner for Change Analysis
+**Load Product Owner Agent:**
+```
+Load the po-agent to perform comprehensive change impact assessment using the change management capability.
+```
+
+**Change Analysis Process:**
+1. **Load Change Request**: Read the pending change from docs/changes/
+2. **Impact Assessment Matrix**: Analyze across 7 dimensions
+3. **Implementation Options**: Generate 3 strategic options
+4. **Risk Assessment**: Identify and categorize risks
+5. **Sprint Impact Analysis**: Assess effect on current/planned sprints
+6. **Stakeholder Communication Plan**: Define notification strategy
+
+### 1B) Automated Validation Gate
+**Quality Gate - Change Impact Validation:**
+```bash
+# Enforce change impact validation
+./.claude/hooks/validation-enforcer.ps1 -EventType "change-request"
+
+# Validates:
+# - Change impact assessment completeness (score ≥7/10)
+# - Risk assessment quality
+# - Implementation options analysis
+# - Stakeholder communication plan
+# - Sprint impact documentation
+echo "✅ Change impact validation completed"
+```
+
+## PHASE 2: STAKEHOLDER APPROVAL PROCESS
+
+### 2A) Approval Workflow Based on Impact Level
+
+**Low Impact Changes (<4 hours):**
+```bash
+# Product Owner approval sufficient
+echo "📋 Low impact change - Product Owner approval only"
+# Auto-approve if score ≥8/10
+```
+
+**Medium Impact Changes (4-40 hours):**
+```bash
+# Require Product Owner + Technical Lead approval
+echo "⚠️ Medium impact change - Multiple approvals required"
+echo "Notify Technical Lead for architecture review"
+```
+
+**High Impact Changes (>40 hours):**
+```bash  
+# Full stakeholder approval required
+echo "🚨 High impact change - Full stakeholder review required"
+echo "Schedule change review meeting with all stakeholders"
+echo "Consider impact on roadmap and release plans"
+```
+
+### 2B) Decision Recording
+**Document Approval Decision:**
+```bash
+# Update change request with decision
+CHANGE_ID=$(cat .bmad-change-pending 2>/dev/null || echo "none")
+if [ "$CHANGE_ID" != "none" ]; then
+    echo "📝 Recording change decision for: $CHANGE_ID"
+    # Product Owner updates change request with decision
+fi
+```
+
+## PHASE 3: CHANGE IMPLEMENTATION
+
+### 3A) Approved Change Implementation
+**For approved changes:**
+```bash
+# Implement approved change
+case "$CHANGE_DECISION" in
+    "APPROVED")
+        echo "✅ Change approved - proceeding with implementation"
+        
+        # Update sprint backlog if needed
+        {{TASKMASTER_CLI}} update-sprint --change-id="$CHANGE_ID"
+        
+        # Route to appropriate development workflow
+        if [ "$IMPLEMENTATION_OPTION" = "phased" ]; then
+            /bmad:story-cycle  # Implement in phases
+        else
+            /bmad:saas-cycle   # Full implementation
+        fi
+        ;;
+        
+    "CONDITIONAL")
+        echo "⚠️ Change conditionally approved"
+        echo "Implement with specified conditions and monitoring"
+        ;;
+        
+    "DEFERRED")
+        echo "⏸️ Change deferred to future sprint/release"
+        # Archive change request to deferred folder
+        ;;
+        
+    "REJECTED")
+        echo "❌ Change rejected - documenting rationale"
+        # Archive change request to rejected folder
+        ;;
+esac
+```
+
+### 3B) Change Monitoring During Implementation
+**Monitor change impact during implementation:**
+```bash
+# Monitor implementation progress
+echo "📊 Monitoring change implementation..."
+
+# Check if implementation is exceeding estimates
+ACTUAL_TIME=$(git log --since="$CHANGE_START_DATE" --pretty=format:"%h" | wc -l)
+if [ $ACTUAL_TIME -gt $((ESTIMATED_TIME * 150 / 100)) ]; then
+    echo "⚠️ Implementation exceeding estimates by >50%"
+    echo "Consider rollback triggers"
+fi
+
+# Monitor for new issues or scope creep
+./.claude/hooks/change-detector.ps1 -EventType "file-modified" -FilePath "docs/stories/"
+```
+
+## PHASE 4: ROLLBACK & CONTINGENCY
+
+### 4A) Rollback Triggers
+**Automatic rollback conditions:**
+```bash
+# Check rollback triggers
+if [ $IMPLEMENTATION_TIME_RATIO -gt 1.5 ]; then
+    echo "🔄 ROLLBACK TRIGGER: Implementation time >150% of estimate"
+    TRIGGER_ROLLBACK=true
+fi
+
+if [ $CRITICAL_ISSUES -gt 0 ]; then
+    echo "🔄 ROLLBACK TRIGGER: Critical issues discovered"
+    TRIGGER_ROLLBACK=true
+fi
+
+if [ "$STAKEHOLDER_APPROVAL_WITHDRAWN" = "true" ]; then
+    echo "🔄 ROLLBACK TRIGGER: Stakeholder approval withdrawn"
+    TRIGGER_ROLLBACK=true
+fi
+```
+
+### 4B) Rollback Execution
+**Execute rollback plan:**
+```bash
+if [ "$TRIGGER_ROLLBACK" = "true" ]; then
+    echo "🔄 Executing rollback plan..."
+    
+    # Stop current implementation
+    git checkout main
+    git reset --hard HEAD~$CHANGE_COMMITS
+    
+    # Restore previous sprint plan
+    {{TASKMASTER_CLI}} restore-sprint --before-change="$CHANGE_ID"
+    
+    # Notify stakeholders
+    echo "📧 Notifying stakeholders of rollback"
+    
+    # Document lessons learned
+    echo "📝 Documenting rollback lessons"
+    
+    echo "✅ Rollback complete. Recovery timeline: 1-2 days"
+fi
+```
+
+## PHASE 5: CHANGE COMPLETION & LEARNING
+
+### 5A) Change Completion Validation
+**Quality Gate - Change Implementation Complete:**
+```bash
+# Validate change implementation
+./.claude/hooks/validation-enforcer.ps1 -EventType "change-implementation-complete" -Context @{ChangeId=$CHANGE_ID}
+
+# Validates:
+# - All change objectives met
+# - No unintended side effects
+# - Documentation updated
+# - Success criteria achieved
+echo "✅ Change implementation validation passed"
+```
+
+### 5B) Archive and Learn
+**Archive change and extract learnings:**
+```bash
+# Archive approved change
+./.claude/hooks/change-detector.ps1 -EventType "approve-change"
+
+# Extract lessons learned
+Load the learnings-agent to extract insights from change process:
+- What went well in change management
+- What could be improved
+- Process refinements for future changes
+- Update change management templates with learnings
+
+# Update change management metrics
+echo "📊 Updating change management metrics..."
+echo "- Change implementation accuracy: $ACCURACY"
+echo "- Stakeholder satisfaction: $SATISFACTION"  
+echo "- Process efficiency: $EFFICIENCY"
+```
+
+## SPECIALIZED CHANGE TYPES
+
+### Technical Architecture Changes
+```bash
+# Route to System Architect for technical impact
+Load architect-agent for:
+- Breaking change analysis
+- Backward compatibility assessment
+- Migration strategy development
+- Performance impact evaluation
+```
+
+### Business Requirements Changes
+```bash
+# Route to Business Analyst for business impact
+Load analyst-agent for:
+- Market impact assessment
+- Competitive advantage analysis
+- User impact evaluation
+- Business case validation
+```
+
+### UX/UI Design Changes
+```bash
+# Route to UX Expert for design impact
+Load ux-agent for:
+- User experience impact analysis
+- Design consistency evaluation
+- Accessibility impact assessment
+- AI tool integration for rapid prototyping
+```
+
+## CHANGE MANAGEMENT COMMANDS
+
+### Quick Commands
+- `/.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"` - Check pending changes
+- `/.claude/hooks/change-detector.ps1 -EventType "manual-change-request"` - Create manual change request  
+- `/bmad:change-management` - Full change management workflow
+- `/.claude/hooks/validation-enforcer.ps1 -EventType "change-request"` - Validate change impact
+
+### Environment Variables
+- `BMAD_CHANGE_MANAGEMENT=1` - Enables change management features
+- `BMAD_CHANGE_MIN_SCORE=7` - Minimum change validation score
+- `BMAD_DISABLE_GATES=1` - Temporarily disable change gates
+
+## SUCCESS METRICS
+
+**Change Management Quality:**
+- Change impact prediction accuracy
+- Stakeholder approval process efficiency
+- Implementation timeline accuracy
+- Rollback frequency and recovery time
+
+**Process Efficiency:**
+- Time from change request to decision
+- Change implementation cycle time
+- Stakeholder satisfaction with process
+- Reduced unplanned work and scope creep
+
+**Business Outcomes:**
+- Improved project predictability
+- Reduced change-related risks
+- Better stakeholder alignment
+- Faster response to market changes
+
+Remember: Effective change management turns scope creep from a threat into a competitive advantage by systematically evaluating and implementing valuable changes while maintaining project integrity and stakeholder trust.

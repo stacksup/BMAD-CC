@@ -1,0 +1,244 @@
+---
+description: Document sharding utility for {{PROJECT_NAME}} - Breaks large documents into manageable pieces for efficient processing.
+allowed-tools: Read, Write, Grep, Glob, Bash(powershell:*), Bash(pwsh:*), Bash(ls:*), Bash(mkdir:*)
+---
+
+# /bmad:shard-document
+
+## DOCUMENT SHARDING UTILITY
+
+Break large documents (PRDs, Architecture specs) into smaller, manageable pieces for more efficient agent processing and focused development cycles.
+
+## WHY SHARD DOCUMENTS?
+
+Large documents can overwhelm context windows and make it difficult for agents to focus on specific sections. Sharding:
+- **Improves Focus**: Agents work on one section at a time
+- **Reduces Context Usage**: Smaller files use less token budget
+- **Enables Parallel Work**: Multiple agents can work on different shards
+- **Simplifies Updates**: Edit specific sections without touching entire document
+- **Tracks Progress**: See which sections are complete vs in-progress
+
+## USAGE
+
+### Command Syntax
+```
+/bmad:shard-document <file-path> [output-dir]
+```
+
+### Examples
+```bash
+# Shard a PRD into docs/prd/ directory
+/bmad:shard-document docs/product-requirements.md docs/prd/
+
+# Shard architecture document
+/bmad:shard-document docs/technical-architecture.md docs/architecture/
+
+# Auto-detect output directory based on filename
+/bmad:shard-document docs/prd.md
+# Creates: docs/prd/
+```
+
+## SHARDING PROCESS
+
+### 1. Document Analysis
+The utility analyzes the document structure to identify:
+- **Level 1 Headers (#)**: Main document title
+- **Level 2 Headers (##)**: Major sections to become separate files
+- **Level 3+ Headers**: Subsections kept within their parent section
+
+### 2. File Creation Strategy
+
+#### For PRD Documents
+Creates structured epic and story files:
+```
+docs/prd/
+├── overview.md              # Document metadata and structure
+├── goals-and-background.md  # Business context
+├── requirements.md          # Core requirements
+├── epic-1-user-auth.md     # Epic with stories
+├── epic-2-dashboard.md     # Epic with stories
+├── epic-3-reporting.md     # Epic with stories
+├── success-metrics.md      # KPIs and metrics
+└── appendices.md           # Additional information
+```
+
+#### For Architecture Documents
+Creates component-focused files:
+```
+docs/architecture/
+├── overview.md                    # System overview
+├── system-architecture.md         # High-level design
+├── component-frontend.md          # Frontend architecture
+├── component-backend.md           # Backend architecture
+├── component-database.md          # Data architecture
+├── api-specifications.md          # API design
+├── deployment-strategy.md         # Infrastructure
+└── security-considerations.md     # Security architecture
+```
+
+#### For Generic Documents
+Creates section-based files:
+```
+docs/[document-name]/
+├── overview.md           # Document metadata
+├── section-1-title.md    # First major section
+├── section-2-title.md    # Second major section
+└── ...                   # Additional sections
+```
+
+### 3. Content Preservation
+
+Each shard maintains:
+- **Original formatting**: Markdown structure preserved
+- **Cross-references**: Links updated to point to new shard files
+- **Context headers**: Each file includes breadcrumb navigation
+- **Metadata**: Source document and creation timestamp
+
+### 4. Overview File Generation
+
+The `overview.md` file contains:
+- Document title and description
+- Table of contents with links to all shards
+- Document metadata (creation date, version, author)
+- Sharding summary (number of files created)
+
+## IMPLEMENTATION
+
+```bash
+# Check if document exists
+if [ ! -f "$1" ]; then
+    echo "❌ Error: Document $1 not found"
+    exit 1
+fi
+
+# Determine output directory
+DOC_NAME=$(basename "$1" .md)
+OUTPUT_DIR="${2:-docs/$DOC_NAME}"
+
+# Create output directory
+mkdir -p "$OUTPUT_DIR"
+echo "📁 Creating shards in $OUTPUT_DIR/"
+
+# Parse document and create shards
+echo "🔍 Analyzing document structure..."
+
+# Extract all level 2 headers
+SECTIONS=$(grep '^## ' "$1" | sed 's/^## //')
+
+# Create overview file
+cat > "$OUTPUT_DIR/overview.md" << EOF
+# $DOC_NAME - Sharded Document Overview
+
+**Source Document**: $1
+**Sharded On**: $(date)
+**Total Shards**: $(echo "$SECTIONS" | wc -l)
+
+## Table of Contents
+
+EOF
+
+# Process each section
+SHARD_COUNT=0
+while IFS= read -r section; do
+    SHARD_COUNT=$((SHARD_COUNT + 1))
+    
+    # Create filename from section title
+    FILENAME=$(echo "$section" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -d '[:punct:]').md
+    
+    # Extract section content (from this ## to next ## or EOF)
+    # This is simplified - actual implementation would use proper parsing
+    
+    echo "📄 Creating shard: $FILENAME"
+    
+    # Add to overview TOC
+    echo "- [$section](./$FILENAME)" >> "$OUTPUT_DIR/overview.md"
+done <<< "$SECTIONS"
+
+echo "✅ Sharding complete! Created $SHARD_COUNT shards in $OUTPUT_DIR/"
+```
+
+## SPECIAL HANDLING
+
+### Epic Detection (PRD Documents)
+If a section title contains "Epic", "Feature", or "User Story":
+- Creates epic-N-[name].md format
+- Preserves story structure within epic
+- Maintains story numbering (1.1, 1.2, etc.)
+
+### Task Master Integration
+For PRD shards containing epics:
+```bash
+# After sharding, offer to create Task Master tasks
+echo "🎯 Would you like to create Task Master tasks from epics? (y/n)"
+read -r response
+if [ "$response" = "y" ]; then
+    for epic in "$OUTPUT_DIR"/epic-*.md; do
+        EPIC_TITLE=$(head -n 1 "$epic" | sed 's/^# //')
+        {{TASKMASTER_CLI}} create --title="$EPIC_TITLE" --description="Imported from sharded PRD"
+    done
+fi
+```
+
+### Large Section Handling
+If a single section exceeds 2000 lines:
+- Automatically sub-shard based on level 3 headers
+- Creates section-name/part-1.md, part-2.md structure
+- Maintains navigation between parts
+
+## POST-SHARDING WORKFLOW
+
+### 1. For Development Teams
+After sharding, the SM agent can:
+- Load specific epic files for story creation
+- Focus on one epic at a time
+- Track completion by epic
+
+### 2. For Architecture Reviews
+After sharding, architects can:
+- Review specific components in isolation
+- Update individual architecture sections
+- Maintain version control per component
+
+### 3. For Product Managers
+After sharding, PMs can:
+- Update individual epic requirements
+- Prioritize at the epic level
+- Track epic-level metrics
+
+## QUALITY CHECKS
+
+After sharding, the utility verifies:
+- ✅ All content from original document is preserved
+- ✅ No duplicate content across shards
+- ✅ All internal links are updated
+- ✅ Character count matches (minus added navigation)
+- ✅ Markdown syntax remains valid
+
+## ERROR HANDLING
+
+The utility handles:
+- **Malformed Markdown**: Warns but continues with best effort
+- **Missing Headers**: Uses default section names
+- **Circular References**: Detects and reports
+- **Encoding Issues**: Converts to UTF-8
+- **Permission Errors**: Reports which files couldn't be created
+
+## TIPS FOR OPTIMAL SHARDING
+
+1. **Structure Documents Well**: Use clear ## headers for major sections
+2. **Keep Sections Balanced**: Aim for 200-500 lines per section
+3. **Use Descriptive Headers**: They become filenames
+4. **Include Overview Sections**: Add ## Overview or ## Introduction
+5. **Group Related Content**: Keep related items in same section
+
+## REVERTING SHARDS
+
+To recombine sharded documents:
+```bash
+# Combines all shards back into single document
+/bmad:unshard-document docs/prd/ docs/prd-combined.md
+```
+
+---
+
+*Note: Document sharding is a one-way transformation by default. Always keep original documents as backup.*

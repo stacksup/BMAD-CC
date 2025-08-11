@@ -50,6 +50,7 @@ New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\lessons")
 New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\story-notes") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\templates") | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\validation") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $ProjectDir "docs\data") | Out-Null
 
 function Apply-Template {
   param($TemplatePath, $DestPath)
@@ -107,6 +108,7 @@ $map = @(
   @{ src = Join-Path $templatesRoot ".claude\commands\bmad\github-setup.md.tmpl"; dst = Join-Path $claudeDir "commands\bmad\github-setup.md" },
   @{ src = Join-Path $templatesRoot ".claude\commands\bmad\docker.md.tmpl"; dst = Join-Path $claudeDir "commands\bmad\docker.md" },
   @{ src = Join-Path $templatesRoot ".claude\commands\bmad\generate-changelog.md.tmpl"; dst = Join-Path $claudeDir "commands\bmad\generate-changelog.md" },
+  @{ src = Join-Path $templatesRoot ".claude\commands\bmad\shard-document.md.tmpl"; dst = Join-Path $claudeDir "commands\bmad\shard-document.md" },
 
   @{ src = Join-Path $templatesRoot ".claude\hooks\on-posttooluse.ps1.tmpl";  dst = Join-Path $claudeDir "hooks\on-posttooluse.ps1" },
   @{ src = Join-Path $templatesRoot ".claude\hooks\gate-enforcer.ps1.tmpl";   dst = Join-Path $claudeDir "hooks\gate-enforcer.ps1" },
@@ -115,6 +117,7 @@ $map = @(
   @{ src = Join-Path $templatesRoot ".claude\hooks\github-backup.ps1.tmpl"; dst = Join-Path $claudeDir "hooks\github-backup.ps1" },
   @{ src = Join-Path $templatesRoot ".claude\hooks\docker-manager.ps1.tmpl"; dst = Join-Path $claudeDir "hooks\docker-manager.ps1" },
   @{ src = Join-Path $templatesRoot ".claude\hooks\documentation-updater.ps1.tmpl"; dst = Join-Path $claudeDir "hooks\documentation-updater.ps1" },
+  @{ src = Join-Path $templatesRoot ".claude\hooks\quality-gate-no-dummies.ps1.tmpl"; dst = Join-Path $claudeDir "hooks\quality-gate-no-dummies.ps1" },
 
   @{ src = Join-Path $templatesRoot ".claude\settings.local.json.tmpl";       dst = Join-Path $claudeDir "settings.local.json" },
 
@@ -138,7 +141,13 @@ $map = @(
   @{ src = Join-Path $templatesRoot "docs\pm-checklist.md.tmpl";              dst = Join-Path $ProjectDir "docs\templates\pm-checklist.md.tmpl" },
   @{ src = Join-Path $templatesRoot "docs\po-master-checklist.md.tmpl";       dst = Join-Path $ProjectDir "docs\templates\po-master-checklist.md.tmpl" },
   @{ src = Join-Path $templatesRoot "docs\story-draft-checklist.md.tmpl";     dst = Join-Path $ProjectDir "docs\templates\story-draft-checklist.md.tmpl" },
-  @{ src = Join-Path $templatesRoot "docs\story-dod-checklist.md.tmpl";       dst = Join-Path $ProjectDir "docs\templates\story-dod-checklist.md.tmpl" }
+  @{ src = Join-Path $templatesRoot "docs\story-dod-checklist.md.tmpl";       dst = Join-Path $ProjectDir "docs\templates\story-dod-checklist.md.tmpl" },
+  @{ src = Join-Path $templatesRoot "docs\no-fallback-policy.md.tmpl";        dst = Join-Path $ProjectDir "docs\no-fallback-policy.md" },
+  @{ src = Join-Path $templatesRoot "docs\expansion-packs.md.tmpl";           dst = Join-Path $ProjectDir "docs\expansion-packs.md" },
+  
+  @{ src = Join-Path $templatesRoot "data\elicitation-methods.md.tmpl";       dst = Join-Path $ProjectDir "docs\data\elicitation-methods.md" },
+  @{ src = Join-Path $templatesRoot "data\brainstorming-techniques.md.tmpl"; dst = Join-Path $ProjectDir "docs\data\brainstorming-techniques.md" },
+  @{ src = Join-Path $templatesRoot "data\technical-preferences.md.tmpl";     dst = Join-Path $ProjectDir "docs\data\technical-preferences.md" }
 )
 
 foreach ($item in $map) { if (Test-Path $item.src) { Apply-Template -TemplatePath $item.src -DestPath $item.dst } }
