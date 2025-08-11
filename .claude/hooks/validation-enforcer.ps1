@@ -1,0 +1,383 @@
+﻿#!/usr/bin/env pwsh
+# Enhanced BMAD Validation Enforcement Hook for BMAD-CC
+# Comprehensive quality gates and validation automation
+
+param(
+    [string]$EventType,
+    [string]$AgentName,
+    [string]$TaskType,
+    [string]$FilePath,
+    [hashtable]$Context = @{}
+)
+
+$ErrorActionPreference = "Stop"
+
+# Enhanced Configuration
+$PROJECT_NAME = "BMAD-CC"
+$PROJECT_TYPE = "other"
+$VALIDATION_DIR = "docs/validation"
+$DISABLE_GATES = $env:BMAD_DISABLE_GATES -eq "1"
+
+# Configurable minimum scores by validation type
+$MIN_SCORES = @{
+    "architecture" = [int]($env:BMAD_ARCH_MIN_SCORE ?? 8)
+    "prd" = [int]($env:BMAD_PRD_MIN_SCORE ?? 8)
+    "project-setup" = [int]($env:BMAD_SETUP_MIN_SCORE ?? 7)
+    "story-draft" = [int]($env:BMAD_STORY_MIN_SCORE ?? 7)
+    "story-dod" = [int]($env:BMAD_DOD_MIN_SCORE ?? 9)
+    "change-impact" = [int]($env:BMAD_CHANGE_MIN_SCORE ?? 7)
+}
+
+# Phase-specific validation phases for automated triggers
+$VALIDATION_PHASES = @{
+    "story-creation" = "story-draft"
+    "story-completion" = "story-dod" 
+    "architecture-design" = "architecture"
+    "requirements-definition" = "prd"
+    "project-initialization" = "project-setup"
+    "scope-change" = "change-impact"
+}
+
+# Ensure validation directory exists
+if (-not (Test-Path $VALIDATION_DIR)) {
+    New-Item -ItemType Directory -Force -Path $VALIDATION_DIR | Out-Null
+}
+
+function Get-ValidationStatus {
+    param([string]$ValidationType, [string]$Identifier)
+    
+    $pattern = "$VALIDATION_DIR/$ValidationType-*$Identifier*.md"
+    $latestValidation = Get-ChildItem -Path $pattern -ErrorAction SilentlyContinue | 
+                        Sort-Object LastWriteTime -Descending | 
+                        Select-Object -First 1
+    
+    if ($latestValidation) {
+        $content = Get-Content $latestValidation.FullName -Raw
+        
+        # Extract score
+        if ($content -match "Overall.*Score.*?(\d+)/10") {
+            $score = [int]$matches[1]
+        } else {
+            $score = 0
+        }
+        
+        # Extract status
+        $status = "UNKNOWN"
+        if ($content -match "\*\*APPROVED\*\*|✅.*APPROVED") { $status = "APPROVED" }
+        elseif ($content -match "\*\*GO\*\*|✅.*GO") { $status = "GO" }
+        elseif ($content -match "\*\*READY\*\*|✅.*READY") { $status = "READY" }
+        elseif ($content -match "\*\*DONE\*\*|✅.*DONE") { $status = "DONE" }
+        elseif ($content -match "\*\*CONDITIONAL\*\*|⚠️") { $status = "CONDITIONAL" }
+        elseif ($content -match "\*\*REJECTED\*\*|❌.*REJECTED") { $status = "REJECTED" }
+        elseif ($content -match "\*\*BLOCKED\*\*|❌.*BLOCKED") { $status = "BLOCKED" }
+        elseif ($content -match "\*\*NOT READY\*\*|❌.*NOT READY") { $status = "NOT_READY" }
+        
+        return @{
+            Score = $score
+            Status = $status
+            File = $latestValidation.Name
+            Date = $latestValidation.LastWriteTime
+        }
+    }
+    
+    return $null
+}
+
+function Invoke-AutomatedValidation {
+    param(
+        [string]$ValidationType,
+        [string]$DocumentPath,
+        [string]$Identifier = (Get-Date -Format "yyyyMMdd-HHmm")
+    )
+    
+    Write-Host "🔍 Running automated validation for $ValidationType..." -ForegroundColor Cyan
+    
+    if (-not (Test-Path $DocumentPath)) {
+        Write-Warning "⚠️ Document not found for validation: $DocumentPath"
+        return @{Score = 0; Status = "DOCUMENT_NOT_FOUND"; Issues = @("Document not found")}
+    }
+    
+    $content = Get-Content $DocumentPath -Raw
+    $issues = @()
+    $score = 0
+    
+    # Automated scoring based on document type
+    switch ($ValidationType) {
+        "story-draft" {
+            # Story validation scoring
+            if ($content -match "User Story:.*As a.*I want.*So that") { $score += 2 } else { $issues += "Missing proper user story format" }
+            if ($content -match "Acceptance Criteria:.*Given.*When.*Then") { $score += 2 } else { $issues += "Missing testable acceptance criteria" }
+            if ($content -match "\[Source:.*\]") { $score += 2 } else { $issues += "Missing source references for technical claims" }
+            if ($content -notmatch "TODO|TBD|FIXME|\[\]") { $score += 2 } else { $issues += "Contains TODOs or incomplete sections" }
+            if ($content -match "Definition of Done:") { $score += 2 } else { $issues += "Missing Definition of Done" }
+        }
+        
+        "architecture" {
+            # Architecture validation scoring  
+            if ($content -match "System Architecture:|Technical Architecture:") { $score += 2 } else { $issues += "Missing system architecture section" }
+            if ($content -match "Technology Stack:") { $score += 2 } else { $issues += "Missing technology stack specification" }
+            if ($content -match "Security:|Security Architecture:") { $score += 2 } else { $issues += "Missing security considerations" }
+            if ($content -match "Performance:|Scalability:") { $score += 2 } else { $issues += "Missing performance/scalability section" }
+            if ($content -match "NO.FALLBACK|NO-FALLBACK") { $score += 2 } else { $issues += "Missing NO-FALLBACK design principles" }
+        }
+        
+        "prd" {
+            # PRD validation scoring
+            if ($content -match "Product Vision:|Vision:") { $score += 2 } else { $issues += "Missing product vision" }
+            if ($content -match "User Stories:|Requirements:") { $score += 2 } else { $issues += "Missing user requirements section" }
+            if ($content -match "Success Metrics:|Metrics:") { $score += 2 } else { $issues += "Missing success metrics" }
+            if ($content -match "Technical Requirements:") { $score += 2 } else { $issues += "Missing technical requirements" }
+            if ($content -notmatch "TODO|TBD|\[\s\]") { $score += 2 } else { $issues += "Contains incomplete sections" }
+        }
+        
+        default {
+            # Generic document validation
+            if ($content.Length -gt 100) { $score += 3 }
+            if ($content -notmatch "TODO|TBD") { $score += 3 }
+            if ($content -match "##.*") { $score += 2 }
+            if ($content -match "\|.*\|") { $score += 2 } # Has tables
+        }
+    }
+    
+    # Determine status based on score
+    $status = switch ($score) {
+        {$_ -ge 9} { "APPROVED" }
+        {$_ -ge 7} { "CONDITIONAL" }
+        {$_ -ge 5} { "NEEDS_WORK" }
+        default { "REJECTED" }
+    }
+    
+    # Generate validation report
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $reportPath = "$VALIDATION_DIR/$ValidationType-$Identifier.md"
+    
+    $report = @"
+# $ValidationType Validation Report
+
+**Document:** $DocumentPath  
+**Validation Date:** $timestamp  
+**Validator:** Automated BMAD Validation System  
+**Overall Score:** $score/10  
+**Status:** $status
+
+## Scoring Breakdown
+
+$(if ($score -ge 8) { "✅" } else { "❌" }) **Overall Score:** $score/10 (Minimum required: $($MIN_SCORES[$ValidationType]))
+
+## Issues Identified
+
+$(if ($issues.Count -eq 0) { "✅ No issues found" } else { ($issues | ForEach-Object { "❌ $_" }) -join "`n" })
+
+## Validation Decision
+
+$(switch ($status) {
+    "APPROVED" { "✅ **APPROVED** - Document meets all requirements and is ready for next phase." }
+    "CONDITIONAL" { "⚠️ **CONDITIONAL** - Document is acceptable but has minor issues that should be addressed." }
+    "NEEDS_WORK" { "🔄 **NEEDS WORK** - Document requires improvements before proceeding." }
+    "REJECTED" { "❌ **REJECTED** - Document has major issues and requires significant rework." }
+})
+
+---
+*Generated by BMAD Validation Enforcer v3.0*
+"@
+    
+    Set-Content -Path $reportPath -Value $report -Encoding UTF8
+    Write-Host "📋 Validation report saved: $reportPath" -ForegroundColor Gray
+    
+    return @{
+        Score = $score
+        Status = $status
+        Issues = $issues
+        ReportPath = $reportPath
+    }
+}
+
+function Enforce-ValidationGate {
+    param(
+        [string]$ValidationType,
+        [string]$Identifier,
+        [string]$RequiredStatus = "APPROVED",
+        [int]$MinScore = 8,
+        [string]$DocumentPath = $null
+    )
+    
+    if ($DISABLE_GATES) {
+        Write-Host "⚠️ Validation gates disabled (BMAD_DISABLE_GATES=1)" -ForegroundColor Yellow
+        return $true
+    }
+    
+    $validation = Get-ValidationStatus -ValidationType $ValidationType -Identifier $Identifier
+    
+    # If no validation exists and we have a document path, run automated validation
+    if (-not $validation -and $DocumentPath -and (Test-Path $DocumentPath)) {
+        Write-Host "🤖 Running automated validation..." -ForegroundColor Blue
+        $autoValidation = Invoke-AutomatedValidation -ValidationType $ValidationType -DocumentPath $DocumentPath -Identifier $Identifier
+        $validation = @{
+            Score = $autoValidation.Score
+            Status = $autoValidation.Status
+            File = Split-Path $autoValidation.ReportPath -Leaf
+            Date = Get-Date
+        }
+    }
+    
+    if (-not $validation) {
+        Write-Warning "⚠️ VALIDATION REQUIRED: No $ValidationType validation found for $Identifier"
+        Write-Host "Please complete validation before proceeding." -ForegroundColor Yellow
+        Write-Host "Or provide document path for automated validation." -ForegroundColor Gray
+        return $false
+    }
+    
+    $hoursSinceValidation = [math]::Round(((Get-Date) - $validation.Date).TotalHours, 1)
+    
+    # Check if validation is stale (>48 hours old)
+    if ($hoursSinceValidation -gt 48) {
+        Write-Warning "⚠️ STALE VALIDATION: $ValidationType validation is $hoursSinceValidation hours old"
+        Write-Host "Consider re-validating before proceeding." -ForegroundColor Yellow
+    }
+    
+    # Check score
+    if ($validation.Score -lt $MinScore) {
+        Write-Error "❌ VALIDATION FAILED: $ValidationType score $($validation.Score)/10 is below minimum $MinScore/10"
+        Write-Host "Please address validation issues in: $($validation.File)" -ForegroundColor Red
+        return $false
+    }
+    
+    # Check status
+    $acceptableStatuses = @("APPROVED", "GO", "READY", "DONE")
+    if ($validation.Status -eq "CONDITIONAL") {
+        Write-Warning "⚠️ CONDITIONAL APPROVAL: $ValidationType has conditions that should be addressed"
+        # Allow conditional to proceed with warning
+    }
+    elseif ($validation.Status -notin $acceptableStatuses) {
+        Write-Error "❌ VALIDATION BLOCKED: $ValidationType status is $($validation.Status)"
+        Write-Host "Please resolve issues in: $($validation.File)" -ForegroundColor Red
+        return $false
+    }
+    
+    Write-Host "✅ Validation Passed: $ValidationType (Score: $($validation.Score)/10, Status: $($validation.Status))" -ForegroundColor Green
+    return $true
+}
+
+# Main enforcement logic based on event type
+switch ($EventType) {
+    "pre-planning-handoff" {
+        # Enforce architecture and PRD validation before development
+        Write-Host "`n🔍 Enforcing Planning Phase Quality Gates..." -ForegroundColor Cyan
+        
+        $architectureValid = Enforce-ValidationGate -ValidationType "architect-validation" `
+                                                   -Identifier (Get-Date -Format "yyyy-MM") `
+                                                   -MinScore $MIN_SCORES["architecture"]
+        
+        $prdValid = Enforce-ValidationGate -ValidationType "prd-validation" `
+                                          -Identifier (Get-Date -Format "yyyy-MM") `
+                                          -MinScore $MIN_SCORES["prd"]
+        
+        if (-not ($architectureValid -and $prdValid)) {
+            throw "Planning phase validation gates not met. Cannot proceed to development."
+        }
+    }
+    
+    "pre-story-development" {
+        # Enforce story draft validation before development starts
+        Write-Host "`n🔍 Enforcing Story Readiness Gate..." -ForegroundColor Cyan
+        
+        $storyId = $Context.StoryId ?? "current"
+        $storyValid = Enforce-ValidationGate -ValidationType "story-draft" `
+                                            -Identifier $storyId `
+                                            -MinScore $MIN_SCORES["story-draft"]
+        
+        if (-not $storyValid) {
+            throw "Story not ready for development. Please complete validation."
+        }
+    }
+    
+    "pre-story-completion" {
+        # Enforce DoD validation before marking story complete
+        Write-Host "`n🔍 Enforcing Definition of Done Gate..." -ForegroundColor Cyan
+        
+        $storyId = $Context.StoryId ?? "current"
+        $dodValid = Enforce-ValidationGate -ValidationType "story-dod" `
+                                          -Identifier $storyId `
+                                          -MinScore $MIN_SCORES["story-dod"]
+        
+        if (-not $dodValid) {
+            throw "Story does not meet Definition of Done. Cannot mark as complete."
+        }
+    }
+    
+    "pre-project-start" {
+        # Enforce project setup validation for new projects
+        Write-Host "`n🔍 Enforcing Project Setup Gate..." -ForegroundColor Cyan
+        
+        $setupValid = Enforce-ValidationGate -ValidationType "project-setup" `
+                                            -Identifier $PROJECT_NAME `
+                                            -MinScore $MIN_SCORES["project-setup"]
+        
+        if (-not $setupValid) {
+            Write-Warning "Project setup validation failed. Critical issues must be resolved."
+            Write-Host "Run: Load po-agent → validate-project-setup" -ForegroundColor Yellow
+            throw "Project not ready to start. Complete setup validation."
+        }
+    }
+    
+    "change-request" {
+        # Enforce change impact validation for scope changes
+        Write-Host "`n🔍 Enforcing Change Management Gate..." -ForegroundColor Cyan
+        
+        $changeId = $Context.ChangeId ?? (Get-Date -Format "yyyyMMdd")
+        $changeValid = Enforce-ValidationGate -ValidationType "change-impact" `
+                                             -Identifier $changeId `
+                                             -MinScore $MIN_SCORES["change-impact"]
+        
+        if (-not $changeValid) {
+            Write-Warning "Change impact assessment required before proceeding."
+            return $false
+        }
+    }
+    
+    "validation-status" {
+        # Report current validation status
+        Write-Host "`n📊 Current Validation Status for $PROJECT_NAME" -ForegroundColor Cyan
+        Write-Host "=" * 60
+        
+        $validationTypes = @(
+            @{Type="architect-validation"; Label="Architecture"},
+            @{Type="prd-validation"; Label="PRD"},
+            @{Type="project-setup"; Label="Project Setup"},
+            @{Type="story-draft"; Label="Story Drafts"},
+            @{Type="story-dod"; Label="Story Completions"}
+        )
+        
+        foreach ($vType in $validationTypes) {
+            $latest = Get-ChildItem -Path "$VALIDATION_DIR/$($vType.Type)-*.md" -ErrorAction SilentlyContinue |
+                     Sort-Object LastWriteTime -Descending |
+                     Select-Object -First 1
+            
+            if ($latest) {
+                $validation = Get-ValidationStatus -ValidationType $vType.Type -Identifier "*"
+                $status = switch($validation.Status) {
+                    "APPROVED" { "✅ Approved" }
+                    "GO" { "✅ Go" }
+                    "READY" { "✅ Ready" }
+                    "DONE" { "✅ Done" }
+                    "CONDITIONAL" { "⚠️ Conditional" }
+                    default { "❌ $($validation.Status)" }
+                }
+                Write-Host "$($vType.Label): $status (Score: $($validation.Score)/10) - $($latest.Name)"
+            } else {
+                Write-Host "$($vType.Label): ⏸️ Not validated yet" -ForegroundColor Gray
+            }
+        }
+        Write-Host "=" * 60
+    }
+    
+    default {
+        # No enforcement for this event type
+        Write-Verbose "No validation enforcement for event type: $EventType"
+    }
+}
+
+# Success message if we get here
+if ($EventType -ne "validation-status") {
+    Write-Host "`n✅ All validation gates passed successfully!" -ForegroundColor Green
+}

@@ -1,0 +1,376 @@
+﻿---
+description: Brownfield enhancement workflow for BMAD-CC (other) - Comprehensive workflow for enhancing existing systems.
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
+---
+
+# /bmad:brownfield-enhancement
+
+## BROWNFIELD ENHANCEMENT WORKFLOW
+
+Comprehensive workflow for enhancing existing systems with new features, modernization, or significant improvements. Handles existing system analysis, safe integration, and coordinated enhancement execution.
+
+**When to Use:**
+- Adding major features to existing applications
+- System modernization and refactoring projects
+- Integration with external systems or services
+- Performance improvements and scalability enhancements
+- UI/UX redesigns for existing applications
+
+## PHASE 0: ENHANCEMENT CLASSIFICATION & ROUTING
+
+### 0A) Business Analyst → Enhancement Scope Analysis
+**Load Business Analyst Agent:**
+```
+Load the analyst-agent to classify and scope the enhancement request.
+```
+
+**Classification Process:**
+Analyze enhancement complexity and route to appropriate path:
+
+**Single Story Enhancement (< 4 hours):**
+- Simple feature additions to existing functionality
+- Bug fixes that require coordination
+- Configuration or integration changes
+- **Route to**: Direct story creation with brownfield context
+
+**Small Feature Enhancement (1-3 stories):**
+- Focused feature additions with clear scope
+- Minor integrations or workflow improvements
+- UI improvements within existing design system
+- **Route to**: Epic creation with focused planning
+
+**Major Enhancement (Multiple epics):**
+- Significant new capabilities or system changes
+- Architectural modifications or technology updates
+- Complex integrations affecting multiple systems
+- **Route to**: Continue with comprehensive planning workflow
+
+**Classification Questions:**
+1. "Can you describe the enhancement scope? Is this a small fix, feature addition, or major enhancement requiring architectural changes?"
+2. "How many existing system components will be affected?"
+3. "Do you need new architectural patterns or can we extend existing approaches?"
+4. "Will this require changes to user workflows or system integrations?"
+
+### 0B) Routing Decision Based on Classification
+
+#### Route A: Single Story Path
+**For simple enhancements < 4 hours:**
+```
+Load pm-agent → Use brownfield-create-story task → Exit to development
+```
+
+#### Route B: Small Feature Path  
+**For focused enhancements 1-3 stories:**
+```
+Load pm-agent → Use brownfield-create-epic task → Exit to story development
+```
+
+#### Route C: Major Enhancement Path
+**For complex multi-story enhancements:**
+Continue with comprehensive planning workflow below.
+
+## PHASE 1: EXISTING SYSTEM ANALYSIS
+
+### 1A) Documentation Assessment
+**Business Analyst → Existing Documentation Review:**
+```
+Check if adequate project documentation exists for enhancement planning.
+```
+
+**Documentation Assessment:**
+- Look for existing architecture docs, API specs, coding standards
+- Assess if documentation is current and comprehensive enough for planning
+- **If Adequate**: Skip system analysis, proceed directly to enhancement PRD
+- **If Inadequate**: Run comprehensive system documentation before PRD
+
+### 1B) CONDITIONAL: System Architecture Analysis
+**System Architect → Comprehensive System Documentation:**
+```
+ONLY if documentation inadequate: Load architect-agent → Use document-project capability to create comprehensive brownfield documentation
+```
+
+**System Analysis Deliverables:**
+- Current system architecture and technical debt assessment
+- Integration points and dependency mapping
+- Performance bottlenecks and scalability constraints
+- Security considerations and compliance requirements
+- Refactoring opportunities and modernization candidates
+
+**Output Location:** Multiple documents per document-project template
+
+## PHASE 2: ENHANCEMENT PLANNING
+
+### 2A) Product Manager → Enhancement PRD
+**Load Product Manager Agent:**
+```
+Load the pm-agent to create comprehensive enhancement PRD.
+```
+
+**Input:** Existing documentation or system analysis
+**Enhancement PRD Focus:**
+- Enhancement objectives and success criteria
+- Integration strategy with existing functionality
+- User impact analysis and migration planning
+- Risk assessment for existing system stability
+- Rollout and deployment strategy
+
+**Key Considerations:**
+- Avoid re-analyzing aspects covered in system documentation
+- Reference existing architecture and constraints
+- Plan for backward compatibility and migration paths
+
+**Output Location:** Save as `docs/enhancement-prd.md`
+
+### 2B) CONDITIONAL: Architecture Planning
+**Architecture Decision Assessment:**
+```
+Review PRD to determine if architectural planning needed:
+- New architectural patterns → Create architecture doc
+- New libraries/frameworks → Create architecture doc  
+- Platform/infrastructure changes → Create architecture doc
+- Following existing patterns → Skip to validation
+```
+
+**System Architect → Enhancement Architecture:**
+```
+ONLY if architectural changes needed: Load architect-agent
+```
+
+**Enhancement Architecture Focus:**
+- Integration approach with existing architecture
+- Migration strategy for affected components
+- New component design within existing patterns
+- Technical debt remediation opportunities
+- Performance and scalability improvements
+
+**Output Location:** Save as `docs/enhancement-architecture.md`
+
+## PHASE 3: VALIDATION & INTEGRATION
+
+### 3A) Product Owner → Enhancement Validation
+**Load Product Owner Agent:**
+```
+Load the po-agent to validate enhancement planning for integration safety.
+```
+
+**Brownfield-Specific Validation:**
+- [ ] Enhancement approach minimizes existing system disruption
+- [ ] Backward compatibility maintained for existing users
+- [ ] Integration points clearly defined and tested
+- [ ] Risk mitigation strategies for system stability
+- [ ] Rollout plan supports safe deployment
+
+**Integration Safety Assessment:**
+- Cross-reference with existing system documentation
+- Validate compatibility with current architecture
+- Assess impact on existing user workflows
+- Confirm testing strategy covers regression scenarios
+
+### 3B) Planning Issue Resolution
+**If PO Identifies Issues:**
+```
+Return to relevant agent (PM/Architect) to fix identified issues.
+Re-export updated documents to docs/ folder after fixes.
+```
+
+## PHASE 4: DEVELOPMENT PREPARATION
+
+### 4A) Document Sharding for Development
+**Product Owner → Documentation Preparation:**
+```
+Load po-agent to use document sharding capability to prepare enhancement documents for development consumption.
+```
+
+**Sharding Options:**
+- **Option A**: Use PO agent: Load po-agent → ask to shard docs/enhancement-prd.md
+- **Option B**: Manual: Use shard-doc task + docs/enhancement-prd.md
+- **Output**: Creates `docs/prd/` and `docs/architecture/` folders
+
+**Brownfield Documentation Package:**
+- Sharded enhancement requirements
+- Existing system context and constraints
+- Integration specifications and testing requirements
+
+### 4B) Story Creation with Brownfield Context
+**Load Scrum Master Agent:**
+```
+Load the sm-agent to use systematic story creation process from available documentation.
+```
+
+**Story Creation Approach:**
+- **For Sharded PRD**: Use standard create-next-story task
+- **For Brownfield Docs**: Use create-brownfield-story task for varied documentation
+
+**Brownfield Story Considerations:**
+- Include existing system integration requirements
+- Define regression testing and validation approach
+- Plan for incremental rollout and feature flags
+- Address backward compatibility requirements
+
+**Quality Gate - Story Validation:**
+```
+After story creation:
+1. SM uses validate-story-draft capability
+2. Validates brownfield integration approach
+3. Minimum score: 8/10 for brownfield stories
+4. Save validation: docs/validation/story-draft-[epic.story]-[date].md
+```
+
+## PHASE 5: DEVELOPMENT EXECUTION
+
+### 5A) OPTIONAL: Story Review & Approval
+**Load Business Analyst or Product Manager:**
+```
+OPTIONAL: Review draft stories for enhancement completeness and safety.
+NOTE: story-review task coming in future releases.
+```
+
+**Brownfield Story Review Focus:**
+- Validate enhancement scope doesn't exceed safe change boundaries
+- Ensure integration approach minimizes system risk
+- Confirm rollback and recovery procedures defined
+- Validate testing coverage for existing functionality
+
+### 5B) Developer Implementation
+**Load Developer Agent (New Chat Session):**
+```
+Load the dev-agent for enhancement implementation with brownfield considerations.
+```
+
+**Brownfield Development Process:**
+1. **Existing Code Analysis**: Understand current implementation patterns
+2. **Integration Planning**: Design enhancement integration with minimal disruption
+3. **Incremental Implementation**: Build changes in testable increments
+4. **Regression Testing**: Ensure existing functionality remains intact
+5. **Migration Support**: Implement data/user migration if needed
+
+**Development Standards:**
+- Follow existing code patterns and conventions
+- Maintain backward compatibility where possible
+- Implement feature flags for safe rollout
+- Comprehensive testing of affected workflows
+
+**Quality Gate - Definition of Done:**
+```
+Before marking story complete:
+1. Developer uses validate-story-completion capability
+2. Reviews against 8-section DoD checklist
+3. Minimum score: 9/10 for production readiness
+4. Save validation: docs/validation/story-dod-[epic.story]-[date].md
+```
+
+### 5C) OPTIONAL: QA Engineer Review
+**Load QA Engineer Agent (New Chat Session):**
+```
+OPTIONAL: Load the qa-agent for senior review with brownfield quality focus.
+```
+
+**Brownfield QA Process:**
+1. **Integration Testing**: Validate enhancement integrates safely
+2. **Regression Validation**: Comprehensive testing of existing functionality
+3. **Performance Impact**: Assess enhancement impact on system performance
+4. **Deployment Safety**: Validate rollout and rollback procedures
+
+**QA Decision:**
+- **QA_APPROVED**: Enhancement safe for deployment
+- **NEEDS_DEV_WORK**: Issues identified, return to development
+
+### 5D) Development Cycle Continuation
+**Multi-Story Enhancement Management:**
+```
+Repeat development cycle (SM → Dev → QA) for all enhancement stories.
+Continue until all enhancement objectives completed.
+```
+
+**Brownfield Coordination:**
+- Coordinate changes across multiple system components
+- Manage dependencies between enhancement stories
+- Maintain system stability throughout development process
+
+## PHASE 6: DEPLOYMENT & VALIDATION
+
+### 6A) CONDITIONAL: Docker Validation (SaaS Projects)
+**For SaaS/Docker-based Projects:**
+```
+{{#if PROJECT_TYPE.saas}}
+Post-commit Docker validation:
+- Build: docker-compose -f  build (or docker-compose build)
+- Restart: docker-compose down && docker-compose up -d
+- Health Check: Backend http://localhost:8001/health, Frontend http://localhost:3000
+{{/if}}
+```
+
+### 6B) OPTIONAL: Enhancement Retrospective
+**Load Product Owner Agent:**
+```
+OPTIONAL: After enhancement completion, conduct retrospective analysis.
+NOTE: epic-retrospective task coming in future releases.
+```
+
+**Retrospective Focus:**
+- Enhancement objectives achievement assessment
+- System integration success validation
+- Lessons learned for future brownfield enhancements
+- Technical debt and modernization opportunities identified
+
+## ENHANCEMENT TYPE SPECIFIC CONSIDERATIONS
+
+### Feature Addition Enhancements
+- **Integration Strategy**: Seamless addition to existing user workflows
+- **Data Migration**: User data compatibility and migration planning
+- **UI Integration**: Consistent design and navigation patterns
+- **API Evolution**: Backward-compatible API changes and versioning
+
+### Modernization Enhancements
+- **Technology Migration**: Gradual migration strategy for new technologies
+- **Architecture Evolution**: Modernization without breaking existing functionality
+- **Performance Improvement**: Optimization without workflow disruption
+- **Code Quality**: Refactoring and technical debt remediation
+
+### System Integration Enhancements
+- **External Service Integration**: Third-party service integration and error handling
+- **Data Synchronization**: Cross-system data consistency and conflict resolution
+- **Authentication/Authorization**: Security integration with existing user management
+- **Monitoring and Observability**: Enhanced system visibility and debugging
+
+## WORKFLOW SUCCESS METRICS
+
+### Enhancement Quality Metrics
+- **Integration Success**: Smooth integration with existing system
+- **Regression Prevention**: No disruption to existing functionality
+- **User Adoption**: Positive user response to enhancements
+- **Performance Impact**: Neutral or positive performance effects
+
+### Development Efficiency Metrics
+- **Planning Accuracy**: Enhancement scope and timeline accuracy
+- **Change Safety**: Minimal rollbacks or production issues
+- **Team Coordination**: Effective coordination across system components
+- **Documentation Quality**: Clear guidance for future enhancements
+
+### Business Value Metrics
+- **Objective Achievement**: Enhancement meets stated business objectives
+- **User Satisfaction**: Improved user experience and satisfaction
+- **System Reliability**: Enhanced system stability and reliability
+- **Technical Debt**: Reduction in technical debt and maintenance burden
+
+## USAGE EXAMPLES
+
+### Example 1: E-commerce Recommendation Engine
+```
+Enhancement: Add AI-powered product recommendations to existing store
+Analysis: Existing system has product catalog, user accounts, purchase history
+Planning: Integration points identified, recommendation API designed, UI components planned
+Implementation: Backend ML service → Frontend recommendation components → A/B testing
+Outcome: Increased sales without disrupting existing shopping experience
+```
+
+### Example 2: Mobile App for Existing Web Platform
+```
+Enhancement: Create mobile app for existing web-based project management tool
+Analysis: Existing APIs, user authentication, data models documented
+Planning: Mobile-specific features planned, API extensions identified, offline capabilities designed
+Implementation: Mobile app development → API enhancements → Cross-platform synchronization
+Outcome: Mobile experience that extends web platform capabilities
+```
+
+Remember: Brownfield enhancements require careful balance between innovation and stability. Respect existing system patterns while strategically introducing improvements that enhance user value and system capabilities.

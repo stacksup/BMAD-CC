@@ -1,0 +1,4 @@
+﻿# docs/
+
+- story-notes/: per-story implementation notes
+- lessons/: short, actionable lessons captured each cycle

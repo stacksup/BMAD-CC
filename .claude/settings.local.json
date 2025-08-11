@@ -1,9 +1,36 @@
-{
+﻿{
   "permissions": {
     "allow": [
-      "Bash(git remote remove:*)",
-      "Bash(grep:*)"
+      "Bash(git:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(powershell:*)",
+      "Bash(pwsh:*)",
+      "Bash(task-master:*)",
+      "Bash(npx task-master:*)",
+      "Bash(python:*)",
+      "Bash(pytest:*)",
+      "Bash(jest:*)"
     ],
     "deny": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/on-posttooluse.ps1" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/gate-enforcer.ps1" }
+        ]
+      }
+    ]
   }
 }
