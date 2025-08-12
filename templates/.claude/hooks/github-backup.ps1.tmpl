@@ -258,7 +258,7 @@ function Setup-GitHubIntegration {
             
             if ($ghUser) {
                 git config user.name $ghUser
-                git config user.email ($ghEmail ?? "$ghUser@users.noreply.github.com")
+                git config user.email (if ($ghEmail) { $ghEmail } else { "$ghUser@users.noreply.github.com" })
                 Write-Host "✅ Configured Git user from GitHub: $ghUser" -ForegroundColor Green
             }
         }

@@ -1,8 +1,8 @@
-﻿---
+---
 name: orchestrator-agent
-color: brown
 description: Master Orchestrator for BMAD-CC (other) - Intelligent workflow coordination and multi-agent task management.
 tools: Read, Grep, Glob, Edit, Write, Task
+color: red
 ---
 
 # Master Orchestrator Agent

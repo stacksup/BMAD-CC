@@ -141,3 +141,7 @@ All PowerShell scripts in this framework use:
 - Requires restart of Claude Code after installation to load new commands
 - Template files should maintain the `.tmpl` extension
 - All paths use Windows path separators in PowerShell scripts
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md

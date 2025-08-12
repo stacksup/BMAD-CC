@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  bmad-cc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bmad-cc-dev
+    ports:
+      - "3000:3000"  # Primary development port
+      - "3001:3001"  # Secondary development port  
+      - "4000:4000"  # API/Backend port
+      - "8000:8000"  # Documentation/Static server
+      - "8081:8080"  # Alternative web port (avoid conflict)
+    volumes:
+      # Mount the entire workspace for live development
+      - .:/workspace
+      # Persist Task Master data
+      - taskmaster_data:/workspace/.taskmaster
+      # Persist node modules for performance
+      - node_modules:/workspace/node_modules
+      # Mount git config for commits
+      - ${HOME}/.gitconfig:/home/bmad/.gitconfig:ro
+      - ${HOME}/.ssh:/home/bmad/.ssh:ro
+    environment:
+      - NODE_ENV=development
+      - BMAD_PROJECT_NAME=BMAD-CC
+      - BMAD_PROJECT_TYPE=other
+      - BMAD_ENABLE_TASKMASTER=true
+      - TASKMASTER_PROJECT_PATH=/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    networks:
+      - bmad-network
+    healthcheck:
+      test: ["CMD", "task-master", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Optional: Database for Task Master data persistence
+  postgres:
+    image: postgres:15-alpine
+    container_name: bmad-cc-postgres
+    environment:
+      - POSTGRES_DB=bmad_cc
+      - POSTGRES_USER=bmad
+      - POSTGRES_PASSWORD=bmad_dev_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # Use different port to avoid conflicts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bmad"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bmad-network
+
+  # Optional: Redis for caching and Task Master performance
+  redis:
+    image: redis:7-alpine
+    container_name: bmad-cc-redis
+    ports:
+      - "6380:6379"  # Use different port to avoid conflicts
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bmad-network
+
+volumes:
+  taskmaster_data:
+    name: bmad-cc-taskmaster
+  postgres_data:
+    name: bmad-cc-postgres
+  redis_data:
+    name: bmad-cc-redis
+  node_modules:
+    name: bmad-cc-node-modules
+
+networks:
+  bmad-network:
+    name: bmad-cc-network
+    driver: bridge

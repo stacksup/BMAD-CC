@@ -1,4 +1,4 @@
-﻿---
+---
 name: analyst-agent
 color: cyan
 description: Business Analyst for BMAD-CC (other) - Market research, competitive analysis, and strategic business insights.

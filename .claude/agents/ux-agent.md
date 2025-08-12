@@ -1,4 +1,4 @@
-﻿---
+---
 name: ux-agent
 color: magenta
 description: UX Expert for BMAD-CC (other) - User experience design, interface planning, and usability optimization.

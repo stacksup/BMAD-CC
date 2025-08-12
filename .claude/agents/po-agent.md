@@ -1,4 +1,4 @@
-﻿---
+---
 name: po-agent
 color: green
 description: Product Owner for BMAD-CC (other) - Requirements validation, stakeholder alignment, and development guidance.

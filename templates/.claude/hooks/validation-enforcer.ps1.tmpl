@@ -18,14 +18,21 @@ $PROJECT_TYPE = "{{PROJECT_TYPE}}"
 $VALIDATION_DIR = "docs/validation"
 $DISABLE_GATES = $env:BMAD_DISABLE_GATES -eq "1"
 
-# Configurable minimum scores by validation type
+# Configurable minimum scores by validation type - PowerShell 5.1 compatible
+$archScore = if ($env:BMAD_ARCH_MIN_SCORE) { $env:BMAD_ARCH_MIN_SCORE } else { 8 }
+$prdScore = if ($env:BMAD_PRD_MIN_SCORE) { $env:BMAD_PRD_MIN_SCORE } else { 8 }
+$setupScore = if ($env:BMAD_SETUP_MIN_SCORE) { $env:BMAD_SETUP_MIN_SCORE } else { 7 }
+$storyScore = if ($env:BMAD_STORY_MIN_SCORE) { $env:BMAD_STORY_MIN_SCORE } else { 7 }
+$dodScore = if ($env:BMAD_DOD_MIN_SCORE) { $env:BMAD_DOD_MIN_SCORE } else { 9 }
+$changeScore = if ($env:BMAD_CHANGE_MIN_SCORE) { $env:BMAD_CHANGE_MIN_SCORE } else { 7 }
+
 $MIN_SCORES = @{
-    "architecture" = [int]($env:BMAD_ARCH_MIN_SCORE ?? 8)
-    "prd" = [int]($env:BMAD_PRD_MIN_SCORE ?? 8)
-    "project-setup" = [int]($env:BMAD_SETUP_MIN_SCORE ?? 7)
-    "story-draft" = [int]($env:BMAD_STORY_MIN_SCORE ?? 7)
-    "story-dod" = [int]($env:BMAD_DOD_MIN_SCORE ?? 9)
-    "change-impact" = [int]($env:BMAD_CHANGE_MIN_SCORE ?? 7)
+    "architecture" = [int]$archScore
+    "prd" = [int]$prdScore
+    "project-setup" = [int]$setupScore
+    "story-draft" = [int]$storyScore
+    "story-dod" = [int]$dodScore
+    "change-impact" = [int]$changeScore
 }
 
 # Phase-specific validation phases for automated triggers
@@ -281,7 +288,7 @@ switch ($EventType) {
         # Enforce story draft validation before development starts
         Write-Host "`n🔍 Enforcing Story Readiness Gate..." -ForegroundColor Cyan
         
-        $storyId = $Context.StoryId ?? "current"
+        $storyId = if ($Context.StoryId) { $Context.StoryId } else { "current" }
         $storyValid = Enforce-ValidationGate -ValidationType "story-draft" `
                                             -Identifier $storyId `
                                             -MinScore $MIN_SCORES["story-draft"]
@@ -295,7 +302,7 @@ switch ($EventType) {
         # Enforce DoD validation before marking story complete
         Write-Host "`n🔍 Enforcing Definition of Done Gate..." -ForegroundColor Cyan
         
-        $storyId = $Context.StoryId ?? "current"
+        $storyId = if ($Context.StoryId) { $Context.StoryId } else { "current" }
         $dodValid = Enforce-ValidationGate -ValidationType "story-dod" `
                                           -Identifier $storyId `
                                           -MinScore $MIN_SCORES["story-dod"]
@@ -324,7 +331,7 @@ switch ($EventType) {
         # Enforce change impact validation for scope changes
         Write-Host "`n🔍 Enforcing Change Management Gate..." -ForegroundColor Cyan
         
-        $changeId = $Context.ChangeId ?? (Get-Date -Format "yyyyMMdd")
+        $changeId = if ($Context.ChangeId) { $Context.ChangeId } else { (Get-Date -Format "yyyyMMdd") }
         $changeValid = Enforce-ValidationGate -ValidationType "change-impact" `
                                              -Identifier $changeId `
                                              -MinScore $MIN_SCORES["change-impact"]

@@ -1,0 +1,143 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Fix Task Master MCP Server Configuration for Windows",
+        "description": "Update MCP server configuration to use Windows cmd /c wrapper pattern for proper execution and resolve punycode deprecation warnings",
+        "details": "Update .mcp.json to use Windows-specific command wrapper pattern. Change the command from 'npx' to 'cmd' with args ['/c', 'npx', ...]. This ensures proper execution on Windows systems. Also investigate and document any punycode deprecation warnings that appear during startup. Update CLAUDE.md with Windows-specific MCP configuration requirements. Test the MCP server connection after changes to ensure proper communication between Claude Code and Task Master.",
+        "testStrategy": "Start Claude Code with --mcp-debug flag to verify MCP server starts without errors. Test basic MCP commands like help, get_tasks, and next_task. Verify no configuration warnings appear in console output. Document any remaining deprecation warnings and their impact.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Optimize Task Master CLI Configuration",
+        "description": "Complete Task Master CLI configuration optimization to resolve all warnings and ensure proper model setup",
+        "details": "Review current Task Master config.json and identify any missing or misconfigured settings. Ensure all AI model configurations are properly set with valid provider/modelId pairs. Configure proper API key environment variables in .env file. Set appropriate maxTokens, temperature values for each model role (main, research, fallback). Update global settings including projectName, defaultNumTasks, and responseLanguage. Create validation script to check configuration completeness.",
+        "testStrategy": "Run 'task-master models' to verify configuration. Execute 'task-master --version' without warnings. Test model access with 'task-master add-task --prompt=\"test task\" --research'. Verify no configuration warnings appear during any Task Master operations.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Validate Docker Infrastructure Health",
+        "description": "Verify Docker container health status and inter-service connectivity for bmad-cc-dev, postgres, and redis containers",
+        "details": "Check Docker container status using 'docker ps' and 'docker-compose ps'. Verify all three containers (bmad-cc-dev, postgres, redis) are running and healthy. Test postgres connectivity on port 5433 with connection string postgres://bmad:bmad_dev_pass@localhost:5433/bmad_cc. Test redis connectivity on port 6380 using redis-cli. Verify network connectivity between containers using 'docker network inspect bmad-cc-network'. Create health check script that validates all services are operational.",
+        "testStrategy": "Execute docker health checks: 'docker exec bmad-cc-dev task-master --version', 'docker exec bmad-cc-postgres pg_isready -U bmad', 'docker exec bmad-cc-redis redis-cli ping'. Verify all return successful status. Test inter-container connectivity from bmad-cc-dev to postgres and redis.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement PowerShell Execution Policy Management",
+        "description": "Ensure PowerShell scripts execute with proper security policies across the BMAD framework",
+        "details": "Review all PowerShell scripts in .claude/hooks/ directory. Ensure all scripts use '-ExecutionPolicy Bypass' flag when invoked. Update hook configurations in settings.local.json to include proper execution policy. Create wrapper scripts if needed for consistent execution. Document PowerShell security requirements in framework documentation. Test scripts work on systems with restricted execution policies.",
+        "testStrategy": "Test hook execution on system with restricted policy (Set-ExecutionPolicy Restricted). Verify hooks still execute properly with Bypass flag. Test on-posttooluse.ps1 and gate-enforcer.ps1 scripts. Ensure no security policy errors occur during normal operations.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Configure Task Master Database Connections",
+        "description": "Establish and validate Task Master connections to postgres and redis services",
+        "details": "Configure Task Master to use postgres for persistent storage. Set DATABASE_URL environment variable to postgres://bmad:bmad_dev_pass@localhost:5433/bmad_cc. Configure redis connection for caching with REDIS_URL=redis://localhost:6380. Update Task Master config to use these connections. Create database schema if needed. Test data persistence across Task Master restarts. Document connection strings and configuration in operational runbook.",
+        "testStrategy": "Create test task and verify it persists in postgres. Restart Task Master and confirm task still exists. Monitor redis cache hits during task operations. Test failover behavior if database becomes unavailable.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Atomic Task Breakdown Workflows",
+        "description": "Configure and test PRD parsing with atomic task breakdown following the 1-3 hour rule",
+        "details": "Create sample PRD document in .taskmaster/docs/. Test 'task-master parse-prd' command with the sample. Verify tasks are created with proper hierarchy. Implement task expansion workflow using 'task-master expand --id=X --num=Y'. Ensure each expanded subtask represents 1-3 hours of work. Create automation script for systematic task breakdown. Document the atomic breakdown process and best practices.",
+        "testStrategy": "Parse test PRD and verify 10+ main tasks created. Expand complex tasks and verify subtasks are atomic (1-3 hours). Test 'task-master list --with-subtasks' shows proper hierarchy. Verify 'task-master analyze-complexity' provides accurate estimates.",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Create Infrastructure Health Monitoring Scripts",
+        "description": "Develop comprehensive health check and monitoring scripts for all infrastructure components",
+        "details": "Create PowerShell script for Windows health checks at scripts/health-check.ps1. Script should check: Docker container status, postgres connectivity and query execution, redis connectivity and operations, Task Master CLI availability, MCP server responsiveness. Implement logging and alerting for failures. Create scheduled task or cron job for regular health checks. Output results in both human-readable and JSON formats.",
+        "testStrategy": "Run health check script and verify all components report healthy. Simulate failure scenarios (stop container, block port) and verify detection. Test JSON output can be parsed by monitoring tools. Verify script exits with proper error codes.",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Git Integration with Task References",
+        "description": "Configure git workflows to properly reference Task Master task IDs in commits and pull requests",
+        "details": "Create git commit template that includes task ID format. Configure git hooks to validate task ID presence in commit messages. Implement commit message format: 'type: description (task X.Y)'. Create helper scripts for task-aware commits. Update git-agent.md to enforce task references. Test integration with GitHub pull requests. Document git workflow with task tracking.",
+        "testStrategy": "Make test commit with task reference and verify format. Test git hook validates missing task IDs. Verify 'git log' shows task IDs clearly. Test GitHub PR creation includes task information.",
+        "priority": "medium",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Create Framework Integration Validation Suite",
+        "description": "Develop comprehensive test suite to validate complete BMAD framework integration with Task Master",
+        "details": "Create test suite in scripts/validate-integration.ps1. Test all BMAD agents are accessible and functional. Verify slash commands work correctly (/bmad:story-cycle, /bmad:saas-cycle). Test hooks execute properly on tool use. Validate Task Master commands work through MCP. Test Docker integration and service connectivity. Verify quality gates enforcement. Create test report with pass/fail status for each component.",
+        "testStrategy": "Run full validation suite and verify 100% pass rate. Test in fresh environment to ensure reproducibility. Verify suite catches intentional failures. Generate HTML report of test results.",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Document Operational Procedures and Runbook",
+        "description": "Create comprehensive documentation for infrastructure management and operational procedures",
+        "details": "Create docs/OPERATIONS.md with complete runbook. Document startup procedures for all services. Include troubleshooting guide for common issues. Document backup and recovery procedures for Task Master data. Create quick reference for all Task Master commands. Include Windows-specific requirements and gotchas. Document health check procedures and monitoring setup. Create incident response playbook. Include architecture diagrams and data flow documentation.",
+        "testStrategy": "Follow runbook procedures on fresh system and verify completeness. Test troubleshooting steps resolve documented issues. Verify backup/restore procedures work correctly. Have team member review documentation for clarity.",
+        "priority": "low",
+        "dependencies": [
+          7,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-11T01:33:05.552Z",
+      "updated": "2025-08-11T01:33:05.552Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

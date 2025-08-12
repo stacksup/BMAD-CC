@@ -183,9 +183,9 @@ switch ($EventType) {
     
     "manual-change-request" {
         # Allow manual change request creation
-        $description = $Context.Description ?? "Manual change request"
-        $priority = $Context.Priority ?? "Medium"
-        $changeType = $Context.ChangeType ?? "Manual"
+        $description = if ($Context.Description) { $Context.Description } else { "Manual change request" }
+        $priority = if ($Context.Priority) { $Context.Priority } else { "Medium" }
+        $changeType = if ($Context.ChangeType) { $Context.ChangeType } else { "Manual" }
         
         Write-Host "📝 Manual change request initiated..." -ForegroundColor Blue
         $changeId = Create-ChangeRequest -ChangeType $changeType -Description $description -SourceFile "Manual Request" -Priority $priority

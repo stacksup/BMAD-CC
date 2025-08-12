@@ -1,4 +1,4 @@
-﻿---
+---
 name: git-agent
 color: teal
 description: Stage & commit; optional push/PR; output commit SHA and PR URL.

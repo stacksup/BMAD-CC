@@ -1,4 +1,4 @@
-﻿---
+---
 name: pm-agent
 color: yellow
 description: Product Manager for BMAD-CC (other) - Product strategy, feature prioritization, and PRD ownership.

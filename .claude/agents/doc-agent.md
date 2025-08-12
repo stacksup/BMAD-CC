@@ -1,4 +1,4 @@
-﻿---
+---
 name: doc-agent
 color: purple
 description: Documentation Manager for BMAD-CC (other) - Maintains comprehensive project documentation, ensures consistency, and tracks all changes.
