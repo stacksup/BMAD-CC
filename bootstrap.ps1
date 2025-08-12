@@ -53,10 +53,8 @@ function Install-BMAD {
   
   $setup = Join-Path $tmp "scripts\setup.ps1"
   
-  # Use direct parameter passing with proper escaping
-  $cmd = "& `"$setup`" -ProjectDir `"$ProjectDir`" -ProjectType `"$ProjectType`" -ProjectName `"$ProjectName`" -PRDPath `"$PRDPath`" -SecondaryPRDPath `"$SecondaryPRDPath`" -FrontendDir `"$FrontendDir`" -BackendDir `"$BackendDir`" -FrontendPort $FrontendPort -BackendPort $BackendPort -DockerComposeFile `"$DockerComposeFile`" -TaskmasterCLI `"$TaskmasterCLI`""
-  
-  Invoke-Expression $cmd
+  # Use direct parameter execution (avoids Invoke-Expression issues)
+  & powershell -ExecutionPolicy Bypass -NoProfile -File $setup -ProjectDir $ProjectDir -ProjectType $ProjectType -ProjectName $ProjectName -PRDPath $PRDPath -SecondaryPRDPath $SecondaryPRDPath -FrontendDir $FrontendDir -BackendDir $BackendDir -FrontendPort $FrontendPort -BackendPort $BackendPort -DockerComposeFile $DockerComposeFile -TaskmasterCLI $TaskmasterCLI
 
   Remove-Item -Recurse -Force $tmp
   Write-Host "BMAD installed and tailored for '$ProjectName' ($ProjectType). Restart Claude Code to load new commands."
