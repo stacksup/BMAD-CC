@@ -301,18 +301,20 @@ if (Test-Path "$ProjectDir\docker-compose.yml") {
 }
 
 # Check Docker MCP installation
-Write-Host "`nChecking Docker MCP installation..." -ForegroundColor Cyan
+Write-Host "Checking Docker MCP installation..." -ForegroundColor Cyan
 if (Test-Path "$env:APPDATA\Claude\claude_desktop_config.json") {
-    $configContent = Get-Content "$env:APPDATA\Claude\claude_desktop_config.json" -Raw | ConvertFrom-Json
-    if ($configContent.mcpServers.'docker') {
-        Write-Host "✅ Docker MCP configured" -ForegroundColor Green
-    } else {
-        Write-Host "📦 Docker MCP not configured" -ForegroundColor Yellow
-        Write-Host "Add Docker MCP to Claude settings for enhanced container management" -ForegroundColor Cyan
-        Write-Host "See: https://github.com/ciac/mcp-docker" -ForegroundColor Gray
+    try {
+        $configContent = Get-Content "$env:APPDATA\Claude\claude_desktop_config.json" -Raw | ConvertFrom-Json
+        if ($configContent.mcpServers.'docker') {
+            Write-Host "Docker MCP configured" -ForegroundColor Green
+        } else {
+            Write-Host "Docker MCP not configured" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "Could not parse Claude settings" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "Claude settings not found - Docker MCP cannot be verified" -ForegroundColor Gray
+    Write-Host "Claude settings not found" -ForegroundColor Gray
 }
 
-Write-Host "`nBMAD Framework setup complete!" -ForegroundColor Green
+Write-Host "BMAD Framework setup complete!" -ForegroundColor Green
