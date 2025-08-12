@@ -22,8 +22,8 @@ function Resolve-Default {
 if (-not $ProjectName) { $ProjectName = Split-Path (Resolve-Path $ProjectDir) -Leaf }
 
 if (-not $ProjectType) {
-  if (Test-Path "$ProjectDir/frontend/package.json" -and Test-Path "$ProjectDir/backend") { $ProjectType = "saas" }
-  elseif (Test-Path "$ProjectDir/src/client" -or Test-Path "$ProjectDir/package.json") { $ProjectType = "phaser" }
+  if ((Test-Path "$ProjectDir/frontend/package.json") -and (Test-Path "$ProjectDir/backend")) { $ProjectType = "saas" }
+  elseif ((Test-Path "$ProjectDir/src/client") -or (Test-Path "$ProjectDir/package.json")) { $ProjectType = "phaser" }
   else { $ProjectType = "other" }
 }
 
@@ -79,7 +79,7 @@ function Apply-Template {
   }
 
   foreach ($k in $map.Keys) {
-    $content = $content -replace [regex]::Escape($k), [regex]::Escape($map[$k]).Replace('\','\\')
+    $content = $content -replace [regex]::Escape($k), [regex]::Escape($map[$k])
   }
 
   $destDir = Split-Path $DestPath
