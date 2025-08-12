@@ -44,19 +44,17 @@ function Install-BMAD {
   $tmp = Join-Path $env:TEMP ("bmadfw_" + [guid]::NewGuid().ToString("N"))
   git clone --depth 1 $repo $tmp | Out-Null
 
+  # Ensure all parameters have values to avoid PowerShell parameter passing issues
+  if ([string]::IsNullOrEmpty($PRDPath)) { $PRDPath = "" }
+  if ([string]::IsNullOrEmpty($SecondaryPRDPath)) { $SecondaryPRDPath = "" }
+  if ([string]::IsNullOrEmpty($DockerComposeFile)) { $DockerComposeFile = "" }
+  
   $setup = Join-Path $tmp "scripts\setup.ps1"
-  & powershell -ExecutionPolicy Bypass -NoProfile -File $setup `
-    -ProjectDir $ProjectDir `
-    -ProjectType $ProjectType `
-    -ProjectName $ProjectName `
-    -PRDPath $PRDPath `
-    -SecondaryPRDPath $SecondaryPRDPath `
-    -FrontendDir $FrontendDir `
-    -BackendDir $BackendDir `
-    -FrontendPort $FrontendPort `
-    -BackendPort $BackendPort `
-    -DockerComposeFile $DockerComposeFile `
-    -TaskmasterCLI $TaskmasterCLI
+  
+  # Use direct parameter passing with proper escaping
+  $cmd = "& `"$setup`" -ProjectDir `"$ProjectDir`" -ProjectType `"$ProjectType`" -ProjectName `"$ProjectName`" -PRDPath `"$PRDPath`" -SecondaryPRDPath `"$SecondaryPRDPath`" -FrontendDir `"$FrontendDir`" -BackendDir `"$BackendDir`" -FrontendPort $FrontendPort -BackendPort $BackendPort -DockerComposeFile `"$DockerComposeFile`" -TaskmasterCLI `"$TaskmasterCLI`""
+  
+  Invoke-Expression $cmd
 
   Remove-Item -Recurse -Force $tmp
   Write-Host "BMAD installed and tailored for '$ProjectName' ($ProjectType). Restart Claude Code to load new commands."
