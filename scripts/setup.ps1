@@ -1,8 +1,8 @@
 param(
   [string]$ProjectDir = ".",
-  [string]$ProjectType,
-  [string]$ProjectName,
-  [string]$PRDPath,
+  [string]$ProjectType = "",
+  [string]$ProjectName = "",
+  [string]$PRDPath = "",
   [string]$SecondaryPRDPath = "",
   [string]$FrontendDir = "frontend",
   [string]$BackendDir = "backend",
