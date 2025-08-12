@@ -34,11 +34,13 @@ function Install-BMAD {
   if (-not $PRDPath) {
     if (Test-Path "$ProjectDir/planning_docs/DEVELOPMENT_PLAN_PART1.md") { $PRDPath = "planning_docs/DEVELOPMENT_PLAN_PART1.md" }
     elseif (Test-Path "$ProjectDir/CLAUDE.md") { $PRDPath = "CLAUDE.md" }
+    else { $PRDPath = "" }
   }
 
   if (-not $DockerComposeFile) {
     if (Test-Path "$ProjectDir/docker-compose.full.yml") { $DockerComposeFile = "docker-compose.full.yml" }
     elseif (Test-Path "$ProjectDir/docker-compose.yml") { $DockerComposeFile = "docker-compose.yml" }
+    else { $DockerComposeFile = "" }
   }
 
   $tmp = Join-Path $env:TEMP ("bmadfw_" + [guid]::NewGuid().ToString("N"))
