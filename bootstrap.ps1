@@ -26,8 +26,8 @@ function Install-BMAD {
   $ProjectName = Split-Path (Resolve-Path $ProjectDir) -Leaf
 
   if ($ProjectType -eq "auto") {
-    if (Test-Path "$ProjectDir/frontend/package.json" -and (Test-Path "$ProjectDir/backend")) { $ProjectType = "saas" }
-    elseif (Test-Path "$ProjectDir/src/client" -or Test-Path "$ProjectDir/package.json") { $ProjectType = "phaser" }
+    if ((Test-Path "$ProjectDir/frontend/package.json") -and (Test-Path "$ProjectDir/backend")) { $ProjectType = "saas" }
+    elseif ((Test-Path "$ProjectDir/src/client") -or (Test-Path "$ProjectDir/package.json")) { $ProjectType = "phaser" }
     else { $ProjectType = "other" }
   }
 
@@ -62,4 +62,4 @@ function Install-BMAD {
   Write-Host "BMAD installed and tailored for '$ProjectName' ($ProjectType). Restart Claude Code to load new commands."
 }
 
-Export-ModuleMember -Function Install-BMAD
+# Export-ModuleMember -Function Install-BMAD  # Not needed for direct execution
