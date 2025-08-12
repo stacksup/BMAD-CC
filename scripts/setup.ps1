@@ -84,7 +84,7 @@ function Apply-Template {
 
   $destDir = Split-Path $DestPath
   if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Force -Path $destDir | Out-Null }
-  Set-Content -Path $DestPath -Value $content -Encoding UTF8
+  Set-Content -Path $DestPath -Value $content -Encoding UTF8NoBOM
 }
 
 $frameworkRoot = Split-Path -Parent $PSCommandPath
