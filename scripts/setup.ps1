@@ -315,4 +315,4 @@ if (Test-Path "$env:APPDATA\Claude\claude_desktop_config.json") {
     Write-Host "Claude settings not found - Docker MCP cannot be verified" -ForegroundColor Gray
 }
 
-Write-Host "`n✅ BMAD Framework setup complete!" -ForegroundColor Green
+Write-Host "`nBMAD Framework setup complete!" -ForegroundColor Green
