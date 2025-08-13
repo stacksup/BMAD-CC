@@ -1,4 +1,4 @@
-﻿---
+---
 description: GitHub integration setup for BMAD-CC - Configure automatic backups and PR creation.
 allowed-tools: Bash(git:*), Bash(gh:*), Read, Write
 ---
@@ -16,14 +16,14 @@ This command sets up automatic GitHub backup for your project, ensuring all comp
 # Check Git installation
 git --version
 if [ $? -ne 0 ]; then
-    echo "❌ Git not installed. Please install Git first."
+    echo "âŒ Git not installed. Please install Git first."
     exit 1
 fi
 
 # Check GitHub CLI (optional but recommended)
 gh --version
 if [ $? -ne 0 ]; then
-    echo "⚠️ GitHub CLI not installed (optional)"
+    echo "âš ï¸ GitHub CLI not installed (optional)"
     echo "Install for better integration: https://cli.github.com"
 fi
 ```
@@ -32,19 +32,19 @@ fi
 ```bash
 # Check if already a git repo
 if [ ! -d .git ]; then
-    echo "📁 Initializing Git repository..."
+    echo "ðŸ“ Initializing Git repository..."
     git init
     git add .
     git commit -m "Initial commit from BMAD setup"
 else
-    echo "✅ Git repository already initialized"
+    echo "âœ… Git repository already initialized"
 fi
 ```
 
 ### Step 3: Configure GitHub Authentication
 ```bash
 # Check authentication method
-echo "🔐 Checking GitHub authentication..."
+echo "ðŸ” Checking GitHub authentication..."
 
 # Option 1: GitHub CLI (recommended)
 if command -v gh &> /dev/null; then
@@ -56,13 +56,13 @@ if command -v gh &> /dev/null; then
     
     # Get authenticated user
     GH_USER=$(gh api user --jq '.login')
-    echo "✅ Authenticated as: $GH_USER"
+    echo "âœ… Authenticated as: $GH_USER"
 else
     # Option 2: SSH Key
     if [ -f ~/.ssh/id_rsa.pub ] || [ -f ~/.ssh/id_ed25519.pub ]; then
-        echo "✅ SSH keys found"
+        echo "âœ… SSH keys found"
     else
-        echo "⚠️ No SSH keys found. You may need to:"
+        echo "âš ï¸ No SSH keys found. You may need to:"
         echo "1. Generate SSH key: ssh-keygen -t ed25519 -C 'your_email@example.com'"
         echo "2. Add to GitHub: https://github.com/settings/keys"
     fi
@@ -78,7 +78,7 @@ REPO_NAME=$(basename $(pwd))
 REMOTE_URL=$(git config --get remote.origin.url)
 
 if [ -z "$REMOTE_URL" ]; then
-    echo "📦 No GitHub remote configured"
+    echo "ðŸ“¦ No GitHub remote configured"
     
     if command -v gh &> /dev/null; then
         # Use GitHub CLI to create repo
@@ -94,19 +94,19 @@ if [ -z "$REMOTE_URL" ]; then
                 --remote=origin \
                 --description "BMAD-CC - Managed by BMAD"
             
-            echo "✅ Created GitHub repository: $GH_USER/$REPO_NAME"
+            echo "âœ… Created GitHub repository: $GH_USER/$REPO_NAME"
         else
             # Repo exists, add remote
             gh repo set-default "$GH_USER/$REPO_NAME"
             git remote add origin "https://github.com/$GH_USER/$REPO_NAME.git"
-            echo "✅ Connected to existing repository"
+            echo "âœ… Connected to existing repository"
         fi
     else
         echo "Please create repository on GitHub and run:"
         echo "  git remote add origin https://github.com/YOUR_USERNAME/$REPO_NAME.git"
     fi
 else
-    echo "✅ GitHub remote already configured: $REMOTE_URL"
+    echo "âœ… GitHub remote already configured: $REMOTE_URL"
 fi
 ```
 
@@ -122,13 +122,13 @@ cat > "$HOOK_FILE" << 'EOF'
 # Only backup if on main/master branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
-    echo "🔄 Auto-backing up to GitHub..."
+    echo "ðŸ”„ Auto-backing up to GitHub..."
     git push origin $BRANCH --quiet &
 fi
 EOF
 
 chmod +x "$HOOK_FILE"
-echo "✅ Automatic backup hook installed"
+echo "âœ… Automatic backup hook installed"
 ```
 
 ### Step 6: Configure BMAD Workflow Integration
@@ -192,7 +192,7 @@ gh pr create \
 
 ### Test the Setup
 ```bash
-echo "🧪 Testing GitHub integration..."
+echo "ðŸ§ª Testing GitHub integration..."
 
 # Make a test commit
 echo "test" > .test-github
@@ -204,12 +204,12 @@ sleep 2
 git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline
 
 if [ $? -eq 0 ]; then
-    echo "✅ GitHub backup working!"
+    echo "âœ… GitHub backup working!"
     rm .test-github
     git rm .test-github
     git commit -m "cleanup: Remove test file"
 else
-    echo "⚠️ Auto-backup may not be working. Check configuration."
+    echo "âš ï¸ Auto-backup may not be working. Check configuration."
 fi
 ```
 
@@ -249,7 +249,7 @@ git config --global --get https.proxy
 
 ## SUCCESS CRITERIA
 
-✅ **Setup is complete when:**
+âœ… **Setup is complete when:**
 - [ ] Git repository initialized
 - [ ] GitHub remote configured
 - [ ] Authentication working (CLI or SSH)

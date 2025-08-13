@@ -1,4 +1,4 @@
-﻿---
+---
 description: Generate or update CHANGELOG.md for BMAD-CC based on git history and task completions
 allowed-tools: Bash(git:*), Bash(task-master:*), Read, Write, Edit
 ---
@@ -21,7 +21,7 @@ else
     COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%h|%s|%an|%ad" --date=short)
 fi
 
-echo "📝 Analyzing commits since: $LAST_TAG"
+echo "ðŸ“ Analyzing commits since: $LAST_TAG"
 ```
 
 ### Categorize Changes
@@ -70,7 +70,7 @@ done <<< "$COMMITS"
 ```bash
 # Get completed tasks since last release
 if command -v task-master &> /dev/null; then
-    echo "📋 Fetching completed tasks from Task Master..."
+    echo "ðŸ“‹ Fetching completed tasks from Task Master..."
     
     # Get tasks completed since last tag date
     if [ "$LAST_TAG" != "initial" ]; then
@@ -82,7 +82,7 @@ if command -v task-master &> /dev/null; then
     
     # Add task completions to changelog
     if [ ! -z "$COMPLETED_TASKS" ]; then
-        echo "✅ Found completed tasks to include"
+        echo "âœ… Found completed tasks to include"
     fi
 fi
 ```
@@ -161,7 +161,7 @@ determine_version_bump() {
 }
 
 NEXT_VERSION=$(determine_version_bump)
-echo "📦 Suggested next version: $NEXT_VERSION"
+echo "ðŸ“¦ Suggested next version: $NEXT_VERSION"
 ```
 
 ## RELEASE PREPARATION
@@ -222,15 +222,15 @@ fi
 5. Commit updated CHANGELOG.md
 
 ```bash
-echo "📝 Changelog generated. Review and edit as needed."
+echo "ðŸ“ Changelog generated. Review and edit as needed."
 echo "Press Enter to continue after review..."
 read
 
 # Validate changelog format
 if grep -q "\[Unreleased\]" CHANGELOG.md; then
-    echo "✅ Changelog format validated"
+    echo "âœ… Changelog format validated"
 else
-    echo "⚠️  Missing [Unreleased] section"
+    echo "âš ï¸  Missing [Unreleased] section"
 fi
 ```
 

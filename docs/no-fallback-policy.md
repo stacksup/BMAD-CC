@@ -1,4 +1,4 @@
-﻿# NO FALLBACK OR DUMMY DATA POLICY
+# NO FALLBACK OR DUMMY DATA POLICY
 
 ## CRITICAL CODING PRINCIPLE FOR BMAD-CC
 
@@ -18,18 +18,18 @@ Silent failures create technical debt that compounds over time:
 
 ## PROHIBITED PATTERNS
 
-### ❌ NEVER Return Dummy Data on Failure
+### âŒ NEVER Return Dummy Data on Failure
 ```javascript
 // PROHIBITED - Silent fallback to dummy data
 try {
   const users = await fetchUsers();
   return users;
 } catch (error) {
-  return [{ id: 1, name: 'Default User' }]; // ❌ NEVER DO THIS
+  return [{ id: 1, name: 'Default User' }]; // âŒ NEVER DO THIS
 }
 ```
 
-### ❌ NEVER Hide Failures Behind Fake Success
+### âŒ NEVER Hide Failures Behind Fake Success
 ```javascript
 // PROHIBITED - Pretending success on failure
 async function saveData(data) {
@@ -37,16 +37,16 @@ async function saveData(data) {
     await api.save(data);
     return { success: true };
   } catch (error) {
-    return { success: true }; // ❌ NEVER DO THIS - Lies about success
+    return { success: true }; // âŒ NEVER DO THIS - Lies about success
   }
 }
 ```
 
-### ❌ NEVER Use Hardcoded Data in Production Code
+### âŒ NEVER Use Hardcoded Data in Production Code
 ```javascript
 // PROHIBITED - Hardcoded test data
 function getProducts() {
-  // ❌ NEVER DO THIS unless building actual mock service
+  // âŒ NEVER DO THIS unless building actual mock service
   return [
     { id: 1, name: 'Test Product', price: 99.99 },
     { id: 2, name: 'Another Product', price: 149.99 }
@@ -54,19 +54,19 @@ function getProducts() {
 }
 ```
 
-### ❌ NEVER Swallow Errors Without Action
+### âŒ NEVER Swallow Errors Without Action
 ```javascript
 // PROHIBITED - Silent error swallowing
 try {
   await criticalOperation();
 } catch (error) {
-  // ❌ NEVER DO THIS - Error disappears into void
+  // âŒ NEVER DO THIS - Error disappears into void
 }
 ```
 
 ## REQUIRED PATTERNS
 
-### ✅ Let Failures Be Visible
+### âœ… Let Failures Be Visible
 ```javascript
 // CORRECT - Propagate errors properly
 try {
@@ -81,7 +81,7 @@ try {
 }
 ```
 
-### ✅ Return Explicit Error States
+### âœ… Return Explicit Error States
 ```javascript
 // CORRECT - Clear failure indication
 async function saveData(data) {
@@ -99,7 +99,7 @@ async function saveData(data) {
 }
 ```
 
-### ✅ Separate Test Data from Production
+### âœ… Separate Test Data from Production
 ```javascript
 // CORRECT - Proper separation of concerns
 function getProducts() {
@@ -110,7 +110,7 @@ function getProducts() {
 }
 ```
 
-### ✅ Handle Errors with User Feedback
+### âœ… Handle Errors with User Feedback
 ```javascript
 // CORRECT - Inform user of actual state
 try {
@@ -179,7 +179,7 @@ Code containing dummy data or fallback patterns will be:
 
 ### API Call Failures
 ```javascript
-// ✅ CORRECT APPROACH
+// âœ… CORRECT APPROACH
 async function fetchUserData(userId) {
   try {
     const response = await api.get(`/users/${userId}`);
@@ -197,7 +197,7 @@ async function fetchUserData(userId) {
 
 ### Database Connection Issues
 ```javascript
-// ✅ CORRECT APPROACH
+// âœ… CORRECT APPROACH
 async function queryDatabase(query) {
   const connection = await getConnection();
   if (!connection) {
@@ -216,7 +216,7 @@ async function queryDatabase(query) {
 
 ### Missing Configuration
 ```javascript
-// ✅ CORRECT APPROACH
+// âœ… CORRECT APPROACH
 function loadConfig() {
   const config = process.env.API_KEY;
   if (!config) {

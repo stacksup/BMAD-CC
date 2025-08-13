@@ -1,4 +1,4 @@
-﻿{
+{
   "permissions": {
     "allow": [
       "Bash(git:*)",
@@ -21,16 +21,26 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/on-posttooluse.ps1" }
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/on-posttooluse.sh"
+          }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/gate-enforcer.ps1" }
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/gate-enforcer.sh"
+          }
         ]
       }
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "task-master-ai"
+  ],
+  "enableAllProjectMcpServers": true
 }

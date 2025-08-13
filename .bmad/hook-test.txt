@@ -1,0 +1,6 @@
+Testing PostToolUse hook after bash conversion
+Timestamp: $(date)
+Status: Testing if on-posttooluse.sh executes properly
+
+Second test - Edit operation
+Hook system appears to be working with bash scripts!

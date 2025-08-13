@@ -1,0 +1,109 @@
+#!/bin/bash
+set -e
+
+if [ "$BMAD_DISABLE_GATES" = "1" ]; then
+    echo "Gates disabled."
+    exit 0
+fi
+
+# Function to get changed files
+get_changed_files() {
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo ""
+        return
+    fi
+    git diff --name-only 2>/dev/null || echo ""
+}
+
+# Check for validation requirements based on changed files
+check_validation_requirements() {
+    local changed_files
+    changed_files=$(get_changed_files)
+    
+    # Check if architecture files changed
+    if echo "$changed_files" | grep -qE 'architecture|system-design'; then
+        echo "Architecture changes detected - validation may be required"
+    fi
+    
+    # Check if PRD/requirements changed
+    if echo "$changed_files" | grep -qE 'prd|requirements|product-strategy'; then
+        echo "Requirements changes detected - PRD validation may be required"
+    fi
+    
+    # Check if story files changed
+    if echo "$changed_files" | grep -qE 'stories/.*\.md'; then
+        echo "Story changes detected - story validation may be required"
+    fi
+}
+
+# TESTS + LINT
+PROJECT_TYPE="${PROJECT_TYPE:-{{PROJECT_TYPE}}}"
+if [ "$PROJECT_TYPE" = "saas" ]; then
+    if [ -d "{{BACKEND_DIR}}" ]; then
+        cd {{BACKEND_DIR}}
+        if ! python -m pytest -q; then
+            echo "Backend tests failed"
+            exit 2
+        fi
+        cd ..
+    fi
+    if [ -f "{{FRONTEND_DIR}}/package.json" ]; then
+        cd {{FRONTEND_DIR}}
+        if ! npm run lint; then
+            echo "Frontend lint failed"
+            exit 2
+        fi
+        if ! npm run typecheck; then
+            echo "Frontend typecheck failed"
+            exit 2
+        fi
+        cd ..
+    fi
+else
+    if [ -f "package.json" ]; then
+        if ! npm test; then
+            echo "Tests failed"
+            exit 2
+        fi
+    fi
+fi
+
+# DOCS + LESSONS gates
+changed_files=$(get_changed_files)
+code_changed=false
+
+# Check if code files changed
+if echo "$changed_files" | grep -qE '^({{BACKEND_DIR}}|{{FRONTEND_DIR}}|src|apps|packages)/'; then
+    code_changed=true
+fi
+
+if [ "$code_changed" = true ]; then
+    has_docs=false
+    has_lesson=false
+    
+    # Check for documentation updates
+    if echo "$changed_files" | grep -qE '(^|/)CHANGELOG\.md|^docs/story-notes/'; then
+        has_docs=true
+    fi
+    
+    if [ "$has_docs" = false ]; then
+        echo "Docs Gate failed."
+        exit 2
+    fi
+    
+    # Check for lessons
+    if echo "$changed_files" | grep -qE '^docs/lessons/'; then
+        has_lesson=true
+    fi
+    
+    if [ "$has_lesson" = false ]; then
+        echo "Learning Gate failed."
+        exit 2
+    fi
+fi
+
+# Run validation checks
+check_validation_requirements
+
+echo "All gates passed."
+exit 0

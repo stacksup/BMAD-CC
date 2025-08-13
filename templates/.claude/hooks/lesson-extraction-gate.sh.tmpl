@@ -1,0 +1,475 @@
+#!/usr/bin/env bash
+# Lesson Extraction Gate for {{PROJECT_NAME}}
+# Ensures lessons learned are captured and documented
+
+set -e
+
+# Parameters
+EVENT_TYPE="${1:-post-completion}"
+STORY_ID="${2:-}"
+AUTO_EXTRACT="${3:-true}"
+
+# Configuration
+PROJECT_NAME="{{PROJECT_NAME}}"
+PROJECT_TYPE="{{PROJECT_TYPE}}"
+LESSONS_ENABLED="${BMAD_LESSONS_ENABLED:-1}"
+LESSONS_DIR="docs/lessons"
+STORY_NOTES_DIR="docs/story-notes"
+LESSONS_REQUIRED="${BMAD_LESSONS_REQUIRED:-1}"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BLUE='\033[0;34m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+# Ensure required directories exist
+mkdir -p "$LESSONS_DIR" "$STORY_NOTES_DIR"
+
+# Helper function to get current date
+get_current_date() {
+    date '+%Y-%m-%d'
+}
+
+# Helper function to detect story ID from context
+detect_story_id() {
+    local story_id=""
+    
+    # Try to get from environment
+    if [ -n "${STORY_ID:-}" ]; then
+        story_id="$STORY_ID"
+    # Try to get from git branch
+    elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        local branch_name
+        branch_name=$(git branch --show-current 2>/dev/null || echo "")
+        story_id=$(echo "$branch_name" | grep -oE '[0-9]+' | head -1 || echo "")
+    fi
+    
+    echo "$story_id"
+}
+
+# Check if story has lessons documented
+check_story_lessons() {
+    local story_id="$1"
+    
+    if [ -z "$story_id" ]; then
+        return 1
+    fi
+    
+    # Check for lesson files
+    local lesson_files=()
+    if [ -d "$LESSONS_DIR" ]; then
+        while IFS= read -r file; do
+            [ -n "$file" ] && lesson_files+=("$file")
+        done <<< "$(find "$LESSONS_DIR" -name "*$story_id*" -type f 2>/dev/null || echo "")"
+    fi
+    
+    # Check if story notes contain lessons section
+    local story_notes_file="$STORY_NOTES_DIR/$story_id.md"
+    local has_lessons_section=false
+    
+    if [ -f "$story_notes_file" ]; then
+        if grep -qi "lesson\|learning\|insight" "$story_notes_file"; then
+            has_lessons_section=true
+        fi
+    fi
+    
+    if [ ${#lesson_files[@]} -gt 0 ] || [ "$has_lessons_section" = true ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Extract lessons from story notes and recent commits
+extract_lessons_from_story() {
+    local story_id="$1"
+    local lesson_date
+    lesson_date=$(get_current_date)
+    
+    echo -e "${CYAN}💡 Extracting lessons for story $story_id...${NC}"
+    
+    # Create lesson file
+    local lesson_file="$LESSONS_DIR/$story_id.md"
+    
+    # Gather context from story notes
+    local story_context=""
+    local story_notes_file="$STORY_NOTES_DIR/$story_id.md"
+    if [ -f "$story_notes_file" ]; then
+        story_context=$(cat "$story_notes_file")
+    fi
+    
+    # Gather context from recent commits
+    local commit_context=""
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        commit_context=$(git log --oneline -10 2>/dev/null | head -10 || echo "")
+    fi
+    
+    # Get changed files for analysis
+    local changed_files=""
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        changed_files=$(git diff --name-only HEAD~5..HEAD 2>/dev/null | head -20 || echo "")
+    fi
+    
+    # Create lesson template
+    cat > "$lesson_file" << EOF
+# Lessons Learned - Story $story_id
+
+**Date:** $lesson_date  
+**Project:** $PROJECT_NAME  
+**Type:** $PROJECT_TYPE  
+**Story ID:** $story_id
+
+## Summary
+
+[Brief summary of what was accomplished and key outcomes]
+
+## What Went Well
+
+### Technical Achievements
+- [List successful technical implementations]
+- [Note any particularly elegant solutions]
+- [Highlight reusable patterns or components]
+
+### Process Improvements
+- [Document workflow improvements]
+- [Note effective collaboration patterns]
+- [Highlight useful tools or techniques]
+
+### Knowledge Gains
+- [New technologies or frameworks learned]
+- [Domain knowledge acquired]
+- [Skills developed or enhanced]
+
+## Challenges and Solutions
+
+### Technical Challenges
+- **Challenge:** [Describe the problem]
+  - **Solution:** [How it was resolved]
+  - **Learning:** [What was learned]
+  - **Future Application:** [How to apply this knowledge]
+
+### Process Challenges
+- **Challenge:** [Describe the process issue]
+  - **Solution:** [How it was addressed]
+  - **Learning:** [Process insight gained]
+  - **Recommendation:** [Process improvement suggestion]
+
+## Mistakes and Pitfalls
+
+### What Didn't Work
+- [Document failed approaches]
+- [Note time wasters or dead ends]
+- [Highlight assumptions that were incorrect]
+
+### How to Avoid in Future
+- [Specific prevention strategies]
+- [Warning signs to watch for]
+- [Alternative approaches to consider]
+
+## Key Insights
+
+### Technical Insights
+1. [Important technical realization]
+2. [Architecture or design principle learned]
+3. [Tool or library insight]
+
+### Business/Domain Insights
+1. [User behavior or need discovered]
+2. [Business requirement clarification]
+3. [Market or competitive insight]
+
+### Team/Process Insights
+1. [Communication improvement identified]
+2. [Collaboration pattern that worked well]
+3. [Process optimization opportunity]
+
+## Actionable Recommendations
+
+### For Future Stories
+- [ ] [Specific action to take in similar situations]
+- [ ] [Process improvement to implement]
+- [ ] [Tool or technique to adopt]
+
+### For Team/Project
+- [ ] [Framework or methodology recommendation]
+- [ ] [Training or knowledge sharing needed]
+- [ ] [Infrastructure or tooling improvement]
+
+### For Personal Development
+- [ ] [Skill to develop further]
+- [ ] [Knowledge area to explore]
+- [ ] [Practice or habit to adopt]
+
+## Context and References
+
+### Files Modified
+\`\`\`
+$changed_files
+\`\`\`
+
+### Key Commits
+\`\`\`
+$commit_context
+\`\`\`
+
+### Related Documentation
+- [Link to story notes: $story_notes_file]
+- [Link to relevant architecture docs]
+- [Link to API or technical documentation]
+
+### External Resources
+- [Helpful tutorials or documentation used]
+- [Stack Overflow solutions referenced]
+- [Articles or blog posts that provided insight]
+
+## Tags
+
+#lesson #story-$story_id #$PROJECT_TYPE #$(date +%Y-%m) #technical #process #team
+
+---
+
+*This lesson was auto-generated on $lesson_date. Please update with specific details and insights.*
+EOF
+    
+    echo -e "${GREEN}✅ Lesson template created: $lesson_file${NC}"
+    echo -e "${YELLOW}📝 Please review and update with specific insights${NC}"
+}
+
+# Check for systemic patterns across lessons
+analyze_lesson_patterns() {
+    echo -e "${CYAN}🔍 Analyzing lesson patterns...${NC}"
+    
+    if [ ! -d "$LESSONS_DIR" ]; then
+        echo -e "${GRAY}No lessons directory found${NC}"
+        return 0
+    fi
+    
+    local lesson_files
+    lesson_files=$(find "$LESSONS_DIR" -name "*.md" -type f 2>/dev/null || echo "")
+    
+    if [ -z "$lesson_files" ]; then
+        echo -e "${GRAY}No lesson files found${NC}"
+        return 0
+    fi
+    
+    local total_lessons
+    total_lessons=$(echo "$lesson_files" | wc -l)
+    
+    echo -e "${BLUE}Found $total_lessons lesson files${NC}"
+    
+    # Look for common themes
+    local common_challenges=()
+    local common_insights=()
+    local recurring_patterns=()
+    
+    # Simple pattern detection (would be enhanced with actual analysis)
+    local challenge_keywords=("authentication" "database" "performance" "testing" "deployment" "api" "frontend" "backend")
+    local insight_keywords=("architecture" "pattern" "framework" "tool" "process" "team" "communication")
+    
+    for keyword in "${challenge_keywords[@]}"; do
+        local count
+        count=$(grep -r -i "$keyword" "$LESSONS_DIR" 2>/dev/null | wc -l || echo "0")
+        if [ "$count" -gt 1 ]; then
+            common_challenges+=("$keyword ($count mentions)")
+        fi
+    done
+    
+    for keyword in "${insight_keywords[@]}"; do
+        local count
+        count=$(grep -r -i "$keyword" "$LESSONS_DIR" 2>/dev/null | wc -l || echo "0")
+        if [ "$count" -gt 1 ]; then
+            common_insights+=("$keyword ($count mentions)")
+        fi
+    done
+    
+    if [ ${#common_challenges[@]} -gt 0 ]; then
+        echo -e "\n${YELLOW}Recurring Challenges:${NC}"
+        for challenge in "${common_challenges[@]}"; do
+            echo -e "  ⚠️ $challenge"
+        done
+    fi
+    
+    if [ ${#common_insights[@]} -gt 0 ]; then
+        echo -e "\n${GREEN}Common Insight Areas:${NC}"
+        for insight in "${common_insights[@]}"; do
+            echo -e "  💡 $insight"
+        done
+    fi
+    
+    # Suggest systemic improvements
+    if [ ${#common_challenges[@]} -gt 2 ]; then
+        echo -e "\n${CYAN}💡 Suggestion: Consider creating framework documentation for recurring challenges${NC}"
+    fi
+}
+
+# Generate lessons summary report
+generate_lessons_report() {
+    echo -e "\n${CYAN}📊 Lessons Learned Report for $PROJECT_NAME${NC}"
+    echo "==============================================="
+    
+    if [ "$LESSONS_ENABLED" != "1" ]; then
+        echo -e "${YELLOW}⚠️ Lessons extraction is disabled${NC}"
+        return 0
+    fi
+    
+    if [ ! -d "$LESSONS_DIR" ]; then
+        echo -e "${YELLOW}⚠️ No lessons directory found${NC}"
+        echo -e "${GRAY}Lessons will be created in: $LESSONS_DIR${NC}"
+        return 0
+    fi
+    
+    local lesson_files
+    lesson_files=$(find "$LESSONS_DIR" -name "*.md" -type f 2>/dev/null || echo "")
+    
+    if [ -z "$lesson_files" ]; then
+        echo -e "${YELLOW}⚠️ No lessons documented yet${NC}"
+        return 0
+    fi
+    
+    local total_lessons
+    total_lessons=$(echo "$lesson_files" | wc -l)
+    
+    echo -e "${GREEN}Total lessons documented: $total_lessons${NC}"
+    
+    # Show recent lessons
+    echo -e "\n${CYAN}Recent Lessons:${NC}"
+    local recent_lessons
+    recent_lessons=$(ls -t "$LESSONS_DIR"/*.md 2>/dev/null | head -5 || echo "")
+    
+    while IFS= read -r lesson_file; do
+        [ -z "$lesson_file" ] && continue
+        local filename
+        filename=$(basename "$lesson_file")
+        local story_id
+        story_id=$(echo "$filename" | grep -oE '[0-9]+' | head -1 || echo "unknown")
+        local mod_date
+        mod_date=$(stat -c %y "$lesson_file" 2>/dev/null || stat -f "%Sm" "$lesson_file" 2>/dev/null || echo "unknown")
+        echo -e "  📝 Story $story_id - $(echo "$mod_date" | cut -d' ' -f1)"
+    done <<< "$recent_lessons"
+    
+    analyze_lesson_patterns
+    
+    echo "==============================================="
+}
+
+# Main execution
+case "$EVENT_TYPE" in
+    post-completion|check)
+        if [ "$LESSONS_ENABLED" != "1" ]; then
+            if [ "$LESSONS_REQUIRED" = "1" ]; then
+                echo -e "${RED}❌ Lessons are required but disabled${NC}"
+                exit 1
+            else
+                echo -e "${GRAY}Lessons extraction disabled${NC}"
+                exit 0
+            fi
+        fi
+        
+        local story_id="${STORY_ID:-$(detect_story_id)}"
+        
+        if [ -z "$story_id" ]; then
+            if [ "$LESSONS_REQUIRED" = "1" ]; then
+                echo -e "${RED}❌ Story ID required for lesson extraction${NC}"
+                echo -e "${YELLOW}Set STORY_ID environment variable or use git branch with story number${NC}"
+                exit 1
+            else
+                echo -e "${YELLOW}⚠️ No story ID detected - skipping lesson extraction${NC}"
+                exit 0
+            fi
+        fi
+        
+        echo -e "${CYAN}🖯 Checking lessons for story $story_id...${NC}"
+        
+        if check_story_lessons "$story_id"; then
+            echo -e "${GREEN}✅ Lessons already documented for story $story_id${NC}"
+        else
+            if [ "$LESSONS_REQUIRED" = "1" ]; then
+                echo -e "${RED}❌ LESSONS GATE FAILED: No lessons documented for story $story_id${NC}"
+                
+                if [ "$AUTO_EXTRACT" = "true" ]; then
+                    echo -e "${YELLOW}Auto-extracting lesson template...${NC}"
+                    extract_lessons_from_story "$story_id"
+                    echo -e "${YELLOW}⚠️ Please complete the lesson documentation before proceeding${NC}"
+                    exit 1
+                else
+                    echo -e "${YELLOW}Use 'extract $story_id' to create lesson template${NC}"
+                    exit 1
+                fi
+            else
+                echo -e "${YELLOW}⚠️ No lessons documented for story $story_id${NC}"
+                if [ "$AUTO_EXTRACT" = "true" ]; then
+                    extract_lessons_from_story "$story_id"
+                fi
+            fi
+        fi
+        ;;
+    
+    extract)
+        local story_id="${STORY_ID:-$2}"
+        if [ -z "$story_id" ]; then
+            story_id=$(detect_story_id)
+        fi
+        
+        if [ -z "$story_id" ]; then
+            echo -e "${RED}Story ID required for lesson extraction${NC}" >&2
+            echo "Usage: $0 extract <story_id>"
+            exit 1
+        fi
+        
+        extract_lessons_from_story "$story_id"
+        ;;
+    
+    analyze)
+        analyze_lesson_patterns
+        ;;
+    
+    report)
+        generate_lessons_report
+        ;;
+    
+    status)
+        echo -e "\n${CYAN}🎯 Lesson Extraction Gate Status for $PROJECT_NAME${NC}"
+        echo "==================================================="
+        
+        if [ "$LESSONS_ENABLED" = "1" ]; then
+            echo -e "${GREEN}✅ Lessons extraction is ENABLED${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Lessons extraction is DISABLED${NC}"
+        fi
+        
+        if [ "$LESSONS_REQUIRED" = "1" ]; then
+            echo -e "${GREEN}✅ Lessons are REQUIRED for completion${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Lessons are optional${NC}"
+        fi
+        
+        echo "Lessons directory: $LESSONS_DIR"
+        echo "Story notes directory: $STORY_NOTES_DIR"
+        
+        local current_story
+        current_story=$(detect_story_id)
+        if [ -n "$current_story" ]; then
+            echo "Current story ID: $current_story"
+            
+            if check_story_lessons "$current_story"; then
+                echo -e "${GREEN}✅ Current story has lessons documented${NC}"
+            else
+                echo -e "${YELLOW}⚠️ Current story needs lesson documentation${NC}"
+            fi
+        else
+            echo -e "${GRAY}No current story detected${NC}"
+        fi
+        
+        echo "==================================================="
+        ;;
+    
+    *)
+        echo -e "${RED}Unknown event type: $EVENT_TYPE${NC}" >&2
+        echo "Valid events: post-completion, check, extract, analyze, report, status"
+        exit 1
+        ;;
+esac

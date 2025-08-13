@@ -1,0 +1,515 @@
+#!/usr/bin/env bash
+# Search Lessons Script for {{PROJECT_NAME}}
+# Search and analyze lessons learned across the project
+
+set -e
+
+# Parameters
+SEARCH_QUERY="${1:-}"
+SEARCH_TYPE="${2:-content}"
+OUTPUT_FORMAT="${3:-text}"
+
+# Configuration
+PROJECT_NAME="{{PROJECT_NAME}}"
+PROJECT_TYPE="{{PROJECT_TYPE}}"
+LESSONS_DIR="docs/lessons"
+STORY_NOTES_DIR="docs/story-notes"
+OUTPUT_DIR=".bmad/reports"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+# Ensure required directories exist
+mkdir -p "$OUTPUT_DIR"
+
+# Helper function to show usage
+show_usage() {
+    echo "Usage: $0 <search_query> [search_type] [output_format]"
+    echo ""
+    echo "Search Types:"
+    echo "  content    - Search lesson content (default)"
+    echo "  tag        - Search by tags"
+    echo "  story      - Search by story ID"
+    echo "  category   - Search by category"
+    echo "  pattern    - Search for recurring patterns"
+    echo "  recent     - Show recent lessons"
+    echo "  summary    - Generate lessons summary"
+    echo ""
+    echo "Output Formats:"
+    echo "  text       - Plain text output (default)"
+    echo "  json       - JSON formatted output"
+    echo "  markdown   - Markdown formatted output"
+    echo "  html       - HTML formatted output"
+    echo ""
+    echo "Examples:"
+    echo "  $0 'authentication' content text"
+    echo "  $0 'performance' tag json"
+    echo "  $0 '42' story markdown"
+    echo "  $0 '' recent text"
+    echo "  $0 '' summary markdown"
+}
+
+# Get all lesson files
+get_lesson_files() {
+    local files=()
+    
+    # Get from lessons directory
+    if [ -d "$LESSONS_DIR" ]; then
+        while IFS= read -r file; do
+            [ -n "$file" ] && files+=("$file")
+        done <<< "$(find "$LESSONS_DIR" -name "*.md" -type f 2>/dev/null | sort || echo "")"
+    fi
+    
+    # Get from story notes that contain lessons
+    if [ -d "$STORY_NOTES_DIR" ]; then
+        while IFS= read -r file; do
+            if [ -f "$file" ] && grep -qi "lesson\|learning\|insight" "$file"; then
+                files+=("$file")
+            fi
+        done <<< "$(find "$STORY_NOTES_DIR" -name "*.md" -type f 2>/dev/null | sort || echo "")"
+    fi
+    
+    printf '%s\n' "${files[@]}"
+}
+
+# Extract metadata from lesson file
+extract_lesson_metadata() {
+    local file="$1"
+    local metadata="{}"
+    
+    if [ ! -f "$file" ]; then
+        echo "$metadata"
+        return
+    fi
+    
+    # Extract basic information
+    local title
+    local date
+    local story_id
+    local tags
+    local category
+    
+    title=$(grep -m1 "^# " "$file" | sed 's/^# //' || echo "")
+    date=$(grep -E "\*\*Date:\*\*|Date:" "$file" | head -1 | sed -E 's/.*Date:?\*?\*? *//' | sed 's/\*\*.*$//' | xargs || echo "")
+    story_id=$(grep -E "\*\*Story ID:\*\*|Story ID:" "$file" | head -1 | sed -E 's/.*Story ID:?\*?\*? *//' | sed 's/\*\*.*$//' | xargs || echo "")
+    tags=$(grep -E "^#[a-zA-Z]|Tags:|tags:" "$file" | tail -1 | sed -E 's/^(Tags?:|#)//' | xargs || echo "")
+    
+    # Determine category from file path or content
+    if echo "$file" | grep -q "$LESSONS_DIR"; then
+        category="lesson"
+    elif echo "$file" | grep -q "$STORY_NOTES_DIR"; then
+        category="story-note"
+    else
+        category="other"
+    fi
+    
+    # Get file modification time as fallback date
+    if [ -z "$date" ]; then
+        date=$(stat -c %y "$file" 2>/dev/null | cut -d' ' -f1 || stat -f "%Sm" "$file" 2>/dev/null | cut -d' ' -f1-3 || echo "")
+    fi
+    
+    # Extract story ID from filename if not found
+    if [ -z "$story_id" ]; then
+        story_id=$(basename "$file" | grep -oE '[0-9]+' | head -1 || echo "")
+    fi
+    
+    # Create JSON metadata
+    metadata=$(cat <<EOF
+{
+    "file": "$file",
+    "title": "$title",
+    "date": "$date",
+    "story_id": "$story_id",
+    "category": "$category",
+    "tags": "$tags"
+}
+EOF
+    )
+    
+    echo "$metadata"
+}
+
+# Search lesson content
+search_lesson_content() {
+    local query="$1"
+    local files
+    files=$(get_lesson_files)
+    local results=()
+    
+    if [ -z "$files" ]; then
+        echo "No lesson files found" >&2
+        return 1
+    fi
+    
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        
+        if grep -qi "$query" "$file"; then
+            local metadata
+            metadata=$(extract_lesson_metadata "$file")
+            
+            # Extract matching lines with context
+            local matches
+            matches=$(grep -ni "$query" "$file" | head -3 || echo "")
+            
+            # Create result object
+            local result
+            result=$(cat <<EOF
+{
+    "metadata": $metadata,
+    "matches": "$matches",
+    "relevance": "high"
+}
+EOF
+            )
+            
+            results+=("$result")
+        fi
+    done <<< "$files"
+    
+    printf '%s\n' "${results[@]}"
+}
+
+# Search by tags
+search_by_tags() {
+    local tag_query="$1"
+    local files
+    files=$(get_lesson_files)
+    local results=()
+    
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        
+        local metadata
+        metadata=$(extract_lesson_metadata "$file")
+        local tags
+        tags=$(echo "$metadata" | grep -o '"tags": "[^"]*"' | sed 's/"tags": "\(.*\)"/\1/')
+        
+        if echo "$tags" | grep -qi "$tag_query"; then
+            results+=("$metadata")
+        fi
+    done <<< "$files"
+    
+    printf '%s\n' "${results[@]}"
+}
+
+# Search by story ID
+search_by_story() {
+    local story_id="$1"
+    local files
+    files=$(get_lesson_files)
+    local results=()
+    
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        
+        local metadata
+        metadata=$(extract_lesson_metadata "$file")
+        local file_story_id
+        file_story_id=$(echo "$metadata" | grep -o '"story_id": "[^"]*"' | sed 's/"story_id": "\(.*\)"/\1/')
+        
+        if [ "$file_story_id" = "$story_id" ]; then
+            results+=("$metadata")
+        fi
+    done <<< "$files"
+    
+    printf '%s\n' "${results[@]}"
+}
+
+# Search for recurring patterns
+search_patterns() {
+    local files
+    files=$(get_lesson_files)
+    local pattern_counts=()
+    
+    if [ -z "$files" ]; then
+        echo "No lesson files found" >&2
+        return 1
+    fi
+    
+    # Define pattern keywords to look for
+    local patterns=(
+        "authentication"
+        "performance"
+        "database"
+        "api"
+        "testing"
+        "deployment"
+        "frontend"
+        "backend"
+        "architecture"
+        "security"
+        "configuration"
+        "debugging"
+        "optimization"
+        "refactoring"
+        "integration"
+        "validation"
+        "error handling"
+        "monitoring"
+        "scalability"
+        "maintainability"
+    )
+    
+    for pattern in "${patterns[@]}"; do
+        local count=0
+        local files_with_pattern=()
+        
+        while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            
+            if grep -qi "$pattern" "$file"; then
+                count=$((count + 1))
+                files_with_pattern+=("$file")
+            fi
+        done <<< "$files"
+        
+        if [ $count -gt 1 ]; then
+            local pattern_info
+            pattern_info=$(cat <<EOF
+{
+    "pattern": "$pattern",
+    "count": $count,
+    "files": [$(printf '"%s",' "${files_with_pattern[@]}" | sed 's/,$//')]]
+}
+EOF
+            )
+            pattern_counts+=("$pattern_info")
+        fi
+    done
+    
+    printf '%s\n' "${pattern_counts[@]}"
+}
+
+# Get recent lessons
+get_recent_lessons() {
+    local limit="${1:-10}"
+    local files
+    files=$(get_lesson_files)
+    local results=()
+    
+    if [ -z "$files" ]; then
+        echo "No lesson files found" >&2
+        return 1
+    fi
+    
+    # Sort files by modification time and take the most recent
+    local recent_files
+    recent_files=$(echo "$files" | xargs ls -t 2>/dev/null | head -"$limit" || echo "")
+    
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        
+        local metadata
+        metadata=$(extract_lesson_metadata "$file")
+        results+=("$metadata")
+    done <<< "$recent_files"
+    
+    printf '%s\n' "${results[@]}"
+}
+
+# Generate lessons summary
+generate_summary() {
+    local files
+    files=$(get_lesson_files)
+    
+    if [ -z "$files" ]; then
+        echo "No lesson files found" >&2
+        return 1
+    fi
+    
+    local total_lessons
+    total_lessons=$(echo "$files" | wc -l)
+    
+    local categories=()
+    local story_ids=()
+    local date_range=""
+    
+    # Collect metadata
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        
+        local metadata
+        metadata=$(extract_lesson_metadata "$file")
+        
+        local category
+        local story_id
+        local date
+        category=$(echo "$metadata" | grep -o '"category": "[^"]*"' | sed 's/"category": "\(.*\)"/\1/')
+        story_id=$(echo "$metadata" | grep -o '"story_id": "[^"]*"' | sed 's/"story_id": "\(.*\)"/\1/')
+        date=$(echo "$metadata" | grep -o '"date": "[^"]*"' | sed 's/"date": "\(.*\)"/\1/')
+        
+        [ -n "$category" ] && categories+=("$category")
+        [ -n "$story_id" ] && story_ids+=("$story_id")
+    done <<< "$files"
+    
+    # Count unique categories and stories
+    local unique_categories
+    local unique_stories
+    unique_categories=$(printf '%s\n' "${categories[@]}" | sort -u | wc -l)
+    unique_stories=$(printf '%s\n' "${story_ids[@]}" | sort -u | wc -l)
+    
+    # Get patterns
+    local patterns
+    patterns=$(search_patterns)
+    local pattern_count
+    pattern_count=$(echo "$patterns" | wc -l)
+    
+    # Create summary
+    local summary
+    summary=$(cat <<EOF
+{
+    "project": "$PROJECT_NAME",
+    "type": "$PROJECT_TYPE",
+    "total_lessons": $total_lessons,
+    "categories": $unique_categories,
+    "stories_covered": $unique_stories,
+    "recurring_patterns": $pattern_count,
+    "lessons_directory": "$LESSONS_DIR",
+    "story_notes_directory": "$STORY_NOTES_DIR"
+}
+EOF
+    )
+    
+    echo "$summary"
+}
+
+# Format output based on requested format
+format_output() {
+    local data="$1"
+    local format="$2"
+    
+    case "$format" in
+        json)
+            echo "$data"
+            ;;
+        
+        markdown)
+            # Convert JSON to markdown (basic conversion)
+            echo "# Lesson Search Results"
+            echo ""
+            echo "**Project:** $PROJECT_NAME"
+            echo "**Search Query:** $SEARCH_QUERY"
+            echo "**Search Type:** $SEARCH_TYPE"
+            echo ""
+            
+            if [ -n "$data" ]; then
+                echo "## Results"
+                echo ""
+                # Basic JSON to markdown conversion
+                echo '```json'
+                echo "$data"
+                echo '```'
+            else
+                echo "No results found."
+            fi
+            ;;
+        
+        html)
+            echo "<!DOCTYPE html>"
+            echo "<html><head><title>Lesson Search Results</title></head><body>"
+            echo "<h1>Lesson Search Results</h1>"
+            echo "<p><strong>Project:</strong> $PROJECT_NAME</p>"
+            echo "<p><strong>Search Query:</strong> $SEARCH_QUERY</p>"
+            echo "<p><strong>Search Type:</strong> $SEARCH_TYPE</p>"
+            
+            if [ -n "$data" ]; then
+                echo "<h2>Results</h2>"
+                echo "<pre><code>$data</code></pre>"
+            else
+                echo "<p>No results found.</p>"
+            fi
+            
+            echo "</body></html>"
+            ;;
+        
+        text|*)
+            # Default text format
+            echo "Lesson Search Results for $PROJECT_NAME"
+            echo "======================================"
+            echo "Search Query: $SEARCH_QUERY"
+            echo "Search Type: $SEARCH_TYPE"
+            echo ""
+            
+            if [ -n "$data" ]; then
+                echo "Results:"
+                echo "--------"
+                # Basic formatting for text output
+                echo "$data" | sed 's/^/  /'
+            else
+                echo "No results found."
+            fi
+            ;;
+    esac
+}
+
+# Main execution
+if [ "$SEARCH_TYPE" = "recent" ] || [ "$SEARCH_TYPE" = "summary" ]; then
+    # These don't require a search query
+    true
+elif [ -z "$SEARCH_QUERY" ] && [ "$SEARCH_TYPE" != "recent" ] && [ "$SEARCH_TYPE" != "summary" ]; then
+    echo -e "${RED}Search query required${NC}" >&2
+    show_usage
+    exit 1
+fi
+
+echo -e "${CYAN}🔍 Searching lessons for $PROJECT_NAME...${NC}"
+
+case "$SEARCH_TYPE" in
+    content)
+        results=$(search_lesson_content "$SEARCH_QUERY")
+        ;;
+    
+    tag)
+        results=$(search_by_tags "$SEARCH_QUERY")
+        ;;
+    
+    story)
+        results=$(search_by_story "$SEARCH_QUERY")
+        ;;
+    
+    category)
+        results=$(search_lesson_content "$SEARCH_QUERY")  # Category search uses content search
+        ;;
+    
+    pattern)
+        results=$(search_patterns)
+        ;;
+    
+    recent)
+        results=$(get_recent_lessons 10)
+        ;;
+    
+    summary)
+        results=$(generate_summary)
+        ;;
+    
+    *)
+        echo -e "${RED}Unknown search type: $SEARCH_TYPE${NC}" >&2
+        show_usage
+        exit 1
+        ;;
+esac
+
+# Format and display results
+if [ -n "$results" ]; then
+    formatted_output=$(format_output "$results" "$OUTPUT_FORMAT")
+    echo "$formatted_output"
+    
+    # Save to file if JSON format
+    if [ "$OUTPUT_FORMAT" = "json" ]; then
+        local output_file="$OUTPUT_DIR/lesson-search-$(date +%Y%m%d-%H%M%S).json"
+        echo "$results" > "$output_file"
+        echo -e "\n${GREEN}✅ Results saved to: $output_file${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️ No results found for query: $SEARCH_QUERY${NC}"
+    exit 1
+fi

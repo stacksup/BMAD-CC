@@ -1,4 +1,4 @@
-﻿# BMAD Framework Expansion Packs
+# BMAD Framework Expansion Packs
 
 ## Overview
 
@@ -113,18 +113,18 @@ Expansion packs extend the BMAD Framework beyond traditional software developmen
 
 ```
 expansion-packs/
-└── my-custom-pack/
-    ├── manifest.yaml           # Pack metadata and configuration
-    ├── agents/                 # Specialized agents
-    │   ├── agent-1.md
-    │   └── agent-2.md
-    ├── workflows/              # Domain-specific workflows
-    │   └── custom-cycle.md
-    ├── templates/              # Specialized templates
-    │   └── domain-template.md
-    ├── hooks/                  # Custom quality gates
-    │   └── domain-check.ps1
-    └── README.md              # Pack documentation
+â””â”€â”€ my-custom-pack/
+    â”œâ”€â”€ manifest.yaml           # Pack metadata and configuration
+    â”œâ”€â”€ agents/                 # Specialized agents
+    â”‚   â”œâ”€â”€ agent-1.md
+    â”‚   â””â”€â”€ agent-2.md
+    â”œâ”€â”€ workflows/              # Domain-specific workflows
+    â”‚   â””â”€â”€ custom-cycle.md
+    â”œâ”€â”€ templates/              # Specialized templates
+    â”‚   â””â”€â”€ domain-template.md
+    â”œâ”€â”€ hooks/                  # Custom quality gates
+    â”‚   â””â”€â”€ domain-check.ps1
+    â””â”€â”€ README.md              # Pack documentation
 ```
 
 ### Manifest File (manifest.yaml)
@@ -227,13 +227,13 @@ Load the domain-specialist agent for specialized analysis
 
 ### When to Create an Expansion Pack
 
-✅ **Good Candidates**:
+âœ… **Good Candidates**:
 - Specialized industry knowledge (healthcare, finance, etc.)
 - Non-software domains (marketing, legal, creative)
 - Platform-specific expertise (Salesforce, SAP, etc.)
 - Methodology-specific approaches (Six Sigma, TOGAF, etc.)
 
-❌ **Keep in Core**:
+âŒ **Keep in Core**:
 - General software development
 - Standard Agile practices
 - Common programming patterns
@@ -295,11 +295,11 @@ Future plans include:
 ### Pack Certification
 
 Certified packs meet quality standards:
-- ✅ Complete documentation
-- ✅ Tested on 3+ projects
-- ✅ Peer reviewed
-- ✅ Maintains compatibility
-- ✅ Active maintenance
+- âœ… Complete documentation
+- âœ… Tested on 3+ projects
+- âœ… Peer reviewed
+- âœ… Maintains compatibility
+- âœ… Active maintenance
 
 ## Support
 

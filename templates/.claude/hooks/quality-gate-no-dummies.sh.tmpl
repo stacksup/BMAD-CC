@@ -1,0 +1,387 @@
+#!/usr/bin/env bash
+# Quality Gate: No Dummy Content for {{PROJECT_NAME}}
+# Prevents commits with placeholder/dummy content
+
+set -e
+
+# Parameters
+EVENT_TYPE="${1:-pre-commit}"
+FILE_PATH="${2:-}"
+FORCE_CHECK="${3:-false}"
+
+# Configuration
+PROJECT_NAME="{{PROJECT_NAME}}"
+PROJECT_TYPE="{{PROJECT_TYPE}}"
+DISABLE_DUMMY_CHECK="${BMAD_DISABLE_DUMMY_CHECK:-0}"
+VERBOSE="${BMAD_VERBOSE:-0}"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+# Dummy content patterns to detect
+DUMMY_PATTERNS=(
+    # Generic placeholders
+    "TODO:"
+    "FIXME:"
+    "XXX:"
+    "HACK:"
+    "TEMP:"
+    "PLACEHOLDER"
+    "DUMMY"
+    "STUB"
+    "MOCK"
+    "FAKE"
+    "TEST_"
+    "DEBUG_"
+    
+    # Common dummy text
+    "Lorem ipsum"
+    "lorem ipsum"
+    "placeholder text"
+    "dummy text"
+    "test data"
+    "sample data"
+    "example data"
+    "fake data"
+    
+    # Development leftovers
+    "console.log"
+    "console.debug"
+    "console.warn"
+    "console.error"
+    "print("
+    "println("
+    "var_dump("
+    "debug_print"
+    "debugger;"
+    
+    # API keys and secrets (basic patterns)
+    "your_api_key"
+    "your_secret"
+    "api_key_here"
+    "secret_key_here"
+    "password123"
+    "admin123"
+    "test123"
+    "12345"
+    
+    # Incomplete implementations
+    "throw new Error(\"Not implemented\")"
+    "raise NotImplementedError"
+    "# TODO: implement"
+    "// TODO: implement"
+    "/* TODO: implement */"
+    "pass  # TODO"
+    "return null; // TODO"
+    "return nil // TODO"
+    
+    # Template placeholders
+    "{{.*}}"
+    "<.*placeholder.*>"
+    "\[.*placeholder.*\]"
+    "<INSERT.*>"
+    "<REPLACE.*>"
+    "\[INSERT.*\]"
+    "\[REPLACE.*\]"
+)
+
+# Files to exclude from dummy checking
+EXCLUDE_PATTERNS=(
+    ".git/"
+    "node_modules/"
+    "vendor/"
+    "dist/"
+    "build/"
+    "target/"
+    ".next/"
+    ".nuxt/"
+    "coverage/"
+    "*.min.js"
+    "*.min.css"
+    "*.map"
+    "*.log"
+    "*.tmp"
+    "*.temp"
+    
+    # Test files may contain dummy data
+    "*test*"
+    "*spec*"
+    "*mock*"
+    "__tests__/"
+    "tests/"
+    "test/"
+    
+    # Documentation may contain examples
+    "*.md"
+    "*.rst"
+    "*.txt"
+    "docs/"
+    "documentation/"
+    
+    # Config files may have placeholders
+    "*.example"
+    "*.sample"
+    "*.template"
+    ".env.example"
+    "config.example.*"
+    
+    # This script itself
+    "quality-gate-no-dummies.sh"
+)
+
+# Check if file should be excluded
+should_exclude_file() {
+    local file="$1"
+    
+    for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+        if [[ "$file" == $pattern ]]; then
+            return 0
+        fi
+    done
+    
+    return 1
+}
+
+# Check for dummy content in a file
+check_file_for_dummies() {
+    local file="$1"
+    local issues=()
+    
+    if [ ! -f "$file" ]; then
+        return 0
+    fi
+    
+    # Skip binary files
+    if file "$file" | grep -q "binary"; then
+        return 0
+    fi
+    
+    local line_num=0
+    while IFS= read -r line; do
+        line_num=$((line_num + 1))
+        
+        for pattern in "${DUMMY_PATTERNS[@]}"; do
+            if echo "$line" | grep -qi "$pattern"; then
+                # Additional checks for common false positives
+                case "$pattern" in
+                    "console.log"|"console.debug"|"console.warn"|"console.error")
+                        # Allow console statements in development/debug contexts
+                        if echo "$line" | grep -qE "(debug|dev|development|logging)"; then
+                            continue
+                        fi
+                        ;;
+                    "TODO:")
+                        # Allow TODO in comments if they're detailed
+                        if echo "$line" | grep -qE "TODO:.*[a-zA-Z]{10,}"; then
+                            continue
+                        fi
+                        ;;
+                esac
+                
+                issues+=("Line $line_num: $pattern - $line")
+            fi
+        done
+    done < "$file"
+    
+    if [ ${#issues[@]} -gt 0 ]; then
+        echo -e "${RED}❌ DUMMY CONTENT DETECTED in $file:${NC}"
+        for issue in "${issues[@]}"; do
+            echo -e "${RED}  $issue${NC}"
+        done
+        return 1
+    fi
+    
+    return 0
+}
+
+# Get list of files to check
+get_files_to_check() {
+    local files=()
+    
+    if [ -n "$FILE_PATH" ]; then
+        # Check specific file
+        files=("$FILE_PATH")
+    elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        # Get files from git
+        case "$EVENT_TYPE" in
+            "pre-commit")
+                # Check staged files
+                while IFS= read -r file; do
+                    [ -n "$file" ] && files+=("$file")
+                done <<< "$(git diff --cached --name-only 2>/dev/null || echo "")"
+                ;;
+            "post-commit"|"check-all")
+                # Check all tracked files
+                while IFS= read -r file; do
+                    [ -n "$file" ] && files+=("$file")
+                done <<< "$(git ls-files 2>/dev/null || echo "")"
+                ;;
+            *)
+                # Check modified files
+                while IFS= read -r file; do
+                    [ -n "$file" ] && files+=("$file")
+                done <<< "$(git diff --name-only 2>/dev/null || echo "")"
+                ;;
+        esac
+    else
+        # Fallback: check common source directories
+        if command -v find >/dev/null 2>&1; then
+            while IFS= read -r file; do
+                [ -n "$file" ] && files+=("$file")
+            done <<< "$(find . -type f \( -name '*.js' -o -name '*.ts' -o -name '*.jsx' -o -name '*.tsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' -o -name '*.php' \) 2>/dev/null | head -100 || echo "")"
+        fi
+    fi
+    
+    # Filter out excluded files
+    local filtered_files=()
+    for file in "${files[@]}"; do
+        if ! should_exclude_file "$file"; then
+            filtered_files+=("$file")
+        fi
+    done
+    
+    printf '%s\n' "${filtered_files[@]}"
+}
+
+# Main execution
+case "$EVENT_TYPE" in
+    pre-commit|post-commit|check-all|scan)
+        if [ "$DISABLE_DUMMY_CHECK" = "1" ]; then
+            if [ "$VERBOSE" = "1" ]; then
+                echo -e "${GRAY}Dummy content check disabled${NC}"
+            fi
+            exit 0
+        fi
+        
+        echo -e "${CYAN}🔍 Checking for dummy content in $PROJECT_NAME...${NC}"
+        
+        local files_to_check
+        files_to_check=$(get_files_to_check)
+        
+        if [ -z "$files_to_check" ]; then
+            if [ "$VERBOSE" = "1" ]; then
+                echo -e "${GRAY}No files to check${NC}"
+            fi
+            exit 0
+        fi
+        
+        local total_files=0
+        local files_with_issues=0
+        local total_issues=0
+        
+        while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            
+            total_files=$((total_files + 1))
+            
+            if [ "$VERBOSE" = "1" ]; then
+                echo -e "${GRAY}Checking: $file${NC}"
+            fi
+            
+            if ! check_file_for_dummies "$file"; then
+                files_with_issues=$((files_with_issues + 1))
+                total_issues=$((total_issues + 1))
+            fi
+        done <<< "$files_to_check"
+        
+        echo -e "\n${CYAN}Dummy Content Check Results:${NC}"
+        echo "  Files checked: $total_files"
+        echo "  Files with issues: $files_with_issues"
+        
+        if [ $files_with_issues -gt 0 ]; then
+            echo -e "${RED}❌ DUMMY CONTENT GATE FAILED${NC}"
+            echo -e "${YELLOW}Please remove or replace dummy/placeholder content before committing.${NC}"
+            echo -e "\n${CYAN}To bypass this check temporarily, set: BMAD_DISABLE_DUMMY_CHECK=1${NC}"
+            exit 1
+        else
+            echo -e "${GREEN}✅ No dummy content detected${NC}"
+            exit 0
+        fi
+        ;;
+    
+    check-file)
+        if [ -z "$FILE_PATH" ]; then
+            echo -e "${RED}File path required for check-file command${NC}" >&2
+            exit 1
+        fi
+        
+        echo -e "${CYAN}Checking file: $FILE_PATH${NC}"
+        
+        if should_exclude_file "$FILE_PATH"; then
+            echo -e "${GRAY}File excluded from dummy content checking${NC}"
+            exit 0
+        fi
+        
+        if check_file_for_dummies "$FILE_PATH"; then
+            echo -e "${GREEN}✅ No dummy content found${NC}"
+            exit 0
+        else
+            echo -e "${RED}❌ Dummy content detected${NC}"
+            exit 1
+        fi
+        ;;
+    
+    list-patterns)
+        echo -e "${CYAN}Dummy Content Detection Patterns:${NC}"
+        echo "============================================"
+        for pattern in "${DUMMY_PATTERNS[@]}"; do
+            echo "  - $pattern"
+        done
+        echo "============================================"
+        
+        echo -e "\n${CYAN}Excluded File Patterns:${NC}"
+        echo "============================================"
+        for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+            echo "  - $pattern"
+        done
+        echo "============================================"
+        ;;
+    
+    status)
+        echo -e "\n${CYAN}🛡️ Dummy Content Gate Status for $PROJECT_NAME${NC}"
+        echo "==============================================="
+        
+        if [ "$DISABLE_DUMMY_CHECK" = "1" ]; then
+            echo -e "${YELLOW}⚠️ Dummy content checking is DISABLED${NC}"
+        else
+            echo -e "${GREEN}✅ Dummy content checking is ENABLED${NC}"
+        fi
+        
+        echo "Patterns monitored: ${#DUMMY_PATTERNS[@]}"
+        echo "File patterns excluded: ${#EXCLUDE_PATTERNS[@]}"
+        
+        # Quick scan of current files
+        local current_issues=0
+        local files_to_check
+        files_to_check=$(get_files_to_check)
+        
+        if [ -n "$files_to_check" ]; then
+            while IFS= read -r file; do
+                [ -z "$file" ] && continue
+                if ! check_file_for_dummies "$file" >/dev/null 2>&1; then
+                    current_issues=$((current_issues + 1))
+                fi
+            done <<< "$files_to_check"
+        fi
+        
+        if [ $current_issues -gt 0 ]; then
+            echo -e "${RED}⚠️ Current issues found: $current_issues files${NC}"
+            echo -e "${CYAN}Run with 'scan' to see details${NC}"
+        else
+            echo -e "${GREEN}✅ No current issues detected${NC}"
+        fi
+        
+        echo "==============================================="
+        ;;
+    
+    *)
+        echo -e "${RED}Unknown event type: $EVENT_TYPE${NC}" >&2
+        echo "Valid events: pre-commit, post-commit, check-all, scan, check-file, list-patterns, status"
+        exit 1
+        ;;
+esac

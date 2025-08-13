@@ -1,5 +1,5 @@
-﻿---
-description: Intelligent BMAD workflow routing for BMAD-CC (other) - Analyzes requests and routes to optimal workflow.
+---
+description: Intelligent BMAD workflow routing for BMAD-CC (Framework) - Analyzes requests and routes to optimal workflow.
 allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, Task
 ---
 
@@ -18,7 +18,7 @@ This command analyzes your request and routes it to the most appropriate BMAD wo
 # MUST succeed or workflow cannot proceed
 ./.claude/hooks/taskmaster-check.ps1 check
 if ($LASTEXITCODE -ne 0) { 
-    Write-Error "❌ BMAD requires Task Master AI. Install with: npm install -g task-master-ai"
+    Write-Error "âŒ BMAD requires Task Master AI. Install with: npm install -g task-master-ai"
     exit 1
 }
 ```
@@ -28,7 +28,7 @@ if ($LASTEXITCODE -ne 0) {
 # Ensure Docker is running (required for all development)
 docker info > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "❌ Docker is not running. Starting Docker Desktop..."
+    echo "âŒ Docker is not running. Starting Docker Desktop..."
     # Attempt to start Docker Desktop (platform specific)
     if [[ "$OSTYPE" == "darwin"* ]]; then
         open -a Docker
@@ -36,12 +36,12 @@ if [ $? -ne 0 ]; then
         Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
     fi
     
-    echo "⏳ Waiting for Docker to start (30 seconds)..."
+    echo "â³ Waiting for Docker to start (30 seconds)..."
     sleep 30
     
     docker info > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo "❌ Docker failed to start. Please start Docker Desktop manually."
+        echo "âŒ Docker failed to start. Please start Docker Desktop manually."
         exit 1
     fi
 fi
@@ -49,11 +49,11 @@ fi
 # Start containers if not running
 ./.claude/hooks/docker-manager.ps1 status
 if [ $? -ne 0 ]; then
-    echo "🐳 Starting Docker containers..."
+    echo "ðŸ³ Starting Docker containers..."
     ./.claude/hooks/docker-manager.ps1 start
     
     # Wait for health checks
-    echo "⏳ Waiting for services to be healthy..."
+    echo "â³ Waiting for services to be healthy..."
     sleep 5
     ./.claude/hooks/docker-manager.ps1 health
 fi
@@ -63,15 +63,15 @@ fi
 ```bash
 # Check if Task Master is initialized for this project
 if [ ! -d ".taskmaster" ]; then
-    echo "📋 Task Master not initialized. Setting up now..."
+    echo "ðŸ“‹ Task Master not initialized. Setting up now..."
     task-master init -y
     task-master models --set-main opus
     task-master models --set-fallback sonnet
     
     # Look for PRD or requirements to parse
-    if [ -f "" ]; then
-        echo "Found PRD at , parsing into tasks..."
-        task-master parse-prd --input= --force
+    if [ -f "CLAUDE\.md" ]; then
+        echo "Found PRD at CLAUDE\.md, parsing into tasks..."
+        task-master parse-prd --input=CLAUDE\.md --force
     elif [ -f "CLAUDE.md" ]; then
         echo "Found CLAUDE.md, parsing into tasks..."
         task-master parse-prd --input=CLAUDE.md --force
@@ -97,7 +97,7 @@ if [[ -z "$CURRENT_TASK" ]]; then
     TASK_COUNT=$(task-master list --json | jq '. | length')
     
     if [[ "$TASK_COUNT" -eq 0 ]]; then
-        echo "📝 No tasks exist yet. Initializing from your request..."
+        echo "ðŸ“ No tasks exist yet. Initializing from your request..."
         # Orchestrator will handle initial task creation
     else
         echo "All tasks complete! Options:"
@@ -122,7 +122,7 @@ For new projects or major initiatives:
    - Auto-backup will be disabled until configured
    
 2. Project Validation:
-   - Load po-agent → Use validate-project-setup capability
+   - Load po-agent â†’ Use validate-project-setup capability
    - Auto-detect project type and characteristics
    - Validate against 6-section master checklist
    - If BLOCKED: Address critical setup issues first
@@ -134,11 +134,11 @@ For new projects or major initiatives:
 ### Project Context Analysis
 ```bash
 # Document Size Detection
-echo "📊 Analyzing project documents..."
+echo "ðŸ“Š Analyzing project documents..."
 if [ -f "docs/PRD.md" ]; then
     PRD_SIZE=$(stat -c%s "docs/PRD.md" 2>/dev/null || stat -f%z "docs/PRD.md" 2>/dev/null || echo 0)
     if [ $PRD_SIZE -gt 5242880 ]; then  # 5MB
-        echo "📚 Large PRD detected (>5MB) - Document sharding recommended"
+        echo "ðŸ“š Large PRD detected (>5MB) - Document sharding recommended"
         export BMAD_ENABLE_SHARDING=1
     fi
 fi
@@ -146,41 +146,41 @@ fi
 if [ -f "docs/architecture.md" ]; then
     ARCH_SIZE=$(stat -c%s "docs/architecture.md" 2>/dev/null || stat -f%z "docs/architecture.md" 2>/dev/null || echo 0)
     if [ $ARCH_SIZE -gt 5242880 ]; then  # 5MB
-        echo "📚 Large architecture document detected - Sharding recommended"
+        echo "ðŸ“š Large architecture document detected - Sharding recommended"
         export BMAD_ENABLE_SHARDING=1
     fi
 fi
 
 # Brownfield Detection  
-echo "🔍 Detecting project type..."
+echo "ðŸ” Detecting project type..."
 if [ -f "package.json" ] || [ -f "requirements.txt" ] || [ -f "go.mod" ] || [ -d "src/" ]; then
     if [ ! -f "docs/PRD.md" ] && [ ! -f "docs/product-requirements-document.md" ]; then
-        echo "🏗️ Existing codebase detected without PRD - Brownfield project"
+        echo "ðŸ—ï¸ Existing codebase detected without PRD - Brownfield project"
         export BMAD_BROWNFIELD_MODE=1
     fi
 fi
 
 # Change Request Detection
-echo "🔍 Checking for pending changes..."
+echo "ðŸ” Checking for pending changes..."
 ./.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"
 
 if [ -f "docs/change-request.md" ] || [ -f ".bmad-change-pending" ]; then
-    echo "🔄 Change request detected - Change management activated"
+    echo "ðŸ”„ Change request detected - Change management activated"
     export BMAD_CHANGE_MANAGEMENT=1
     
     # Check if change validation is complete
     if [ -f ".bmad-change-pending" ]; then
         CHANGE_ID=$(cat .bmad-change-pending)
-        echo "⚠️ Pending change: $CHANGE_ID requires validation before proceeding"
+        echo "âš ï¸ Pending change: $CHANGE_ID requires validation before proceeding"
         echo "Run Product Owner change management process to resolve"
     fi
 fi
 
 # Interactive Enhancement Detection
 if [ "$BMAD_ENABLE_SHARDING" = "1" ] || [ "$BMAD_BROWNFIELD_MODE" = "1" ]; then
-    echo "✨ Enhanced capabilities activated:"
-    [ "$BMAD_ENABLE_SHARDING" = "1" ] && echo "   📄 Document Sharding"
-    [ "$BMAD_BROWNFIELD_MODE" = "1" ] && echo "   🏗️ Brownfield Analysis"
+    echo "âœ¨ Enhanced capabilities activated:"
+    [ "$BMAD_ENABLE_SHARDING" = "1" ] && echo "   ðŸ“„ Document Sharding"
+    [ "$BMAD_BROWNFIELD_MODE" = "1" ] && echo "   ðŸ—ï¸ Brownfield Analysis"
 fi
 ```
 
@@ -194,12 +194,12 @@ fi
 
 2. **Apply Enhanced Classification Decision Tree**
    ```
-   Is this a bug fix or small improvement? → maintenance-cycle
-   Clear requirements, no architecture changes? → story-cycle/saas-cycle
-   Existing codebase without clear docs? → brownfield-enhancement
-   Large documents detected (>5MB)? → Enable document sharding
-   New project or major enhancement? → greenfield/planning workflows
-   Need business/UX/architecture planning? → planning-cycle + elicitation
+   Is this a bug fix or small improvement? â†’ maintenance-cycle
+   Clear requirements, no architecture changes? â†’ story-cycle/saas-cycle
+   Existing codebase without clear docs? â†’ brownfield-enhancement
+   Large documents detected (>5MB)? â†’ Enable document sharding
+   New project or major enhancement? â†’ greenfield/planning workflows
+   Need business/UX/architecture planning? â†’ planning-cycle + elicitation
    ```
 
 3. **Route to Appropriate Enhanced Workflow**
@@ -218,7 +218,7 @@ fi
 - Configuration changes
 - Documentation updates
 
-**Process:** Developer → QA Engineer → Documentation → Git
+**Process:** Developer â†’ QA Engineer â†’ Documentation â†’ Git
 
 ### Route B: Standard Development (`/bmad:story-cycle` or `/bmad:saas-cycle`)
 **When to Use:**
@@ -227,7 +227,7 @@ fi
 - No architectural changes
 - Integration with existing systems
 
-**Process:** Scrum Master → Product Owner → Developer → QA Engineer → Documentation → Learnings → Git
+**Process:** Scrum Master â†’ Product Owner â†’ Developer â†’ QA Engineer â†’ Documentation â†’ Learnings â†’ Git
 
 ### Route C: Strategic Planning (`/bmad:planning-cycle`)
 **When to Use:**
@@ -290,16 +290,16 @@ The orchestrator will ask clarifying questions to ensure proper routing:
 **When requirements need refinement, orchestrator offers:**
 
 **Brainstorming Techniques** (`docs/data/brainstorming-techniques.md`):
-- **"Let's explore alternatives"** → SCAMPER method for systematic variations
-- **"What if scenarios"** → Explore different approaches and constraints
-- **"Find the core need"** → Five Whys to drill down to fundamentals
-- **"Think bigger/smaller"** → Scale exploration techniques
+- **"Let's explore alternatives"** â†’ SCAMPER method for systematic variations
+- **"What if scenarios"** â†’ Explore different approaches and constraints
+- **"Find the core need"** â†’ Five Whys to drill down to fundamentals
+- **"Think bigger/smaller"** â†’ Scale exploration techniques
 
 **Elicitation Methods** (`docs/data/elicitation-methods.md`):
-- **"Break this down"** → Tree of Thoughts for complex decomposition
-- **"All perspectives"** → Stakeholder Round Table analysis
-- **"Risk assessment"** → Identify potential challenges and mitigation
-- **"Challenge approach"** → Red Team vs Blue Team critical analysis
+- **"Break this down"** â†’ Tree of Thoughts for complex decomposition
+- **"All perspectives"** â†’ Stakeholder Round Table analysis
+- **"Risk assessment"** â†’ Identify potential challenges and mitigation
+- **"Challenge approach"** â†’ Red Team vs Blue Team critical analysis
 
 **Interactive Commands:**
 - Say "brainstorm" to activate creative expansion
@@ -363,7 +363,7 @@ Once the orchestrator determines the optimal route:
 **Change Management Integration:**
 - **Requirement Changes**: Use change-checklist template for systematic analysis
 - **Scope Evolution**: Apply change management process before major pivots  
-- **Course Correction**: Load po-agent → Use change management capability when needed
+- **Course Correction**: Load po-agent â†’ Use change management capability when needed
 - **Impact Assessment**: Evaluate changes against epics, artifacts, and timelines
 - Coordinate cross-workflow dependencies
 
@@ -410,7 +410,7 @@ Routing Decision: `/bmad:story-cycle`
 ```
 User: "We want to build a mobile app version of our web application"
 Orchestrator Analysis: Major project, needs planning, architecture, UX design
-Routing Decision: `/bmad:planning-cycle` → `/bmad:greenfield-mobile`
+Routing Decision: `/bmad:planning-cycle` â†’ `/bmad:greenfield-mobile`
 ```
 
 Remember: The smart-cycle is your intelligent entry point into the BMAD system. Trust the orchestrator's analysis and routing decisions - they're designed to optimize your workflow efficiency and project success.

@@ -1,5 +1,5 @@
-﻿---
-description: Streamlined maintenance workflow for BMAD-CC (other) - Efficient cycle for bug fixes and small improvements.
+---
+description: Streamlined maintenance workflow for BMAD-CC (Framework) - Efficient cycle for bug fixes and small improvements.
 allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*)
 ---
 
@@ -165,7 +165,7 @@ Load the git-agent for change management and deployment.
    - Files modified: [Key files changed]
    - Testing: [Testing performed]
    
-   🤖 Generated with [Claude Code](https://claude.ai/code)
+   ðŸ¤– Generated with [Claude Code](https://claude.ai/code)
    
    Co-Authored-By: Claude <noreply@anthropic.com>"
    ```
@@ -177,7 +177,7 @@ Load the git-agent for change management and deployment.
    - Create PR if required by team process
    - Monitor deployment and health checks
    - **Post-Deploy Validation**: 
-     -  health check if applicable
+     - docker-compose\.yml health check if applicable
      - Verify fix in production/staging environment
    {{/if}}
    
@@ -230,16 +230,16 @@ If using task management:
 - **High Risk**: Changes could impact critical system functionality
 
 ### Escalation Options
-- **Feature Development**: If improvement becomes a larger feature → `/bmad:story-cycle`
-- **Strategic Planning**: If architectural changes needed → `/bmad:planning-cycle`
-- **Specialized Workflow**: If project type specific needs → specialized workflow
+- **Feature Development**: If improvement becomes a larger feature â†’ `/bmad:story-cycle`
+- **Strategic Planning**: If architectural changes needed â†’ `/bmad:planning-cycle`
+- **Specialized Workflow**: If project type specific needs â†’ specialized workflow
 
 ## SUCCESS PATTERNS
 
 ### Ideal Maintenance Cycle
 ```
-Issue Identified → Dev Analysis & Fix → Optional QA Review → 
-Documentation Update → Git Commit → Deployment → Issue Resolved
+Issue Identified â†’ Dev Analysis & Fix â†’ Optional QA Review â†’ 
+Documentation Update â†’ Git Commit â†’ Deployment â†’ Issue Resolved
 Total Time: 30 minutes - 4 hours
 ```
 
@@ -254,21 +254,21 @@ Total Time: 30 minutes - 4 hours
 ### Example 1: Simple Bug Fix
 ```
 Issue: "Login button doesn't show loading state"
-Process: Dev fix CSS/JS → Test login flow → Update CHANGELOG → Commit & deploy
+Process: Dev fix CSS/JS â†’ Test login flow â†’ Update CHANGELOG â†’ Commit & deploy
 Time: ~45 minutes
 ```
 
 ### Example 2: Configuration Update
 ```
 Issue: "Update API timeout from 30s to 60s" 
-Process: Dev update config → Test API calls → Document change → Commit & deploy
+Process: Dev update config â†’ Test API calls â†’ Document change â†’ Commit & deploy
 Time: ~20 minutes
 ```
 
 ### Example 3: Performance Tweak
 ```
 Issue: "Database query is slow on user dashboard"
-Process: Dev optimize query → QA review → Test performance → Update docs → Deploy  
+Process: Dev optimize query â†’ QA review â†’ Test performance â†’ Update docs â†’ Deploy  
 Time: ~2-3 hours
 ```
 

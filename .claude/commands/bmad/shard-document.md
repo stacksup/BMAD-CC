@@ -1,4 +1,4 @@
-﻿---
+---
 description: Document sharding utility for BMAD-CC - Breaks large documents into manageable pieces for efficient processing.
 allowed-tools: Read, Write, Grep, Glob, Bash(powershell:*), Bash(pwsh:*), Bash(ls:*), Bash(mkdir:*)
 ---
@@ -52,38 +52,38 @@ The utility analyzes the document structure to identify:
 Creates structured epic and story files:
 ```
 docs/prd/
-├── overview.md              # Document metadata and structure
-├── goals-and-background.md  # Business context
-├── requirements.md          # Core requirements
-├── epic-1-user-auth.md     # Epic with stories
-├── epic-2-dashboard.md     # Epic with stories
-├── epic-3-reporting.md     # Epic with stories
-├── success-metrics.md      # KPIs and metrics
-└── appendices.md           # Additional information
+â”œâ”€â”€ overview.md              # Document metadata and structure
+â”œâ”€â”€ goals-and-background.md  # Business context
+â”œâ”€â”€ requirements.md          # Core requirements
+â”œâ”€â”€ epic-1-user-auth.md     # Epic with stories
+â”œâ”€â”€ epic-2-dashboard.md     # Epic with stories
+â”œâ”€â”€ epic-3-reporting.md     # Epic with stories
+â”œâ”€â”€ success-metrics.md      # KPIs and metrics
+â””â”€â”€ appendices.md           # Additional information
 ```
 
 #### For Architecture Documents
 Creates component-focused files:
 ```
 docs/architecture/
-├── overview.md                    # System overview
-├── system-architecture.md         # High-level design
-├── component-frontend.md          # Frontend architecture
-├── component-backend.md           # Backend architecture
-├── component-database.md          # Data architecture
-├── api-specifications.md          # API design
-├── deployment-strategy.md         # Infrastructure
-└── security-considerations.md     # Security architecture
+â”œâ”€â”€ overview.md                    # System overview
+â”œâ”€â”€ system-architecture.md         # High-level design
+â”œâ”€â”€ component-frontend.md          # Frontend architecture
+â”œâ”€â”€ component-backend.md           # Backend architecture
+â”œâ”€â”€ component-database.md          # Data architecture
+â”œâ”€â”€ api-specifications.md          # API design
+â”œâ”€â”€ deployment-strategy.md         # Infrastructure
+â””â”€â”€ security-considerations.md     # Security architecture
 ```
 
 #### For Generic Documents
 Creates section-based files:
 ```
 docs/[document-name]/
-├── overview.md           # Document metadata
-├── section-1-title.md    # First major section
-├── section-2-title.md    # Second major section
-└── ...                   # Additional sections
+â”œâ”€â”€ overview.md           # Document metadata
+â”œâ”€â”€ section-1-title.md    # First major section
+â”œâ”€â”€ section-2-title.md    # Second major section
+â””â”€â”€ ...                   # Additional sections
 ```
 
 ### 3. Content Preservation
@@ -107,7 +107,7 @@ The `overview.md` file contains:
 ```bash
 # Check if document exists
 if [ ! -f "$1" ]; then
-    echo "❌ Error: Document $1 not found"
+    echo "âŒ Error: Document $1 not found"
     exit 1
 fi
 
@@ -117,10 +117,10 @@ OUTPUT_DIR="${2:-docs/$DOC_NAME}"
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
-echo "📁 Creating shards in $OUTPUT_DIR/"
+echo "ðŸ“ Creating shards in $OUTPUT_DIR/"
 
 # Parse document and create shards
-echo "🔍 Analyzing document structure..."
+echo "ðŸ” Analyzing document structure..."
 
 # Extract all level 2 headers
 SECTIONS=$(grep '^## ' "$1" | sed 's/^## //')
@@ -148,13 +148,13 @@ while IFS= read -r section; do
     # Extract section content (from this ## to next ## or EOF)
     # This is simplified - actual implementation would use proper parsing
     
-    echo "📄 Creating shard: $FILENAME"
+    echo "ðŸ“„ Creating shard: $FILENAME"
     
     # Add to overview TOC
     echo "- [$section](./$FILENAME)" >> "$OUTPUT_DIR/overview.md"
 done <<< "$SECTIONS"
 
-echo "✅ Sharding complete! Created $SHARD_COUNT shards in $OUTPUT_DIR/"
+echo "âœ… Sharding complete! Created $SHARD_COUNT shards in $OUTPUT_DIR/"
 ```
 
 ## SPECIAL HANDLING
@@ -169,7 +169,7 @@ If a section title contains "Epic", "Feature", or "User Story":
 For PRD shards containing epics:
 ```bash
 # After sharding, offer to create Task Master tasks
-echo "🎯 Would you like to create Task Master tasks from epics? (y/n)"
+echo "ðŸŽ¯ Would you like to create Task Master tasks from epics? (y/n)"
 read -r response
 if [ "$response" = "y" ]; then
     for epic in "$OUTPUT_DIR"/epic-*.md; do
@@ -208,11 +208,11 @@ After sharding, PMs can:
 ## QUALITY CHECKS
 
 After sharding, the utility verifies:
-- ✅ All content from original document is preserved
-- ✅ No duplicate content across shards
-- ✅ All internal links are updated
-- ✅ Character count matches (minus added navigation)
-- ✅ Markdown syntax remains valid
+- âœ… All content from original document is preserved
+- âœ… No duplicate content across shards
+- âœ… All internal links are updated
+- âœ… Character count matches (minus added navigation)
+- âœ… Markdown syntax remains valid
 
 ## ERROR HANDLING
 

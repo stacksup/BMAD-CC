@@ -69,10 +69,10 @@ fi
 # Check if GitHub is configured
 REMOTE_URL=$(git config --get remote.origin.url)
 if [[ -z "$REMOTE_URL" ]]; then
-    echo "⚠️ GitHub not configured. Run: /bmad:github-setup"
+    echo "âš ï¸ GitHub not configured. Run: /bmad:github-setup"
     echo "Continuing without backup..."
 else
-    echo "✅ GitHub configured: $REMOTE_URL"
+    echo "âœ… GitHub configured: $REMOTE_URL"
 fi
 ```
 

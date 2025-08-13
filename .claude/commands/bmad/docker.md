@@ -1,4 +1,4 @@
-﻿---
+---
 description: Docker container management for BMAD-CC - Start, stop, and manage Docker containers for development.
 allowed-tools: Bash(docker:*), Bash(docker-compose:*), mcp__docker__list_containers, mcp__docker__list_images, mcp__docker__get_container_logs, mcp__docker__execute_command, mcp__docker__get_container_stats, Read, Write
 ---
@@ -49,24 +49,24 @@ mcp__docker__get_container_logs --container_id=[container_name] --tail=100
 
 ### 1. Pre-Development Setup
 ```bash
-echo "🐳 Setting up Docker development environment..."
+echo "ðŸ³ Setting up Docker development environment..."
 
 # Ensure Docker is running
 docker info > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "❌ Docker is not running. Please start Docker Desktop."
+    echo "âŒ Docker is not running. Please start Docker Desktop."
     exit 1
 fi
 
 # Check if docker-compose.yml exists
-if [ ! -f "" ] && [ ! -f "docker-compose.yml" ]; then
-    echo "⚠️ No docker-compose.yml found. Creating default..."
+if [ ! -f "docker-compose\.yml" ] && [ ! -f "docker-compose.yml" ]; then
+    echo "âš ï¸ No docker-compose.yml found. Creating default..."
     # Create based on project type
 fi
 
 # Start containers
 docker-compose up -d --build
-echo "⏳ Waiting for services to be healthy..."
+echo "â³ Waiting for services to be healthy..."
 sleep 5
 
 # Health check

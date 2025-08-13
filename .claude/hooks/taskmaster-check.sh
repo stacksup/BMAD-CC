@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# Task Master AI Availability Check and Integration
+# This hook ensures Task Master is available and configured
+
+set -e
+
+# Configuration
+# Try to find task-master in various locations
+if command -v task-master &> /dev/null; then
+    TASKMASTER_CLI="task-master"
+elif command -v npx &> /dev/null && npx task-master --version &> /dev/null 2>&1; then
+    TASKMASTER_CLI="npx task-master"
+elif [ -f "./node_modules/.bin/task-master" ]; then
+    TASKMASTER_CLI="./node_modules/.bin/task-master"
+else
+    # Default fallback
+    TASKMASTER_CLI="task-master"
+fi
+PROJECT_NAME="BMAD-CC"
+
+# Default command
+COMMAND="${1:-check}"
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+GRAY='\033[0;90m'
+NC='\033[0m' # No Color
+
+# Functions
+test_taskmaster_available() {
+    if command -v "$TASKMASTER_CLI" &> /dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+test_taskmaster_project() {
+    # Check if current directory has Task Master initialized
+    if [ ! -d ".taskmaster" ]; then
+        return 1
+    fi
+    
+    # Check if tasks.json exists
+    if [ ! -f ".taskmaster/tasks/tasks.json" ]; then
+        return 1
+    fi
+    
+    return 0
+}
+
+initialize_taskmaster() {
+    echo -e "${CYAN}🚀 Initializing Task Master for $PROJECT_NAME...${NC}"
+    
+    # Initialize Task Master
+    if ! $TASKMASTER_CLI init -y; then
+        echo -e "${RED}Failed to initialize Task Master${NC}" >&2
+        exit 1
+    fi
+    
+    # Set models
+    $TASKMASTER_CLI models --set-main opus
+    $TASKMASTER_CLI models --set-fallback sonnet
+    
+    echo -e "${GREEN}✅ Task Master initialized successfully${NC}"
+}
+
+get_current_task() {
+    if result=$($TASKMASTER_CLI next --json 2>/dev/null); then
+        echo "$result"
+        return 0
+    else
+        return 1
+    fi
+}
+
+get_task_by_id() {
+    local task_id="$1"
+    if result=$($TASKMASTER_CLI show "$task_id" --json 2>/dev/null); then
+        echo "$result"
+        return 0
+    else
+        return 1
+    fi
+}
+
+create_task_from_request() {
+    local title="$1"
+    local description="$2"
+    local type="${3:-feature}"
+    local priority="${4:-2}"
+    
+    # Create JSON for task
+    local task_json=$(cat <<EOF
+{
+    "title": "$title",
+    "description": "$description",
+    "type": "$type",
+    "priority": $priority,
+    "status": "todo"
+}
+EOF
+    )
+    
+    echo "$task_json" | $TASKMASTER_CLI create --json
+}
+
+# Main execution
+case "$COMMAND" in
+    check)
+        # Check Task Master availability
+        if ! test_taskmaster_available; then
+            echo -e "${RED}❌ TASK MASTER NOT AVAILABLE!${NC}" >&2
+            echo -e "\nTask Master AI is required for BMAD workflows." >&2
+            echo -e "${YELLOW}Please install it with:${NC}" >&2
+            echo -e "  ${CYAN}npm install -g task-master-ai${NC}" >&2
+            echo -e "${YELLOW}\nOr if using npx:${NC}" >&2
+            echo -e "  ${CYAN}npm install task-master-ai${NC}" >&2
+            exit 1
+        fi
+        
+        # Check project initialization
+        if ! test_taskmaster_project; then
+            echo -e "${YELLOW}⚠️ Task Master not initialized in this project${NC}"
+            echo -e "${YELLOW}Initializing now...${NC}"
+            initialize_taskmaster
+        fi
+        
+        echo -e "${GREEN}✅ Task Master is available and configured${NC}"
+        
+        # Show current task status
+        if current=$(get_current_task); then
+            # Parse JSON using basic tools (compatible with most systems)
+            title=$(echo "$current" | grep -o '"title"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*: *"\(.*\)"/\1/')
+            id=$(echo "$current" | grep -o '"id"[[:space:]]*:[[:space:]]*[^,}]*' | head -1 | sed 's/.*: *\(.*\)/\1/')
+            status=$(echo "$current" | grep -o '"status"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*: *"\(.*\)"/\1/')
+            priority=$(echo "$current" | grep -o '"priority"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*: *"\(.*\)"/\1/')
+            
+            if [ -n "$title" ]; then
+                echo -e "\n${CYAN}📋 Current Task: $title${NC}"
+                echo "   ID: $id | Status: $status | Priority: $priority"
+            fi
+        else
+            echo -e "\n${GRAY}📋 No tasks currently assigned${NC}"
+        fi
+        ;;
+    
+    init)
+        initialize_taskmaster
+        ;;
+    
+    current)
+        if current=$(get_current_task); then
+            echo "$current"
+        else
+            echo -e "${GRAY}No current task${NC}"
+        fi
+        ;;
+    
+    create)
+        # Used by workflows to create tasks automatically
+        title="${TASK_TITLE}"
+        description="${TASK_DESCRIPTION}"
+        if [ -n "$title" ]; then
+            if task=$(create_task_from_request "$title" "$description"); then
+                task_id=$(echo "$task" | grep -o '"id"[[:space:]]*:[[:space:]]*[^,}]*' | head -1 | sed 's/.*: *\(.*\)/\1/')
+                task_title=$(echo "$task" | grep -o '"title"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*: *"\(.*\)"/\1/')
+                echo -e "${GREEN}✅ Created task: $task_id - $task_title${NC}"
+            fi
+        fi
+        ;;
+    
+    *)
+        echo "Unknown command: $COMMAND" >&2
+        exit 1
+        ;;
+esac

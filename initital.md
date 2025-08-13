@@ -501,7 +501,7 @@ OUTPUT
 
 ### 3.5 Commands (two variants)
 
-**`story-cycle.md.tmpl`** (generic/Phaser/etc.)
+**`story-cycle.md.tmpl`** (generic/Framework/etc.)
 
 ```md
 ---
@@ -668,7 +668,7 @@ claude
   ```
   /bmad:saas-cycle
   ```
-* Generic/Phaser/etc.:
+* Generic/Framework/etc.:
 
   ```
   /bmad:story-cycle

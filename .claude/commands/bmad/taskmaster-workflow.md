@@ -1,4 +1,4 @@
-﻿---
+---
 description: Task Master AI integrated workflow for BMAD-CC - Work through tasks systematically with full BMAD agent coordination.
 allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(task-master:*), Bash(npx task-master:*), Read, Grep, Glob, Edit, Write, Task
 ---
@@ -16,7 +16,7 @@ This workflow ensures all work is tracked and managed through Task Master AI as 
 # Check Task Master availability (REQUIRED)
 task-master --version
 if [ $? -ne 0 ]; then
-    echo "❌ ERROR: Task Master AI is REQUIRED for BMAD workflows"
+    echo "âŒ ERROR: Task Master AI is REQUIRED for BMAD workflows"
     echo "Install with: npm install -g task-master-ai"
     echo "Or locally: npm install task-master-ai"
     exit 1
@@ -71,7 +71,7 @@ Pass CURRENT_TASK JSON to orchestrator for analysis.
 1. **Simple Task (< 4 hours)**
    - Single story, no expansion needed
    - Route directly to implementation
-   - Status: todo → in-progress → done
+   - Status: todo â†’ in-progress â†’ done
 
 2. **Complex Task (4-40 hours)**
    - May need expansion into subtasks
@@ -97,7 +97,7 @@ fi
 
 ## PHASE 2: STORY CREATION WITH TASK CONTEXT
 
-### 2A) Scrum Master → Story Creation from Task
+### 2A) Scrum Master â†’ Story Creation from Task
 **Load Scrum Master Agent:**
 ```
 Load the sm-agent with task details from Task Master.
@@ -126,7 +126,7 @@ task-master update-task --id=$TASK_ID --prompt="Story creation started by SM age
 
 ## PHASE 3: DEVELOPMENT WITH TASK TRACKING
 
-### 3A) Developer → Implementation with Task Updates
+### 3A) Developer â†’ Implementation with Task Updates
 **Load Developer Agent:**
 ```
 Load the dev-agent with task ID and story reference.
@@ -171,7 +171,7 @@ done
 
 ## PHASE 4: TESTING & QUALITY ASSURANCE
 
-### 4A) QA Engineer → Testing with Task Context
+### 4A) QA Engineer â†’ Testing with Task Context
 **Load QA Engineer Agent:**
 ```
 Load the qa-agent with task and implementation details.
@@ -210,17 +210,17 @@ task-master update-task --id=$TASK_ID --prompt="Task complete. PR: #$PR_NUMBER m
 # For parent tasks, ensure all subtasks are done
 SUBTASKS=$(task-master list --parent=$TASK_ID --status=todo,in-progress,blocked)
 if [ ! -z "$SUBTASKS" ]; then
-    echo "⚠️ WARNING: Parent task has incomplete subtasks"
+    echo "âš ï¸ WARNING: Parent task has incomplete subtasks"
     echo "Complete all subtasks before marking parent done"
 fi
 
 # Automatic GitHub backup
-echo "🔄 Backing up completed work to GitHub..."
+echo "ðŸ”„ Backing up completed work to GitHub..."
 ./.claude/hooks/github-backup.ps1 backup
 if [ $? -eq 0 ]; then
-    echo "✅ Work backed up to GitHub"
+    echo "âœ… Work backed up to GitHub"
 else
-    echo "⚠️ GitHub backup failed - run manually: git push origin main"
+    echo "âš ï¸ GitHub backup failed - run manually: git push origin main"
 fi
 ```
 
@@ -235,7 +235,7 @@ if [ ! -z "$NEXT_TASK" ]; then
     echo "Next task ready: $(echo $NEXT_TASK | jq -r '.title')"
     echo "Continue with: /bmad:taskmaster-workflow"
 else
-    echo "✅ All tasks complete! Current backlog is empty."
+    echo "âœ… All tasks complete! Current backlog is empty."
     echo "Options:"
     echo "1. Parse new PRD: task-master parse-prd --input=<file>"
     echo "2. Review completed: task-master list --status=done"
@@ -279,7 +279,7 @@ task-master list --status=blocked
 ### Task Master Not Available
 ```bash
 if ! command -v task-master &> /dev/null; then
-    echo "❌ FATAL: Task Master AI is required but not installed"
+    echo "âŒ FATAL: Task Master AI is required but not installed"
     echo "This workflow cannot proceed without Task Master"
     echo "Install: npm install -g task-master-ai"
     exit 1
@@ -303,7 +303,7 @@ task-master create --title="Resolve blocker for task $TASK_ID" \
 # Validate task state before marking done
 TASK_STATE=$(task-master show $TASK_ID --json | jq -r '.status')
 if [[ "$TASK_STATE" != "in-progress" ]]; then
-    echo "⚠️ WARNING: Task not in progress, may have been worked outside workflow"
+    echo "âš ï¸ WARNING: Task not in progress, may have been worked outside workflow"
     task-master update-task --id=$TASK_ID --prompt="State inconsistency detected"
 fi
 ```

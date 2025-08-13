@@ -1,0 +1,417 @@
+#!/usr/bin/env bash
+# Documentation Auto-updater for {{PROJECT_NAME}}
+# Maintains CHANGELOG, README, and story documentation
+
+set -e
+
+# Parameters
+TRIGGER="${1:-post-commit}"
+FORCE_UPDATE="${2:-false}"
+TARGET_DOCS="${3:-all}"
+
+# Configuration
+PROJECT_NAME="{{PROJECT_NAME}}"
+PROJECT_TYPE="{{PROJECT_TYPE}}"
+DOCS_ENABLED="${BMAD_DOCS_ENABLED:-1}"
+STORY_ID="${STORY_ID:-}"
+CHANGELOG_FILE="CHANGELOG.md"
+README_FILE="README.md"
+STORY_NOTES_DIR="docs/story-notes"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+# Ensure required directories exist
+mkdir -p "$STORY_NOTES_DIR"
+
+# Helper function to get current date
+get_current_date() {
+    date '+%Y-%m-%d'
+}
+
+# Helper function to detect significant changes
+detect_change_type() {
+    local changed_files
+    changed_files=$(git diff --name-only HEAD~1 2>/dev/null || git diff --cached --name-only || echo "")
+    
+    local change_types=()
+    
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        
+        case "$file" in
+            *.js|*.ts|*.jsx|*.tsx|*.py|*.go|*.java|*.cs|*.rb|*.php)
+                change_types+=("code")
+                ;;
+            *.json|*.yaml|*.yml|*.toml|*.ini)
+                change_types+=("config")
+                ;;
+            package.json|requirements.txt|go.mod|pom.xml|Gemfile|composer.json)
+                change_types+=("dependencies")
+                ;;
+            *test*|*spec*)
+                change_types+=("tests")
+                ;;
+            *.md|*.rst|*.txt)
+                change_types+=("docs")
+                ;;
+            docker*|*Dockerfile*|compose*)
+                change_types+=("infrastructure")
+                ;;
+            src/components/*|src/pages/*|public/*)
+                change_types+=("frontend")
+                ;;
+            src/api/*|src/models/*|src/services/*)
+                change_types+=("backend")
+                ;;
+        esac
+    done <<< "$changed_files"
+    
+    # Remove duplicates and return
+    printf '%s\n' "${change_types[@]}" | sort -u | tr '\n' ' '
+}
+
+# Generate changelog entry
+generate_changelog_entry() {
+    echo -e "${CYAN}📝 Generating changelog entry...${NC}"
+    
+    local change_types
+    change_types=$(detect_change_type)
+    
+    local commit_msg
+    commit_msg=$(git log -1 --pretty=format:"%s" 2>/dev/null || echo "Recent changes")
+    
+    local entry_date
+    entry_date=$(get_current_date)
+    
+    # Determine entry type based on commit message and changes
+    local entry_type="Changed"
+    if echo "$commit_msg" | grep -qiE "^(feat|add|new)"; then
+        entry_type="Added"
+    elif echo "$commit_msg" | grep -qiE "^(fix|bug)"; then
+        entry_type="Fixed"
+    elif echo "$commit_msg" | grep -qiE "^(remove|delete|drop)"; then
+        entry_type="Removed"
+    elif echo "$commit_msg" | grep -qiE "^(break|breaking)"; then
+        entry_type="Changed"
+    fi
+    
+    # Create temporary changelog entry
+    local temp_entry="/tmp/changelog-entry-$$.md"
+    cat > "$temp_entry" << EOF
+## [Unreleased] - $entry_date
+
+### $entry_type
+- $commit_msg
+
+EOF
+    
+    # Check if CHANGELOG.md exists
+    if [ ! -f "$CHANGELOG_FILE" ]; then
+        # Create new changelog
+        cat > "$CHANGELOG_FILE" << EOF
+# Changelog
+
+All notable changes to $PROJECT_NAME will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+$(cat "$temp_entry")
+EOF
+        echo -e "${GREEN}✅ Created new changelog${NC}"
+    else
+        # Update existing changelog
+        if grep -q "\[Unreleased\]" "$CHANGELOG_FILE"; then
+            # Add to existing unreleased section
+            local temp_changelog="/tmp/changelog-$$.md"
+            
+            # Extract header
+            sed '/^## \[Unreleased\]/q' "$CHANGELOG_FILE" > "$temp_changelog"
+            
+            # Add new entry under appropriate section
+            echo "" >> "$temp_changelog"
+            echo "### $entry_type" >> "$temp_changelog"
+            echo "- $commit_msg" >> "$temp_changelog"
+            
+            # Add rest of the file
+            sed '1,/^## \[Unreleased\]/d' "$CHANGELOG_FILE" | sed '1,/^$/d' >> "$temp_changelog"
+            
+            mv "$temp_changelog" "$CHANGELOG_FILE"
+            echo -e "${GREEN}✅ Updated changelog with new entry${NC}"
+        else
+            # Insert new unreleased section
+            local temp_changelog="/tmp/changelog-$$.md"
+            
+            # Find insertion point (after header, before first version)
+            if grep -q "^## \[" "$CHANGELOG_FILE"; then
+                # Insert before first version
+                sed '/^## \[/i\' "$CHANGELOG_FILE" | sed "\|^## \[|i $(cat "$temp_entry")" > "$temp_changelog"
+            else
+                # Append to end
+                cp "$CHANGELOG_FILE" "$temp_changelog"
+                echo "" >> "$temp_changelog"
+                cat "$temp_entry" >> "$temp_changelog"
+            fi
+            
+            mv "$temp_changelog" "$CHANGELOG_FILE"
+            echo -e "${GREEN}✅ Added unreleased section to changelog${NC}"
+        fi
+    fi
+    
+    rm -f "$temp_entry"
+}
+
+# Update README if needed
+update_readme() {
+    echo -e "${CYAN}📖 Checking README updates...${NC}"
+    
+    if [ ! -f "$README_FILE" ]; then
+        echo -e "${YELLOW}⚠️ README.md not found - creating basic template${NC}"
+        
+        cat > "$README_FILE" << EOF
+# $PROJECT_NAME
+
+BMAD Framework Project
+
+## Description
+
+A $PROJECT_TYPE project built with the BMAD (Builder Method Architecture Design) framework.
+
+## Getting Started
+
+### Prerequisites
+
+- [List prerequisites here]
+
+### Installation
+
+\`\`\`bash
+# Installation instructions
+\`\`\`
+
+### Usage
+
+\`\`\`bash
+# Usage examples
+\`\`\`
+
+## Development
+
+### Setup
+
+\`\`\`bash
+# Development setup
+\`\`\`
+
+### Testing
+
+\`\`\`bash
+# Testing instructions
+\`\`\`
+
+## Contributing
+
+This project follows BMAD framework conventions. See [CHANGELOG.md](./CHANGELOG.md) for recent changes.
+
+## License
+
+[Add license information]
+EOF
+        
+        echo -e "${GREEN}✅ Created basic README template${NC}"
+    else
+        # Check if README needs updates based on package.json changes
+        local changed_files
+        changed_files=$(git diff --name-only HEAD~1 2>/dev/null || echo "")
+        
+        if echo "$changed_files" | grep -qE "package\.json|requirements\.txt|go\.mod"; then
+            echo -e "${YELLOW}💡 Dependencies changed - consider updating README prerequisites${NC}"
+        fi
+        
+        # Check if Docker files changed
+        if echo "$changed_files" | grep -qE "docker|compose"; then
+            echo -e "${YELLOW}💡 Docker configuration changed - consider updating README setup instructions${NC}"
+        fi
+        
+        echo -e "${GREEN}✅ README checked${NC}"
+    fi
+}
+
+# Update story notes
+update_story_notes() {
+    local story_id="$1"
+    
+    if [ -z "$story_id" ]; then
+        # Try to detect story ID from branch name or environment
+        story_id=$(git branch --show-current 2>/dev/null | grep -oE '[0-9]+' | head -1 || echo "")
+        
+        if [ -z "$story_id" ]; then
+            echo -e "${GRAY}📋 No story ID provided - skipping story notes${NC}"
+            return 0
+        fi
+    fi
+    
+    echo -e "${CYAN}📋 Updating story notes for story $story_id...${NC}"
+    
+    local story_file="$STORY_NOTES_DIR/$story_id.md"
+    local update_date
+    update_date=$(get_current_date)
+    
+    # Create or update story notes
+    if [ ! -f "$story_file" ]; then
+        cat > "$story_file" << EOF
+# Story $story_id - Implementation Notes
+
+**Created:** $update_date  
+**Project:** $PROJECT_NAME  
+**Type:** $PROJECT_TYPE
+
+## Overview
+
+[Story description and objectives]
+
+## Implementation Progress
+
+### $update_date
+- Initial implementation started
+- [Add specific progress notes]
+
+## Technical Details
+
+### Architecture
+- [Architecture decisions and patterns]
+
+### Dependencies
+- [New dependencies or changes]
+
+### Testing
+- [Testing approach and coverage]
+
+## Lessons Learned
+
+- [Key insights and learnings]
+
+## Next Steps
+
+- [Remaining work and future considerations]
+EOF
+        echo -e "${GREEN}✅ Created story notes for story $story_id${NC}"
+    else
+        # Append progress update
+        echo "" >> "$story_file"
+        echo "### $update_date" >> "$story_file"
+        
+        local commit_msg
+        commit_msg=$(git log -1 --pretty=format:"%s" 2>/dev/null || echo "Progress update")
+        echo "- $commit_msg" >> "$story_file"
+        
+        echo -e "${GREEN}✅ Updated story notes for story $story_id${NC}"
+    fi
+}
+
+# Main execution
+case "$TRIGGER" in
+    post-commit|post-merge)
+        if [ "$DOCS_ENABLED" != "1" ]; then
+            echo -e "${GRAY}Documentation updates disabled${NC}"
+            exit 0
+        fi
+        
+        echo -e "\n${CYAN}📚 Auto-updating documentation for $PROJECT_NAME${NC}"
+        echo "====================================================="
+        
+        # Update different docs based on target
+        case "$TARGET_DOCS" in
+            changelog|all)
+                generate_changelog_entry
+                ;;&
+            readme|all)
+                update_readme
+                ;;&
+            story|all)
+                update_story_notes "$STORY_ID"
+                ;;
+        esac
+        
+        echo "====================================================="
+        echo -e "${GREEN}✅ Documentation updates complete${NC}\n"
+        ;;
+    
+    manual)
+        echo -e "${CYAN}📚 Manual documentation update${NC}"
+        
+        case "$TARGET_DOCS" in
+            changelog)
+                generate_changelog_entry
+                ;;
+            readme)
+                update_readme
+                ;;
+            story)
+                if [ -n "$STORY_ID" ]; then
+                    update_story_notes "$STORY_ID"
+                else
+                    echo -e "${RED}Story ID required for story notes update${NC}"
+                    exit 1
+                fi
+                ;;
+            all)
+                generate_changelog_entry
+                update_readme
+                update_story_notes "$STORY_ID"
+                ;;
+            *)
+                echo -e "${RED}Unknown target: $TARGET_DOCS${NC}"
+                echo "Valid targets: changelog, readme, story, all"
+                exit 1
+                ;;
+        esac
+        ;;
+    
+    check)
+        echo -e "\n${CYAN}📚 Documentation Health Check${NC}"
+        echo "======================================"
+        
+        local issues=()
+        
+        # Check for required files
+        if [ ! -f "$CHANGELOG_FILE" ]; then
+            issues+=("CHANGELOG.md missing")
+        elif ! grep -q "\[Unreleased\]" "$CHANGELOG_FILE"; then
+            issues+=("CHANGELOG.md missing [Unreleased] section")
+        fi
+        
+        if [ ! -f "$README_FILE" ]; then
+            issues+=("README.md missing")
+        fi
+        
+        # Check for recent story notes
+        if [ -n "$STORY_ID" ] && [ ! -f "$STORY_NOTES_DIR/$STORY_ID.md" ]; then
+            issues+=("Story notes missing for story $STORY_ID")
+        fi
+        
+        if [ ${#issues[@]} -eq 0 ]; then
+            echo -e "${GREEN}✅ All documentation looks good${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Documentation issues found:${NC}"
+            for issue in "${issues[@]}"; do
+                echo -e "${YELLOW}  - $issue${NC}"
+            done
+            echo -e "\n${CYAN}💡 Run with 'manual all' to fix these issues${NC}"
+        fi
+        
+        echo "======================================"
+        ;;
+    
+    *)
+        echo -e "${RED}Unknown trigger: $TRIGGER${NC}" >&2
+        echo "Valid triggers: post-commit, post-merge, manual, check"
+        exit 1
+        ;;
+esac

@@ -1,5 +1,5 @@
-﻿---
-description: Brownfield enhancement workflow for BMAD-CC (other) - Comprehensive workflow for enhancing existing systems.
+---
+description: Brownfield enhancement workflow for BMAD-CC (Framework) - Comprehensive workflow for enhancing existing systems.
 allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
 ---
 
@@ -18,7 +18,7 @@ Comprehensive workflow for enhancing existing systems with new features, moderni
 
 ## PHASE 0: ENHANCEMENT CLASSIFICATION & ROUTING
 
-### 0A) Business Analyst → Enhancement Scope Analysis
+### 0A) Business Analyst â†’ Enhancement Scope Analysis
 **Load Business Analyst Agent:**
 ```
 Load the analyst-agent to classify and scope the enhancement request.
@@ -56,13 +56,13 @@ Analyze enhancement complexity and route to appropriate path:
 #### Route A: Single Story Path
 **For simple enhancements < 4 hours:**
 ```
-Load pm-agent → Use brownfield-create-story task → Exit to development
+Load pm-agent â†’ Use brownfield-create-story task â†’ Exit to development
 ```
 
 #### Route B: Small Feature Path  
 **For focused enhancements 1-3 stories:**
 ```
-Load pm-agent → Use brownfield-create-epic task → Exit to story development
+Load pm-agent â†’ Use brownfield-create-epic task â†’ Exit to story development
 ```
 
 #### Route C: Major Enhancement Path
@@ -72,7 +72,7 @@ Continue with comprehensive planning workflow below.
 ## PHASE 1: EXISTING SYSTEM ANALYSIS
 
 ### 1A) Documentation Assessment
-**Business Analyst → Existing Documentation Review:**
+**Business Analyst â†’ Existing Documentation Review:**
 ```
 Check if adequate project documentation exists for enhancement planning.
 ```
@@ -84,9 +84,9 @@ Check if adequate project documentation exists for enhancement planning.
 - **If Inadequate**: Run comprehensive system documentation before PRD
 
 ### 1B) CONDITIONAL: System Architecture Analysis
-**System Architect → Comprehensive System Documentation:**
+**System Architect â†’ Comprehensive System Documentation:**
 ```
-ONLY if documentation inadequate: Load architect-agent → Use document-project capability to create comprehensive brownfield documentation
+ONLY if documentation inadequate: Load architect-agent â†’ Use document-project capability to create comprehensive brownfield documentation
 ```
 
 **System Analysis Deliverables:**
@@ -100,7 +100,7 @@ ONLY if documentation inadequate: Load architect-agent → Use document-project 
 
 ## PHASE 2: ENHANCEMENT PLANNING
 
-### 2A) Product Manager → Enhancement PRD
+### 2A) Product Manager â†’ Enhancement PRD
 **Load Product Manager Agent:**
 ```
 Load the pm-agent to create comprehensive enhancement PRD.
@@ -125,13 +125,13 @@ Load the pm-agent to create comprehensive enhancement PRD.
 **Architecture Decision Assessment:**
 ```
 Review PRD to determine if architectural planning needed:
-- New architectural patterns → Create architecture doc
-- New libraries/frameworks → Create architecture doc  
-- Platform/infrastructure changes → Create architecture doc
-- Following existing patterns → Skip to validation
+- New architectural patterns â†’ Create architecture doc
+- New libraries/frameworks â†’ Create architecture doc  
+- Platform/infrastructure changes â†’ Create architecture doc
+- Following existing patterns â†’ Skip to validation
 ```
 
-**System Architect → Enhancement Architecture:**
+**System Architect â†’ Enhancement Architecture:**
 ```
 ONLY if architectural changes needed: Load architect-agent
 ```
@@ -147,7 +147,7 @@ ONLY if architectural changes needed: Load architect-agent
 
 ## PHASE 3: VALIDATION & INTEGRATION
 
-### 3A) Product Owner → Enhancement Validation
+### 3A) Product Owner â†’ Enhancement Validation
 **Load Product Owner Agent:**
 ```
 Load the po-agent to validate enhancement planning for integration safety.
@@ -176,13 +176,13 @@ Re-export updated documents to docs/ folder after fixes.
 ## PHASE 4: DEVELOPMENT PREPARATION
 
 ### 4A) Document Sharding for Development
-**Product Owner → Documentation Preparation:**
+**Product Owner â†’ Documentation Preparation:**
 ```
 Load po-agent to use document sharding capability to prepare enhancement documents for development consumption.
 ```
 
 **Sharding Options:**
-- **Option A**: Use PO agent: Load po-agent → ask to shard docs/enhancement-prd.md
+- **Option A**: Use PO agent: Load po-agent â†’ ask to shard docs/enhancement-prd.md
 - **Option B**: Manual: Use shard-doc task + docs/enhancement-prd.md
 - **Output**: Creates `docs/prd/` and `docs/architecture/` folders
 
@@ -278,7 +278,7 @@ OPTIONAL: Load the qa-agent for senior review with brownfield quality focus.
 ### 5D) Development Cycle Continuation
 **Multi-Story Enhancement Management:**
 ```
-Repeat development cycle (SM → Dev → QA) for all enhancement stories.
+Repeat development cycle (SM â†’ Dev â†’ QA) for all enhancement stories.
 Continue until all enhancement objectives completed.
 ```
 
@@ -294,7 +294,7 @@ Continue until all enhancement objectives completed.
 ```
 {{#if PROJECT_TYPE.saas}}
 Post-commit Docker validation:
-- Build: docker-compose -f  build (or docker-compose build)
+- Build: docker-compose -f docker-compose\.yml build (or docker-compose build)
 - Restart: docker-compose down && docker-compose up -d
 - Health Check: Backend http://localhost:8001/health, Frontend http://localhost:3000
 {{/if}}
@@ -360,7 +360,7 @@ NOTE: epic-retrospective task coming in future releases.
 Enhancement: Add AI-powered product recommendations to existing store
 Analysis: Existing system has product catalog, user accounts, purchase history
 Planning: Integration points identified, recommendation API designed, UI components planned
-Implementation: Backend ML service → Frontend recommendation components → A/B testing
+Implementation: Backend ML service â†’ Frontend recommendation components â†’ A/B testing
 Outcome: Increased sales without disrupting existing shopping experience
 ```
 
@@ -369,7 +369,7 @@ Outcome: Increased sales without disrupting existing shopping experience
 Enhancement: Create mobile app for existing web-based project management tool
 Analysis: Existing APIs, user authentication, data models documented
 Planning: Mobile-specific features planned, API extensions identified, offline capabilities designed
-Implementation: Mobile app development → API enhancements → Cross-platform synchronization
+Implementation: Mobile app development â†’ API enhancements â†’ Cross-platform synchronization
 Outcome: Mobile experience that extends web platform capabilities
 ```
 

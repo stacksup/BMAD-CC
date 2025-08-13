@@ -1,5 +1,5 @@
-﻿---
-description: Greenfield full-stack development workflow for BMAD-CC (other) - Complete workflow for new application development.
+---
+description: Greenfield full-stack development workflow for BMAD-CC (Framework) - Complete workflow for new application development.
 allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
 ---
 
@@ -18,7 +18,7 @@ Comprehensive workflow for building new full-stack applications from concept to 
 
 ## PHASE 1: STRATEGIC FOUNDATION
 
-### 1A) Business Analyst → Project Brief & Market Context
+### 1A) Business Analyst â†’ Project Brief & Market Context
 **Load Business Analyst Agent:**
 ```
 Load the analyst-agent to create foundational project understanding.
@@ -37,7 +37,7 @@ Load the analyst-agent to create foundational project understanding.
 
 **Output Location:** Save as `docs/project-brief.md`
 
-### 1B) Product Manager → Product Requirements & Strategy  
+### 1B) Product Manager â†’ Product Requirements & Strategy  
 **Load Product Manager Agent:**
 ```
 Load the pm-agent to define comprehensive product requirements.
@@ -55,7 +55,7 @@ Load the pm-agent to define comprehensive product requirements.
 
 ## PHASE 2: DESIGN & ARCHITECTURE
 
-### 2A) UX Expert → User Experience Design
+### 2A) UX Expert â†’ User Experience Design
 **Load UX Expert Agent:**
 ```
 Load the ux-agent to design user experience and interfaces.
@@ -76,7 +76,7 @@ Load the ux-agent to design user experience and interfaces.
 **Output Location:** Save as `docs/ux-design-spec.md`
 
 ### 2B) OPTIONAL: AI-Generated UI Foundation
-**Enhanced UX Agent → AI UI Generation:**
+**Enhanced UX Agent â†’ AI UI Generation:**
 ```
 OPTIONAL BUT RECOMMENDED: Generate AI UI prompts for external tools like v0, Lovable, etc.
 Use the ux-agent with generate-ai-frontend-prompt capability.
@@ -93,7 +93,7 @@ Use the ux-agent with generate-ai-frontend-prompt capability.
 - Professional design system foundation
 - Component library starting point
 
-### 2C) System Architect → Full-Stack Architecture
+### 2C) System Architect â†’ Full-Stack Architecture
 **Load System Architect Agent:**
 ```
 Load the architect-agent to design comprehensive system architecture.
@@ -118,7 +118,7 @@ Load the architect-agent to design comprehensive system architecture.
 
 ## PHASE 3: VALIDATION & INTEGRATION
 
-### 3A) Product Manager → Architecture Integration Review
+### 3A) Product Manager â†’ Architecture Integration Review
 **Load Product Manager Agent:**
 ```
 If architecture suggests changes to PRD features, update requirements.
@@ -130,7 +130,7 @@ If architecture suggests changes to PRD features, update requirements.
 3. Update PRD with any architectural insights or constraints
 4. Re-export complete updated PRD to `docs/prd.md`
 
-### 3B) Product Owner → Comprehensive Validation
+### 3B) Product Owner â†’ Comprehensive Validation
 **Load Product Owner Agent:**
 ```
 Load the po-agent to validate all strategic planning artifacts.
@@ -159,12 +159,12 @@ Load the po-agent to validate all strategic planning artifacts.
 # Check Docker is running
 docker info > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "❌ Docker required for development. Please start Docker Desktop."
+    echo "âŒ Docker required for development. Please start Docker Desktop."
     exit 1
 fi
 
 # Create docker-compose.yml based on project type
-echo "🐳 Setting up Docker environment for other project..."
+echo "ðŸ³ Setting up Docker environment for Framework project..."
 ```
 
 **Generate docker-compose.yml:**
@@ -229,7 +229,7 @@ docker-compose up -d
 # Validate health
 ./.claude/hooks/docker-manager.ps1 health
 
-echo "✅ Docker environment ready for development"
+echo "âœ… Docker environment ready for development"
 ```
 
 ## PHASE 5: DEVELOPMENT PREPARATION
@@ -245,14 +245,14 @@ echo "✅ Docker environment ready for development"
 - Ensure project structure aligns with planned development workflow
 - Validate tooling and build system compatibility
 
-### 5B) Product Owner → Document Sharding
+### 5B) Product Owner â†’ Document Sharding
 **Load Product Owner Agent:**
 ```
 Shard planning documents for development team consumption.
 ```
 
 **Document Sharding Options:**
-- **Option A**: Use PO agent to shard: Load po-agent → ask to shard docs/prd.md
+- **Option A**: Use PO agent to shard: Load po-agent â†’ ask to shard docs/prd.md
 - **Option B**: Manual approach: Use shard-doc task + docs/prd.md
 - **Output**: Creates `docs/prd/` and `docs/architecture/` folders with focused content
 
@@ -286,7 +286,7 @@ NOTE: story-review task coming in future releases.
 - Validate story alignment with business objectives
 - Ensure acceptance criteria are testable and complete
 - Confirm story scope is appropriate for development iteration
-- Update story status: Draft → Approved
+- Update story status: Draft â†’ Approved
 
 ## PHASE 6: DEVELOPMENT CYCLE EXECUTION
 
@@ -414,15 +414,15 @@ NOTE: epic-retrospective task coming in future releases.
 
 ### Example 1: SaaS Project Management Tool
 ```
-Planning Phase: Market research → PRD for PM features → UX design for dashboards → Full-stack architecture
-Development: Story creation → Sprint development → QA review → Feature deployment
+Planning Phase: Market research â†’ PRD for PM features â†’ UX design for dashboards â†’ Full-stack architecture
+Development: Story creation â†’ Sprint development â†’ QA review â†’ Feature deployment
 Outcome: Production-ready SaaS application with user management, project tracking, team collaboration
 ```
 
 ### Example 2: E-commerce Platform
 ```
-Planning Phase: Business analysis → Product catalog PRD → Shopping UX design → E-commerce architecture  
-Development: Product management → Shopping cart → Payment processing → Admin panel
+Planning Phase: Business analysis â†’ Product catalog PRD â†’ Shopping UX design â†’ E-commerce architecture  
+Development: Product management â†’ Shopping cart â†’ Payment processing â†’ Admin panel
 Outcome: Complete e-commerce solution with customer and merchant capabilities
 ```
 

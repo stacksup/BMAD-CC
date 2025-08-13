@@ -70,7 +70,7 @@ tools: Read, Edit, Write, Grep, Glob
 When other agents encounter scenarios matching lesson criteria:
 
 ```markdown
-🔍 **Relevant Lesson Found**
+ðŸ” **Relevant Lesson Found**
 **LESSON-001: JWT Authentication Implementation Patterns**
 
 This lesson applies because:

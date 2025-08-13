@@ -1,5 +1,5 @@
-﻿---
-description: BMAD story development cycle for BMAD-CC (other) - Complete story implementation with Docker container management.
+---
+description: BMAD story development cycle for BMAD-CC (Framework) - Complete story implementation with Docker container management.
 allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), mcp__docker__list_containers, mcp__docker__get_container_logs, mcp__docker__execute_command
 ---
 
@@ -16,7 +16,7 @@ Complete story implementation from task assignment to deployment, with all devel
 # Get next task or specific task
 STORY_ID=$(task-master next --field=id)
 STORY_TITLE=$(task-master next --field=title)
-echo "📋 Working on: $STORY_TITLE (ID: $STORY_ID)"
+echo "ðŸ“‹ Working on: $STORY_TITLE (ID: $STORY_ID)"
 
 # Set task to in-progress
 task-master set-status --id=$STORY_ID --status=in-progress
@@ -27,13 +27,13 @@ task-master set-status --id=$STORY_ID --status=in-progress
 # Ensure Docker is running
 docker info > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "❌ Docker not running. Starting Docker Desktop..."
+    echo "âŒ Docker not running. Starting Docker Desktop..."
     ./.claude/hooks/docker-manager.ps1 start
 fi
 
 # Start development containers
 docker-compose up -d --build
-echo "⏳ Waiting for services to be healthy..."
+echo "â³ Waiting for services to be healthy..."
 sleep 5
 
 # Verify health
@@ -42,7 +42,7 @@ sleep 5
 
 ## PHASE 1: STORY CREATION & REFINEMENT
 
-### 1A) Scrum Master → Story Creation
+### 1A) Scrum Master â†’ Story Creation
 **Load Scrum Master Agent:**
 ```
 Load the sm-agent to create or refine the user story.
@@ -66,12 +66,12 @@ Story must reference Task Master ID: $STORY_ID
 # - Run automated validation if no report exists
 # - Enforce minimum score of 7/10
 # - Block workflow if validation fails
-echo "✅ Story validation passed - proceeding to development"
+echo "âœ… Story validation passed - proceeding to development"
 ```
 
 ## PHASE 2: PRODUCT OWNER VALIDATION
 
-### 2A) Product Owner → Story Approval
+### 2A) Product Owner â†’ Story Approval
 **Load Product Owner Agent:**
 ```
 Load the po-agent to validate story completeness and alignment.
@@ -89,12 +89,12 @@ Load the po-agent to validate story completeness and alignment.
 # - Deployment strategy considers containerization
 # - Acceptance criteria completeness (automated scoring)
 # - Technical feasibility assessment
-echo "✅ Product Owner validation completed"
+echo "âœ… Product Owner validation completed"
 ```
 
 ## PHASE 3: DEVELOPMENT IN CONTAINERS
 
-### 3A) Developer → Implementation
+### 3A) Developer â†’ Implementation
 **Load Developer Agent:**
 ```
 Load the dev-agent for Docker-based implementation.
@@ -102,7 +102,7 @@ Load the dev-agent for Docker-based implementation.
 
 **CRITICAL DEVELOPMENT REMINDER:**
 ```
-⚠️ NO DUMMY DATA OR FALLBACK IMPLEMENTATIONS ALLOWED!
+âš ï¸ NO DUMMY DATA OR FALLBACK IMPLEMENTATIONS ALLOWED!
 - All features must use REAL data connections
 - Failures must be VISIBLE, not hidden
 - No catch blocks returning fake success
@@ -112,7 +112,7 @@ Load the dev-agent for Docker-based implementation.
 **Docker Development Process:**
 ```bash
 # All development happens in containers
-echo "🐳 Starting Docker-based development..."
+echo "ðŸ³ Starting Docker-based development..."
 
 # Install dependencies in container
 docker-compose exec backend npm install [required-packages]
@@ -153,10 +153,10 @@ docker-compose logs -f &
 **Quality Gate - Implementation Validation:**
 ```bash
 # Check for dummy data patterns FIRST
-echo "🔍 Running no-dummy-data quality gate..."
+echo "ðŸ” Running no-dummy-data quality gate..."
 ./.claude/hooks/quality-gate-no-dummies.ps1
 if [ $? -ne 0 ]; then
-    echo "❌ Dummy data or fallback patterns detected!"
+    echo "âŒ Dummy data or fallback patterns detected!"
     echo "Fix all issues before proceeding"
     exit 1
 fi
@@ -169,7 +169,7 @@ docker-compose ps  # All containers healthy
 
 ## PHASE 4: QUALITY ASSURANCE IN DOCKER
 
-### 4A) QA Engineer → Docker-Based Testing
+### 4A) QA Engineer â†’ Docker-Based Testing
 **Load QA Engineer Agent:**
 ```
 Load the qa-agent for containerized quality assurance.
@@ -178,10 +178,10 @@ Load the qa-agent for containerized quality assurance.
 **Docker QA Process:**
 ```bash
 # FIRST: Validate no dummy data patterns
-echo "🔍 QA: Checking for dummy data and fallback patterns..."
+echo "ðŸ” QA: Checking for dummy data and fallback patterns..."
 ./.claude/hooks/quality-gate-no-dummies.ps1
 if [ $? -ne 0 ]; then
-    echo "❌ QA FAILED: Dummy data or fallback implementations found!"
+    echo "âŒ QA FAILED: Dummy data or fallback implementations found!"
     echo "Returning to developer for fixes"
     exit 1
 fi
@@ -219,17 +219,17 @@ docker stats --no-stream
 # - Docker health checks pass
 # - Documentation updated
 # - Acceptance criteria fully met
-echo "✅ Definition of Done validation passed"
+echo "âœ… Definition of Done validation passed"
 ```
 
 **QA Decision:**
-- **APPROVED**: All tests pass AND no dummy data patterns found AND DoD score ≥9/10
+- **APPROVED**: All tests pass AND no dummy data patterns found AND DoD score â‰¥9/10
 - **NEEDS_WORK**: Issues found, return to dev
 - **AUTOMATIC REJECTION**: Any dummy data, mock implementations, or silent failures
 
 ## PHASE 5: DOCUMENTATION & LEARNINGS
 
-### 5A) Documentation Agent → Update Docs
+### 5A) Documentation Agent â†’ Update Docs
 **Load Documentation Agent:**
 ```
 Load the doc-agent to update project documentation.
@@ -241,7 +241,7 @@ Load the doc-agent to update project documentation.
 - Update API documentation
 - Add Docker troubleshooting guides
 
-### 5B) Learnings Agent → Capture Insights
+### 5B) Learnings Agent â†’ Capture Insights
 **Load Learnings Agent:**
 ```
 Load the learnings-agent to extract lessons learned.
@@ -254,7 +254,7 @@ Load the learnings-agent to extract lessons learned.
 
 ## PHASE 6: GIT INTEGRATION & BACKUP
 
-### 6A) Git Agent → Commit and Push
+### 6A) Git Agent â†’ Commit and Push
 **Load Git Agent:**
 ```
 Load the git-agent for version control with Task Master integration.
@@ -327,7 +327,7 @@ Load the doc-agent to update all project documentation.
     -TaskTitle "$STORY_TITLE" \
     -ChangeType "feature"
 
-echo "📚 Documentation updated automatically"
+echo "ðŸ“š Documentation updated automatically"
 ```
 
 ### 8B) Mark Task Complete
@@ -339,7 +339,7 @@ task-master update-task --id=$STORY_ID --prompt="Story complete. Commit: $COMMIT
 # Clean up Docker resources
 docker-compose down
 
-echo "✅ Story $STORY_ID complete with documentation!"
+echo "âœ… Story $STORY_ID complete with documentation!"
 ```
 
 ### 8C) Get Next Task
@@ -347,9 +347,9 @@ echo "✅ Story $STORY_ID complete with documentation!"
 # Check for next task
 NEXT_TASK=$(task-master next)
 if [ ! -z "$NEXT_TASK" ]; then
-    echo "📋 Next task available. Run: /bmad:story-cycle"
+    echo "ðŸ“‹ Next task available. Run: /bmad:story-cycle"
 else
-    echo "🎉 No more tasks! All caught up."
+    echo "ðŸŽ‰ No more tasks! All caught up."
 fi
 ```
 

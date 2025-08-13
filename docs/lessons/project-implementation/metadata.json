@@ -1,0 +1,37 @@
+{
+  "category": "project-implementation",
+  "last_updated": "2025-08-13",
+  "total_lessons": 0,
+  "lessons": [],
+  "tags_index": {},
+  "difficulty_index": {
+    "beginner": [],
+    "intermediate": [],
+    "advanced": []
+  },
+  "impact_index": {
+    "high": [],
+    "medium": [],
+    "low": []
+  },
+  "project_type_index": {
+    "saas": [],
+    "phaser": [],
+    "mobile": [],
+    "other": []
+  },
+  "surface_when_index": {
+    "SM": [],
+    "PO": [],
+    "DEV": [],
+    "QA": [],
+    "ARCHITECT": [],
+    "ORCHESTRATOR": [],
+    "LEARNINGS": [],
+    "DOC": [],
+    "GIT": [],
+    "UX": [],
+    "ANALYST": [],
+    "PM": []
+  }
+}

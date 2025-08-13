@@ -1,0 +1,431 @@
+#!/usr/bin/env bash
+# Change Detection and Management for {{PROJECT_NAME}}
+# Detects significant changes and triggers appropriate workflows
+
+set -e
+
+# Parameters
+EVENT_TYPE="${1:-file-change}"
+TARGET_PATH="${2:-}"
+AUTO_TRIGGER="${3:-true}"
+
+# Configuration
+PROJECT_NAME="{{PROJECT_NAME}}"
+PROJECT_TYPE="{{PROJECT_TYPE}}"
+CHANGE_DETECTION_ENABLED="${BMAD_CHANGE_DETECTION:-1}"
+CHANGE_LOG_FILE=".bmad/change-log.json"
+LAST_CHECK_FILE=".bmad/last-change-check.txt"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BLUE='\033[0;34m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+# Ensure required directories exist
+mkdir -p ".bmad"
+
+# Helper function to get current timestamp
+get_timestamp() {
+    date '+%Y-%m-%d %H:%M:%S'
+}
+
+# Helper function to get file modification time
+get_file_mtime() {
+    local file="$1"
+    if [ -f "$file" ]; then
+        stat -c %Y "$file" 2>/dev/null || stat -f "%m" "$file" 2>/dev/null || echo "0"
+    else
+        echo "0"
+    fi
+}
+
+# Detect change significance
+detect_change_significance() {
+    local file_path="$1"
+    local change_type="modified"
+    
+    # Determine change type from git status if available
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        local git_status
+        git_status=$(git status --porcelain "$file_path" 2>/dev/null || echo "")
+        
+        if [ -n "$git_status" ]; then
+            case "${git_status:0:2}" in
+                "A ")
+                    change_type="added"
+                    ;;
+                "M ")
+                    change_type="modified"
+                    ;;
+                "D ")
+                    change_type="deleted"
+                    ;;
+                "R ")
+                    change_type="renamed"
+                    ;;
+                "??"|"!!")
+                    change_type="untracked"
+                    ;;
+                *)
+                    change_type="modified"
+                    ;;
+            esac
+        fi
+    fi
+    
+    # Determine significance based on file type and path
+    local significance="low"
+    local category="other"
+    
+    case "$file_path" in
+        # Critical configuration files
+        "package.json"|"requirements.txt"|"go.mod"|"pom.xml"|"Gemfile"|"composer.json")
+            significance="high"
+            category="dependencies"
+            ;;
+        
+        # Infrastructure files
+        *"Dockerfile"*|*"docker-compose"*|*"compose."*)
+            significance="high"
+            category="infrastructure"
+            ;;
+        
+        # API and backend core
+        "src/api/"*|"src/models/"*|"src/services/"*|"api/"*|"models/"*|"services/"*)
+            significance="high"
+            category="backend-core"
+            ;;
+        
+        # Frontend core components
+        "src/components/"*|"src/pages/"*|"components/"*|"pages/"*)
+            significance="medium"
+            category="frontend-core"
+            ;;
+        
+        # Database and migrations
+        *"migration"*|*"schema"*|"*.sql"|"*.prisma")
+            significance="high"
+            category="database"
+            ;;
+        
+        # Configuration files
+        "*.env"*|"config/"*|"settings."*|"*.config."*)
+            significance="medium"
+            category="configuration"
+            ;;
+        
+        # Security files
+        "*.key"|"*.pem"|"*.cert"|"auth/"*|"security/"*)
+            significance="critical"
+            category="security"
+            ;;
+        
+        # Build and deployment
+        "*.yml"|"*.yaml"|"Makefile"|"build."*|"deploy."*)
+            significance="medium"
+            category="build-deploy"
+            ;;
+        
+        # Documentation
+        "*.md"|"docs/"*|"README"*|"CHANGELOG"*)
+            significance="low"
+            category="documentation"
+            ;;
+        
+        # Tests
+        *"test"*|*"spec"*|"__tests__/"*)
+            significance="medium"
+            category="tests"
+            ;;
+        
+        # Regular code files
+        "*.js"|"*.ts"|"*.jsx"|"*.tsx"|"*.py"|"*.go"|"*.java"|"*.cs"|"*.rb"|"*.php")
+            significance="medium"
+            category="code"
+            ;;
+        
+        # Ignore files and temporary
+        ".gitignore"|"*.tmp"|"*.log"|"node_modules/"*|"vendor/"*|"dist/"*|"build/"*)
+            significance="minimal"
+            category="temporary"
+            ;;
+    esac
+    
+    echo "{\"significance\": \"$significance\", \"category\": \"$category\", \"type\": \"$change_type\"}"
+}
+
+# Log change event
+log_change_event() {
+    local file_path="$1"
+    local change_info="$2"
+    local timestamp
+    timestamp=$(get_timestamp)
+    
+    # Parse change info
+    local significance
+    local category
+    local change_type
+    significance=$(echo "$change_info" | grep -o '"significance": "[^"]*"' | sed 's/"significance": "\(.*\)"/\1/')
+    category=$(echo "$change_info" | grep -o '"category": "[^"]*"' | sed 's/"category": "\(.*\)"/\1/')
+    change_type=$(echo "$change_info" | grep -o '"type": "[^"]*"' | sed 's/"type": "\(.*\)"/\1/')
+    
+    # Create change log entry
+    local log_entry
+    log_entry=$(cat <<EOF
+{
+    "timestamp": "$timestamp",
+    "file": "$file_path",
+    "type": "$change_type",
+    "significance": "$significance",
+    "category": "$category",
+    "project": "$PROJECT_NAME"
+}
+EOF
+    )
+    
+    # Initialize or append to change log
+    if [ ! -f "$CHANGE_LOG_FILE" ]; then
+        echo '[' > "$CHANGE_LOG_FILE"
+        echo "$log_entry" >> "$CHANGE_LOG_FILE"
+        echo ']' >> "$CHANGE_LOG_FILE"
+    else
+        # Remove closing bracket, add comma and new entry, then close
+        local temp_log="/tmp/change-log-$$.json"
+        head -n -1 "$CHANGE_LOG_FILE" > "$temp_log"
+        
+        # Add comma if not empty
+        if [ $(wc -l < "$temp_log") -gt 1 ]; then
+            echo ',' >> "$temp_log"
+        fi
+        
+        echo "$log_entry" >> "$temp_log"
+        echo ']' >> "$temp_log"
+        
+        mv "$temp_log" "$CHANGE_LOG_FILE"
+    fi
+}
+
+# Trigger appropriate workflows based on change
+trigger_workflows() {
+    local file_path="$1"
+    local change_info="$2"
+    
+    local significance
+    local category
+    significance=$(echo "$change_info" | grep -o '"significance": "[^"]*"' | sed 's/"significance": "\(.*\)"/\1/')
+    category=$(echo "$change_info" | grep -o '"category": "[^"]*"' | sed 's/"category": "\(.*\)"/\1/')
+    
+    case "$significance" in
+        "critical")
+            echo -e "${RED}⚠️ CRITICAL CHANGE DETECTED: $file_path${NC}"
+            echo -e "${RED}Immediate review required!${NC}"
+            
+            # Trigger security validation if available
+            if [ -f ".claude/hooks/validation-enforcer.sh" ]; then
+                bash ".claude/hooks/validation-enforcer.sh" "security-review" "$file_path"
+            fi
+            ;;
+        
+        "high")
+            echo -e "${YELLOW}🔴 HIGH IMPACT CHANGE: $file_path${NC}"
+            
+            case "$category" in
+                "dependencies")
+                    echo -e "${CYAN}📦 Dependency change detected - consider updating documentation${NC}"
+                    if [ -f ".claude/hooks/documentation-updater.sh" ]; then
+                        bash ".claude/hooks/documentation-updater.sh" "manual" "readme"
+                    fi
+                    ;;
+                
+                "infrastructure")
+                    echo -e "${CYAN}🐳 Infrastructure change - check deployment requirements${NC}"
+                    if [ -f ".claude/hooks/docker-manager.sh" ]; then
+                        bash ".claude/hooks/docker-manager.sh" "status"
+                    fi
+                    ;;
+                
+                "backend-core")
+                    echo -e "${CYAN}🚀 Backend core change - run tests and update API docs${NC}"
+                    if [ -f ".claude/hooks/gate-enforcer.sh" ]; then
+                        bash ".claude/hooks/gate-enforcer.sh"
+                    fi
+                    ;;
+                
+                "database")
+                    echo -e "${CYAN}🗄 Database change - verify migrations and backups${NC}"
+                    ;;
+            esac
+            ;;
+        
+        "medium")
+            echo -e "${BLUE}🔵 MEDIUM CHANGE: $file_path (category: $category)${NC}"
+            
+            # Trigger appropriate workflows
+            case "$category" in
+                "frontend-core")
+                    echo -e "${GRAY}Frontend component changed - consider UI testing${NC}"
+                    ;;
+                
+                "tests")
+                    echo -e "${GRAY}Test changes detected - run test suite${NC}"
+                    ;;
+                
+                "configuration")
+                    echo -e "${GRAY}Configuration changed - verify settings${NC}"
+                    ;;
+            esac
+            ;;
+        
+        "low")
+            echo -e "${GREEN}🟫 Low impact change: $file_path${NC}"
+            ;;
+        
+        "minimal")
+            # Don't log minimal changes unless in verbose mode
+            if [ "${BMAD_VERBOSE:-0}" = "1" ]; then
+                echo -e "${GRAY}Minimal change: $file_path${NC}"
+            fi
+            return 0
+            ;;
+    esac
+}
+
+# Scan for recent changes
+scan_for_changes() {
+    echo -e "${CYAN}🔍 Scanning for recent changes...${NC}"
+    
+    local last_check_time="0"
+    if [ -f "$LAST_CHECK_FILE" ]; then
+        last_check_time=$(cat "$LAST_CHECK_FILE")
+    fi
+    
+    local current_time
+    current_time=$(date +%s)
+    
+    # Find files modified since last check
+    local changed_files
+    if command -v find >/dev/null 2>&1; then
+        # Use find with newer than timestamp
+        changed_files=$(find . -type f -newer "$LAST_CHECK_FILE" 2>/dev/null | head -100 || echo "")
+    else
+        # Fallback to git if available
+        if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            changed_files=$(git diff --name-only 2>/dev/null || echo "")
+        fi
+    fi
+    
+    local change_count=0
+    while IFS= read -r file; do
+        [ -z "$file" ] && continue
+        [ "$file" = "." ] && continue
+        
+        # Skip hidden files and common ignored patterns
+        case "$file" in
+            .*|
+            *"node_modules"*|
+            *"vendor"*|
+            *"dist"*|
+            *"build"*|
+            *".git"*|
+            *".DS_Store"*|
+            *"*.log"*|
+            *"*.tmp"*)
+                continue
+                ;;
+        esac
+        
+        local change_info
+        change_info=$(detect_change_significance "$file")
+        
+        # Log the change
+        log_change_event "$file" "$change_info"
+        
+        # Trigger workflows if auto-trigger is enabled
+        if [ "$AUTO_TRIGGER" = "true" ]; then
+            trigger_workflows "$file" "$change_info"
+        fi
+        
+        change_count=$((change_count + 1))
+    done <<< "$changed_files"
+    
+    # Update last check time
+    echo "$current_time" > "$LAST_CHECK_FILE"
+    
+    if [ $change_count -gt 0 ]; then
+        echo -e "${GREEN}📊 Processed $change_count changes${NC}"
+    else
+        echo -e "${GRAY}No significant changes detected${NC}"
+    fi
+}
+
+# Main execution
+case "$EVENT_TYPE" in
+    file-change)
+        if [ "$CHANGE_DETECTION_ENABLED" != "1" ]; then
+            exit 0
+        fi
+        
+        if [ -n "$TARGET_PATH" ]; then
+            # Specific file change
+            echo -e "${CYAN}🔍 Analyzing change: $TARGET_PATH${NC}"
+            
+            local change_info
+            change_info=$(detect_change_significance "$TARGET_PATH")
+            
+            log_change_event "$TARGET_PATH" "$change_info"
+            
+            if [ "$AUTO_TRIGGER" = "true" ]; then
+                trigger_workflows "$TARGET_PATH" "$change_info"
+            fi
+        else
+            # Scan for all changes
+            scan_for_changes
+        fi
+        ;;
+    
+    scan)
+        scan_for_changes
+        ;;
+    
+    report)
+        echo -e "\n${CYAN}📊 Change Detection Report for $PROJECT_NAME${NC}"
+        echo "==============================================="
+        
+        if [ ! -f "$CHANGE_LOG_FILE" ]; then
+            echo -e "${GRAY}No changes recorded yet${NC}"
+        else
+            local total_changes
+            total_changes=$(grep -c '"timestamp"' "$CHANGE_LOG_FILE" || echo "0")
+            
+            echo -e "${GREEN}Total changes logged: $total_changes${NC}"
+            
+            # Show recent changes
+            echo -e "\n${CYAN}Recent Changes:${NC}"
+            if command -v jq >/dev/null 2>&1; then
+                # Use jq for pretty formatting if available
+                tail -10 "$CHANGE_LOG_FILE" | jq -r '.[] | "\(.timestamp) - \(.file) (\(.significance))"' 2>/dev/null || true
+            else
+                # Fallback to basic parsing
+                tail -20 "$CHANGE_LOG_FILE" | grep -E '"timestamp"|"file"|"significance"' | sed 'N;N;s/\n/ /g'
+            fi
+        fi
+        
+        echo "==============================================="
+        ;;
+    
+    clear)
+        echo -e "${YELLOW}🗏 Clearing change log...${NC}"
+        rm -f "$CHANGE_LOG_FILE" "$LAST_CHECK_FILE"
+        echo -e "${GREEN}✅ Change log cleared${NC}"
+        ;;
+    
+    *)
+        echo -e "${RED}Unknown event type: $EVENT_TYPE${NC}" >&2
+        echo "Valid events: file-change, scan, report, clear"
+        exit 1
+        ;;
+esac

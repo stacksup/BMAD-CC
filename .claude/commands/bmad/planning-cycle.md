@@ -1,5 +1,5 @@
-﻿---
-description: Strategic planning workflow for BMAD-CC (other) - Coordinates strategic agents for comprehensive project planning.
+---
+description: Strategic planning workflow for BMAD-CC (Framework) - Coordinates strategic agents for comprehensive project planning.
 allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
 ---
 
@@ -27,17 +27,17 @@ Remember: You think like a CEO with unlimited resources. Push agents to deliver 
 # Check Docker availability
 docker info > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "⚠️ Docker not running. Strategic planning includes container architecture."
+    echo "âš ï¸ Docker not running. Strategic planning includes container architecture."
     echo "Start Docker Desktop to enable container validation during planning."
 fi
 
 # If docker-compose.yml exists, validate it
-if [ -f "" ] || [ -f "docker-compose.yml" ]; then
+if [ -f "docker-compose\.yml" ] || [ -f "docker-compose.yml" ]; then
     docker-compose config > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-        echo "✅ Docker compose configuration valid"
+        echo "âœ… Docker compose configuration valid"
     else
-        echo "⚠️ Docker compose configuration has errors - will need fixing during planning"
+        echo "âš ï¸ Docker compose configuration has errors - will need fixing during planning"
     fi
 fi
 ```
@@ -48,7 +48,7 @@ fi
 # Ensure Task Master is available
 task-master --version > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo "❌ Task Master required for planning workflow"
+    echo "âŒ Task Master required for planning workflow"
     exit 1
 fi
 
@@ -58,7 +58,7 @@ task-master create-task --title="Strategic Planning Phase" --type=epic
 
 ## PHASE 1: BUSINESS CONTEXT & ANALYSIS
 
-### 1A) Business Analyst → Market Research & Requirements Analysis
+### 1A) Business Analyst â†’ Market Research & Requirements Analysis
 **Load Business Analyst Agent:**
 ```
 Load the analyst-agent to conduct market research and business analysis using the project brief template with advanced elicitation.
@@ -88,12 +88,12 @@ The analyst will use techniques from `docs/data/brainstorming-techniques.md` and
 # - Competitive analysis depth
 # - Business case strength
 # - Risk assessment quality
-echo "✅ Business analysis validation completed"
+echo "âœ… Business analysis validation completed"
 ```
 
 **Output Location:** Save completed analysis as `docs/market-analysis.md`
 
-### 1B) Product Manager → Product Strategy & Vision
+### 1B) Product Manager â†’ Product Strategy & Vision
 **Load Product Manager Agent:**
 ```
 Load the pm-agent to create comprehensive PRD using the PRD template with advanced elicitation.
@@ -129,7 +129,7 @@ After PRD completion:
 
 ## PHASE 2: TECHNICAL PLANNING & ARCHITECTURE
 
-### 2A) System Architect → Technical Architecture & Implementation Strategy
+### 2A) System Architect â†’ Technical Architecture & Implementation Strategy
 **Load System Architect Agent:**
 ```
 Load the architect-agent to create comprehensive architecture specification using the architecture template with advanced elicitation.
@@ -166,7 +166,7 @@ After architecture completion:
 5. Save validation: docs/validation/architect-validation-[date].md
 ```
 
-### 2B) UX Expert → User Experience Design & Interface Planning
+### 2B) UX Expert â†’ User Experience Design & Interface Planning
 **Load UX Expert Agent:**
 ```
 Load the ux-agent to design user experience and interface specifications.
@@ -184,7 +184,7 @@ Load the ux-agent to design user experience and interface specifications.
 
 ## PHASE 3: INTEGRATION & VALIDATION
 
-### 3A) Product Owner → Requirements Integration & Validation
+### 3A) Product Owner â†’ Requirements Integration & Validation
 **Load Product Owner Agent:**
 ```
 Load the po-agent to validate and integrate all planning outputs.
@@ -205,7 +205,7 @@ Load the po-agent to validate and integrate all planning outputs.
 - [ ] Success metrics are measurable
 - [ ] Risks are identified with mitigation plans
 
-### 3B) Master Orchestrator → Planning Summary & Development Readiness
+### 3B) Master Orchestrator â†’ Planning Summary & Development Readiness
 **Load Master Orchestrator Agent:**
 ```
 Load the orchestrator-agent to assess planning completeness and readiness.
@@ -231,7 +231,7 @@ Load the orchestrator-agent to assess planning completeness and readiness.
 
 ## PHASE 4: DEVELOPMENT PREPARATION
 
-### 4A) Task Master Integration → Development Backlog Preparation
+### 4A) Task Master Integration â†’ Development Backlog Preparation
 **Task Master Integration:**
 ```
 Integrate planning outputs with task management system:
@@ -245,7 +245,7 @@ Integrate planning outputs with task management system:
 - Estimate story complexity and dependencies
 - Sequence development work based on priorities
 
-### 4B) Documentation Handoff → Development Team Briefing
+### 4B) Documentation Handoff â†’ Development Team Briefing
 **Documentation Package:**
 - `docs/market-analysis.md` - Business context and requirements
 - `docs/product-strategy.md` - Product vision and priorities  
@@ -293,7 +293,7 @@ Integrate planning outputs with task management system:
 # - docs/ux-design-spec.md (User experience)
 # - Cross-document consistency check
 # - Development readiness assessment
-echo "✅ All planning phase quality gates passed"
+echo "âœ… All planning phase quality gates passed"
 ```
 
 ### Planning Phase Quality Gates
@@ -373,7 +373,7 @@ Planning Outcome:
 - Product strategy for competitive differentiation
 - SaaS architecture with real-time collaboration
 - UX design for distributed team workflows
-Transition: → `/bmad:greenfield-fullstack`
+Transition: â†’ `/bmad:greenfield-fullstack`
 ```
 
 ### Example 2: Mobile App Addition
@@ -384,7 +384,7 @@ Planning Outcome:
 - Mobile-first product strategy and feature prioritization
 - API architecture for mobile client support
 - Mobile UX design optimized for touch interfaces
-Transition: → `/bmad:brownfield-enhancement` + mobile development
+Transition: â†’ `/bmad:brownfield-enhancement` + mobile development
 ```
 
 Remember: Strategic planning prevents costly rework and ensures development efforts align with business objectives. Invest time in planning to accelerate development and improve outcomes.

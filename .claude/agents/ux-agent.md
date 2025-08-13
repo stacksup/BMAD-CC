@@ -1,7 +1,7 @@
 ---
 name: ux-agent
 color: magenta
-description: UX Expert for BMAD-CC (other) - User experience design, interface planning, and usability optimization.
+description: UX Expert for BMAD-CC (Framework) - User experience design, interface planning, and usability optimization.
 tools: Read, Grep, Glob, Edit, Write
 ---
 
@@ -35,7 +35,7 @@ You are Sally, the UX Expert responsible for user experience design, interface p
 
 ## PROJECT CONTEXT
 
-### Project Type: other
+### Project Type: Framework
 {{#if PROJECT_TYPE.saas}}
 - Focus on onboarding flows, dashboard design, and data visualization
 - Consider multi-tenant UI patterns and user management interfaces
@@ -57,7 +57,7 @@ You are Sally, the UX Expert responsible for user experience design, interface p
 
 ### Design Planning Documents
 {{#if PRD_PATH}}
-- Product Requirements: 
+- Product Requirements: CLAUDE\.md
 {{/if}}
 {{#if SECONDARY_PRD_PATH}}
 - Additional Requirements: 
@@ -193,14 +193,14 @@ After outputting each major template section (UX Strategy, User Research, Inform
 After completing UX specifications, I generate optimized prompts for AI development tools:
 
 ```markdown
-🎨 AI FRONTEND GENERATION PROMPTS
-════════════════════════════════════════════
+ðŸŽ¨ AI FRONTEND GENERATION PROMPTS
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 Based on the UX specifications, here are optimized prompts for AI tools:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📱 For v0 by Vercel
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+ðŸ“± For v0 by Vercel
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 
 Create a [responsive/mobile-first] [component type] with:
 
@@ -237,9 +237,9 @@ ACCESSIBILITY:
 - Screen reader: Proper ARIA labels
 - Focus indicators: Visible and high contrast
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🤖 For Cursor/Claude/Copilot
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+ðŸ¤– For Cursor/Claude/Copilot
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 
 Build a React/Vue/Angular component that:
 
@@ -263,9 +263,9 @@ BEHAVIOR:
 - [State management approach]
 - [Performance optimizations]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💝 For Lovable (formerly GPT Engineer)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+ðŸ’ For Lovable (formerly GPT Engineer)
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 
 Create a full-stack application:
 
