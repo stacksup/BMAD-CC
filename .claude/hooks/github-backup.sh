@@ -73,7 +73,7 @@ get_current_branch() {
 
 # Function to ensure GitHub remote
 ensure_github_remote() {
-    local repo_name="$1"
+    repo_name="$1"
     
     local remote_url=$(git config --get remote.origin.url 2>/dev/null)
     
@@ -130,7 +130,7 @@ backup_to_github() {
         echo -e "${YELLOW}GitHub not connected: $message${NC}"
         
         # Try to set up remote
-        local repo_name=$(basename "$(pwd)")
+        repo_name=$(basename "$(pwd)")
         if ! ensure_github_remote "$repo_name"; then
             echo -e "${RED}Cannot establish GitHub connection${NC}"
             return 1
@@ -257,7 +257,7 @@ case "$ACTION" in
         ;;
     
     setup)
-        local repo_name=$(basename "$(pwd)")
+        repo_name=$(basename "$(pwd)")
         ensure_github_remote "$repo_name"
         ;;
     
