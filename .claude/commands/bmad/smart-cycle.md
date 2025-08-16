@@ -11,7 +11,68 @@ This command analyzes your request and routes it to the most appropriate BMAD wo
 
 **VIBE CEO PHILOSOPHY**: You are the strategic leader with unlimited resources. The orchestrator empowers you with advanced elicitation tools to refine your vision before committing to a workflow. Think big, challenge assumptions, maximize value.
 
-## 0) INFRASTRUCTURE CHECKS & ROUTING
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
+
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$(task-master current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Smart cycle requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:smart-cycle --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct smart cycle request (not from planning):"
+    echo "1. Create task: task-master create --title='Smart Cycle: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for smart cycle workflow"
+    echo "Required: All smart cycle work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$(task-master get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+task-master set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for smart cycle"
+echo "📋 Task ID: $TASK_ID"
+echo "🧠 Smart cycle workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    task-master update-task --id=$TASK_ID --prompt="Smart cycle started - execution authorized"
+else
+    # Create new smart cycle task if none provided
+    TASK_ID=$(task-master create --title="Smart Cycle: [Auto-generated]" --type="smart-cycle" --status="in-progress")
+    echo "📝 Created smart cycle task: $TASK_ID"
+fi
+
+# Set smart-cycle-specific metadata
+task-master set-field --id=$TASK_ID --field="workflow" --value="smart-cycle"
+task-master set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+```
+
+## 1) INFRASTRUCTURE CHECKS & ROUTING
 
 **CRITICAL: Task Master Availability Check:**
 ```bash
@@ -109,9 +170,14 @@ fi
 
 **STEP 1 TRIGGER: Use Task tool to invoke orchestrator-agent**
 ```
-Use Task tool to invoke orchestrator-agent with Task Master context to determine optimal workflow routing.
-If no tasks exist, orchestrator will create initial tasks from user request.
+/task orchestrator-agent
 ```
+
+**Context for Orchestrator:**
+- Use Task Master context to determine optimal workflow routing
+- If no tasks exist, orchestrator will create initial tasks from user request
+- Apply enhanced classification decision tree based on request characteristics
+- Enable document sharding or brownfield analysis if detected
 
 **MANDATORY: Wait for orchestrator-agent completion confirmation before proceeding to workflow routing.**
 
@@ -125,6 +191,9 @@ For new projects or major initiatives:
    
 2. Project Validation:
    - STEP 2A TRIGGER: Use Task tool to invoke po-agent
+   ```
+   /task po-agent
+   ```
    - Use validate-project-setup capability
    - Auto-detect project type and characteristics
    - Validate against 6-section master checklist

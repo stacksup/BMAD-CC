@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 2025-08-16 - Workflow Compliance Fix
+
+### [Bug Fix] - 2025-08-16
+- **COMPLETED**: Fixed workflow compliance violation in smart-cycle.md - Added execution authorization validation
+- **COMPLIANCE ISSUE**: Smart-cycle workflow lacked mandatory execution authorization validation, creating bypass vulnerability
+- **IMPLEMENTATION**: Applied proven authorization patterns from maintenance-cycle.md to smart-cycle.md
+- **VALIDATION**: Added comprehensive execution authorization checks including:
+  - Task ID validation requirement
+  - Task status verification (execution-authorized or in-progress)
+  - Compliance violation error messages with corrective guidance
+  - Task Master integration enforcement
+- **IMPACT**: Prevents future workflow compliance bypasses and ensures all smart-cycle executions are properly authorized
+- **QA STATUS**: APPROVED by qa-agent with LOW risk assessment
+- **FILES MODIFIED**: `.claude/commands/bmad/smart-cycle.md`
+
 ## 2025-08-16 - Attribution and Credit Updates
 
 ### ✅ Added Attribution to Original BMAD METHOD
