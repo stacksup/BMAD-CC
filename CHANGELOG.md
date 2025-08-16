@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 2025-08-16 - Framework Integrity Improvements
+
+### ✅ Workflow Compliance Audit and Systematic Fixes
+- **COMPLETED**: Comprehensive audit of all 7 standard workflows for compliance gaps
+- **CHANGE TYPE**: feat - Significant framework improvement preventing session corruption and workflow failures
+- **AUDIT SCOPE**: All standard workflows (story-cycle, planning-cycle, maintenance-cycle, crisis-cycle, reflection-cycle, quality-cycle, deployment-cycle)
+- **CRITICAL FINDINGS**:
+  - story-cycle.md: Major compliance violations with descriptive text instead of Task tool invocations
+  - planning-cycle.md: Missing approval gates and completion validation
+  - Multiple workflows lacked systematic enforcement mechanisms
+- **FIXES IMPLEMENTED**:
+  - **story-cycle.md**: Full Task tool compliance with explicit /task triggers for each agent
+  - **planning-cycle.md**: Systematic approach with approval gates and validation checkpoints
+  - Enhanced workflow execution enforcement throughout framework
+- **SYSTEMATIC APPROACH**: Applied lessons learned from maintenance workflow fix to audit and improve other workflows
+- **TECHNICAL DEBT RESOLVED**: Framework integrity now properly maintained across all standard workflows
+- **IMPACT**: Prevents workflow execution failures and session corruption across BMAD framework
+- **REMAINING WORK**: Continue systematic fixes for remaining workflows identified in audit
+
 ## 2025-08-16 - Maintenance Workflow Enhancement
 
 ### ✅ README PowerShell References Sync Issue Resolution

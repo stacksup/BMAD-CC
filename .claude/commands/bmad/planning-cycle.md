@@ -59,10 +59,12 @@ task-master create-task --title="Strategic Planning Phase" --type=epic
 ## PHASE 1: BUSINESS CONTEXT & ANALYSIS
 
 ### 1A) Business Analyst â†’ Market Research & Requirements Analysis
-**Load Business Analyst Agent:**
+**STEP 1 TRIGGER: Use Task tool to invoke analyst-agent**
 ```
-Load the analyst-agent to conduct market research and business analysis using the project brief template with advanced elicitation.
+Use Task tool to invoke analyst-agent to conduct market research and business analysis using the project brief template with advanced elicitation.
 ```
+
+**MANDATORY: Wait for analyst-agent completion confirmation before proceeding to product manager phase.**
 
 **Brainstorming & Elicitation Techniques:**
 The analyst will use techniques from `docs/data/brainstorming-techniques.md` and `docs/data/elicitation-methods.md`:
@@ -94,10 +96,12 @@ echo "âœ… Business analysis validation completed"
 **Output Location:** Save completed analysis as `docs/market-analysis.md`
 
 ### 1B) Product Manager â†’ Product Strategy & Vision
-**Load Product Manager Agent:**
+**STEP 2 TRIGGER: Use Task tool to invoke pm-agent**
 ```
-Load the pm-agent to create comprehensive PRD using the PRD template with advanced elicitation.
+Use Task tool to invoke pm-agent to create comprehensive PRD using the PRD template with advanced elicitation.
 ```
+
+**MANDATORY: Wait for pm-agent completion confirmation before proceeding to technical planning.**
 
 **Brainstorming & Elicitation Techniques:**
 The PM will apply structured ideation methods:

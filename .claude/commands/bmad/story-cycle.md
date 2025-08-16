@@ -43,11 +43,13 @@ sleep 5
 ## PHASE 1: STORY CREATION & REFINEMENT
 
 ### 1A) Scrum Master â†’ Story Creation
-**Load Scrum Master Agent:**
+**STEP 1 TRIGGER: Use Task tool to invoke sm-agent**
 ```
-Load the sm-agent to create or refine the user story.
+Use Task tool to invoke sm-agent to create or refine the user story.
 Story must reference Task Master ID: $STORY_ID
 ```
+
+**MANDATORY: Wait for SM agent completion confirmation before proceeding to validation.**
 
 **Story Creation Process:**
 1. Understand requirements from task description
@@ -72,10 +74,12 @@ echo "âœ… Story validation passed - proceeding to development"
 ## PHASE 2: PRODUCT OWNER VALIDATION
 
 ### 2A) Product Owner â†’ Story Approval
-**Load Product Owner Agent:**
+**STEP 2 TRIGGER: Use Task tool to invoke po-agent**
 ```
-Load the po-agent to validate story completeness and alignment.
+Use Task tool to invoke po-agent to validate story completeness and alignment.
 ```
+
+**MANDATORY: Wait for PO agent completion confirmation before proceeding to development.**
 
 **Product Owner Validation Process:**
 ```bash
@@ -95,10 +99,12 @@ echo "âœ… Product Owner validation completed"
 ## PHASE 3: DEVELOPMENT IN CONTAINERS
 
 ### 3A) Developer â†’ Implementation
-**Load Developer Agent:**
+**STEP 3 TRIGGER: Use Task tool to invoke dev-agent**
 ```
-Load the dev-agent for Docker-based implementation.
+Use Task tool to invoke dev-agent for Docker-based implementation.
 ```
+
+**MANDATORY: Wait for dev-agent completion confirmation before proceeding to QA.**
 
 **CRITICAL DEVELOPMENT REMINDER:**
 ```
@@ -170,10 +176,12 @@ docker-compose ps  # All containers healthy
 ## PHASE 4: QUALITY ASSURANCE IN DOCKER
 
 ### 4A) QA Engineer â†’ Docker-Based Testing
-**Load QA Engineer Agent:**
+**STEP 4 TRIGGER: Use Task tool to invoke qa-agent**
 ```
-Load the qa-agent for containerized quality assurance.
+Use Task tool to invoke qa-agent for containerized quality assurance.
 ```
+
+**MANDATORY: Wait for qa-agent completion confirmation before proceeding to documentation.**
 
 **Docker QA Process:**
 ```bash
@@ -255,10 +263,15 @@ Load the learnings-agent to extract lessons learned.
 ## PHASE 6: GIT INTEGRATION & BACKUP
 
 ### 6A) Git Agent â†’ Commit and Push
-**Load Git Agent:**
+**MANDATORY: Get user approval before proceeding to git operations.**
+**STOP - USER APPROVAL REQUIRED**
+
+**STEP 6 TRIGGER: Use Task tool to invoke git-agent**
 ```
-Load the git-agent for version control with Task Master integration.
+Use Task tool to invoke git-agent for version control with Task Master integration.
 ```
+
+**MANDATORY: Wait for git-agent completion confirmation before marking task complete.**
 
 **Git Process with Docker:**
 ```bash
