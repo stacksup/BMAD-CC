@@ -22,9 +22,15 @@ BMAD-CC is a comprehensive framework that transforms Claude Code into an enterpr
 
 ### One-Line Installation
 
-```powershell
-# Windows PowerShell
-powershell -ExecutionPolicy Bypass -NoProfile -Command "iwr https://raw.githubusercontent.com/stacksup/BMAD-CC/main/bootstrap.ps1 -UseBasicParsing | iex; Install-BMAD -ProjectDir . -ProjectType auto"
+```bash
+# WSL/Linux/macOS
+curl -fsSL https://raw.githubusercontent.com/stacksup/BMAD-CC/main/bootstrap.sh | bash -s -- --project-dir . --project-type auto
+
+
+# Alternative: Clone and run locally
+git clone https://github.com/stacksup/BMAD-CC.git bmad-cc
+cd bmad-cc
+./simple-install.sh --project-dir /path/to/your/project
 ```
 
 ### Start Your First Workflow

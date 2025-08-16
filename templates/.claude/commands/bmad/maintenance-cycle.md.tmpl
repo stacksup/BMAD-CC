@@ -30,7 +30,7 @@ If using task management:
 
 **Load Developer Agent:**
 ```
-Load the dev-agent for direct implementation of maintenance task.
+/task dev-agent "Implement maintenance fix with comprehensive testing"
 ```
 
 **Implementation Process:**
@@ -75,12 +75,15 @@ Load the dev-agent for direct implementation of maintenance task.
 - [ ] No regressions introduced
 - [ ] Change is minimal and focused on the specific issue
 
+**After implementation complete, proceed to QA ENGINEER REVIEW (step 2) or DOCUMENTATION (step 3) if QA skipped.**
+
 ## 2) QA ENGINEER REVIEW (OPTIONAL)
 
 **Load QA Engineer Agent:**
 ```
-OPTIONAL: Load the qa-agent for quality review if the change is complex or high-risk.
+/task qa-agent "Review maintenance implementation for quality and risks"
 ```
+Note: This step is optional for simple changes but recommended for complex or high-risk modifications.
 
 **When QA Review is Recommended:**
 - Changes affect critical system functionality
@@ -100,14 +103,16 @@ OPTIONAL: Load the qa-agent for quality review if the change is complex or high-
    - Validate performance impact (positive or neutral)
 
 3. **Quality Assessment**
-   - **QA_APPROVED**: Change meets quality standards, proceed to documentation
-   - **NEEDS_REVISION**: Issues found, return to developer with specific feedback
+   - **QA_APPROVED**: Change meets quality standards, proceed to DOCUMENTATION (step 3)
+   - **NEEDS_REVISION**: Issues found, return to DEVELOPER IMPLEMENTATION (step 1) with specific feedback
+
+**After QA review complete, proceed to DOCUMENTATION & CHANGE LOG (step 3).**
 
 ## 3) DOCUMENTATION & CHANGE LOG
 
 **Load Documentation Agent:**
 ```
-Load the doc-agent to ensure all documentation is updated.
+/task doc-agent "Update documentation and changelog for maintenance task completion"
 ```
 
 **Automatic Documentation Updates:**
@@ -143,11 +148,39 @@ CHANGE_TYPE="fix"  # or "chore" for maintenance tasks
    - Document any gotchas or important context for future developers
    - Note any technical debt discovered but not addressed
 
-## 4) GIT COMMIT & DEPLOYMENT
+**After documentation complete, proceed to USER APPROVAL GATE (step 4).**
+
+## 4) USER APPROVAL GATE
+
+**MANDATORY: Get user approval before proceeding to git operations.**
+
+```
+STOP - USER APPROVAL REQUIRED
+
+Before proceeding with git commit and deployment:
+
+1. Present summary of changes made
+2. Show which files were modified
+3. Confirm testing results
+4. Get explicit user approval to proceed with git operations
+
+DO NOT PROCEED until user approves the changes.
+```
+
+**User Approval Process:**
+1. **Change Summary**: List all files modified and nature of changes
+2. **Testing Results**: Report on all tests run and their outcomes
+3. **Impact Assessment**: Describe what the changes fix/improve
+4. **Risk Analysis**: Note any potential risks or side effects
+5. **Approval Request**: Explicitly ask "Do you approve proceeding with git commit and deployment?"
+
+**Only proceed to step 5 after receiving explicit user approval.**
+
+## 5) GIT COMMIT & DEPLOYMENT
 
 **Load Git Agent:**
 ```
-Load the git-agent for change management and deployment.
+/task git-agent "Handle git operations for maintenance task completion"
 ```
 
 **Version Control Process:**
@@ -195,7 +228,7 @@ Load the git-agent for change management and deployment.
    - Coordinate with app deployment process
    {{/if}}
 
-## 5) OPTIONAL: Task Master Completion
+## 6) OPTIONAL: Task Master Completion
 
 **Task Tracking Completion:**
 ```

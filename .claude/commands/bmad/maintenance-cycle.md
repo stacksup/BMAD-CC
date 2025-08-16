@@ -28,10 +28,12 @@ If using task management:
 
 ## 1) DEVELOPER IMPLEMENTATION
 
-**Load Developer Agent:**
+**STEP 1 TRIGGER: Use Task tool to invoke dev-agent**
 ```
-Load the dev-agent for direct implementation of maintenance task.
+/task dev-agent "Implement maintenance fix with comprehensive testing"
 ```
+
+**MANDATORY: Wait for dev-agent completion confirmation before proceeding to step 2.**
 
 **Implementation Process:**
 1. **Issue Analysis**
@@ -75,12 +77,24 @@ Load the dev-agent for direct implementation of maintenance task.
 - [ ] No regressions introduced
 - [ ] Change is minimal and focused on the specific issue
 
+**STEP 1 COMPLETION VALIDATION:**
+- ✅ Implementation completed by dev-agent
+- ✅ All tests pass
+- ✅ Quality gates met
+- ✅ Agent reports completion confirmation
+
+**After implementation complete, proceed to QA ENGINEER REVIEW (step 2) or DOCUMENTATION (step 3) if QA skipped.**
+
 ## 2) QA ENGINEER REVIEW (OPTIONAL)
 
-**Load QA Engineer Agent:**
+**STEP 2 TRIGGER: Use Task tool to invoke qa-agent (if needed)**
 ```
-OPTIONAL: Load the qa-agent for quality review if the change is complex or high-risk.
+/task qa-agent "Review maintenance implementation for quality and risks"
 ```
+
+**MANDATORY: Wait for qa-agent completion confirmation before proceeding to step 3.**
+
+Note: This step is optional for simple changes but recommended for complex or high-risk modifications.
 
 **When QA Review is Recommended:**
 - Changes affect critical system functionality
@@ -100,15 +114,24 @@ OPTIONAL: Load the qa-agent for quality review if the change is complex or high-
    - Validate performance impact (positive or neutral)
 
 3. **Quality Assessment**
-   - **QA_APPROVED**: Change meets quality standards, proceed to documentation
-   - **NEEDS_REVISION**: Issues found, return to developer with specific feedback
+   - **QA_APPROVED**: Change meets quality standards, proceed to DOCUMENTATION (step 3)
+   - **NEEDS_REVISION**: Issues found, return to DEVELOPER IMPLEMENTATION (step 1) with specific feedback
+
+**STEP 2 COMPLETION VALIDATION:**
+- ✅ QA review completed by qa-agent
+- ✅ Quality assessment provided (APPROVED/NEEDS_REVISION)
+- ✅ Agent reports completion confirmation
+
+**After QA review complete, proceed to DOCUMENTATION & CHANGE LOG (step 3).**
 
 ## 3) DOCUMENTATION & CHANGE LOG
 
-**Load Documentation Agent:**
+**STEP 3 TRIGGER: Use Task tool to invoke doc-agent**
 ```
-Load the doc-agent to ensure all documentation is updated.
+/task doc-agent "Update documentation and changelog for maintenance task completion"
 ```
+
+**MANDATORY: Wait for doc-agent completion confirmation before proceeding to step 4.**
 
 **Automatic Documentation Updates:**
 ```bash
@@ -143,12 +166,48 @@ CHANGE_TYPE="fix"  # or "chore" for maintenance tasks
    - Document any gotchas or important context for future developers
    - Note any technical debt discovered but not addressed
 
-## 4) GIT COMMIT & DEPLOYMENT
+**STEP 3 COMPLETION VALIDATION:**
+- ✅ Documentation updated by doc-agent
+- ✅ CHANGELOG.md updated
+- ✅ All required documentation complete
+- ✅ Agent reports completion confirmation
 
-**Load Git Agent:**
+**After documentation complete, proceed to USER APPROVAL GATE (step 4).**
+
+## 4) USER APPROVAL GATE
+
+**MANDATORY: Get user approval before proceeding to git operations.**
+
 ```
-Load the git-agent for change management and deployment.
+STOP - USER APPROVAL REQUIRED
+
+Before proceeding with git commit and deployment:
+
+1. Present summary of changes made
+2. Show which files were modified
+3. Confirm testing results
+4. Get explicit user approval to proceed with git operations
+
+DO NOT PROCEED until user approves the changes.
 ```
+
+**User Approval Process:**
+1. **Change Summary**: List all files modified and nature of changes
+2. **Testing Results**: Report on all tests run and their outcomes
+3. **Impact Assessment**: Describe what the changes fix/improve
+4. **Risk Analysis**: Note any potential risks or side effects
+5. **Approval Request**: Explicitly ask "Do you approve proceeding with git commit and deployment?"
+
+**Only proceed to step 5 after receiving explicit user approval.**
+
+## 5) GIT COMMIT & DEPLOYMENT
+
+**STEP 5 TRIGGER: Use Task tool to invoke git-agent (ONLY after user approval)**
+```
+/task git-agent "Handle git operations for maintenance task completion"
+```
+
+**MANDATORY: Only proceed after explicit user approval in step 4.**
 
 **Version Control Process:**
 1. **Stage Changes**
@@ -195,7 +254,7 @@ Load the git-agent for change management and deployment.
    - Coordinate with app deployment process
    {{/if}}
 
-## 5) OPTIONAL: Task Master Completion
+## 6) OPTIONAL: Task Master Completion
 
 **Task Tracking Completion:**
 ```

@@ -75,6 +75,64 @@ When requirements are unclear:
 → Routes to: Planning Cycle → Greenfield
 ```
 
+### 🎯 Proper Workflow Invocation Guide
+
+**The Right Way**: Always start with Smart Cycle for intelligent routing
+
+| What Users Often Say (Wrong) | What to Say Instead (Right) | Why |
+|------------------------------|----------------------------|-----|
+| "Create a component for user profiles" | `/bmad:smart-cycle` → "Add user profile feature" | Smart Cycle routes to correct workflow |
+| "Write code for login functionality" | `/bmad:smart-cycle` → "Implement user authentication" | Ensures proper planning and quality gates |
+| "Fix this bug quickly" | `/bmad:smart-cycle` → "Login validation error not showing" | Routes to optimized maintenance workflow |
+| "Help me design the database" | `/bmad:smart-cycle` → "Design user management system" | Triggers strategic planning if needed |
+| "Run planning cycle" | `/bmad:smart-cycle` → "Build mobile app for platform" | Let Smart Cycle decide the right workflow |
+| "Create a story for..." | `/bmad:smart-cycle` → "Add analytics dashboard" | Smart Cycle handles story creation routing |
+
+### 🚀 Workflow Trigger Examples
+
+**Direct Commands** (when you know exactly what you need):
+```bash
+# Only use these if you're certain about the workflow type
+/bmad:planning-cycle      # For complex strategic initiatives
+/bmad:story-cycle         # For clear feature development
+/bmad:maintenance-cycle   # For quick fixes under 4 hours
+/bmad:greenfield-fullstack # For new project development
+/bmad:brownfield-enhancement # For existing system improvements
+```
+
+**Smart Commands** (recommended for most users):
+```bash
+# Always start here - let AI route your work
+/bmad:smart-cycle
+
+# Enhanced elicitation triggers
+/bmad:smart-cycle + "brainstorm mobile app features"
+/bmad:smart-cycle + "clarify user requirements for dashboard"
+/bmad:smart-cycle + "challenge our current auth approach"
+/bmad:smart-cycle + "explore alternatives to current architecture"
+```
+
+### 💡 Trigger Word Recognition
+
+Smart Cycle recognizes these patterns:
+
+| Pattern | Typical Routing | Example |
+|---------|----------------|---------|
+| "Fix", "Bug", "Error", "Issue" | Maintenance Cycle | "Fix login error messages" |
+| "Add", "Create", "Build" + feature | Story Cycle | "Add user profile dashboard" |
+| "Design", "Plan", "Architecture" | Planning Cycle | "Design new mobile architecture" |
+| "New project", "From scratch" | Greenfield Workflow | "Build new customer portal" |
+| "Enhance", "Improve", "Modernize" | Brownfield Workflow | "Modernize payment system" |
+| "Brainstorm", "Explore", "Ideas" | Enhanced Elicitation | "Brainstorm mobile app features" |
+
+### ⚠️ Common Mistakes to Avoid
+
+1. **Don't bypass Smart Cycle** unless you're absolutely certain
+2. **Don't give direct implementation instructions** - describe the business need
+3. **Don't specify technical details upfront** - let the appropriate agent handle that
+4. **Don't mix workflows** - complete one cycle before starting another
+5. **Don't skip quality gates** - they prevent expensive rework
+
 ---
 
 ## Planning Cycle - Strategic Intelligence

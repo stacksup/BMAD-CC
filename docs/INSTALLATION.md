@@ -7,7 +7,7 @@
 - **Docker Desktop**: Container runtime for development environment
 - **Node.js**: v16+ for Task Master AI
 - **Git**: Version control system
-- **PowerShell**: For Windows installation scripts
+- **Bash**: Shell for installation scripts (WSL on Windows)
 
 ### System Requirements
 - **OS**: Windows 10/11, macOS 10.15+, Linux (Ubuntu 20.04+)
@@ -19,14 +19,12 @@
 
 ### One-Line Remote Installation
 
-```powershell
-# Windows PowerShell
-powershell -ExecutionPolicy Bypass -NoProfile -Command "iwr https://raw.githubusercontent.com/YOUR-USERNAME/bmad-cc/main/bootstrap.ps1 -UseBasicParsing | iex; Install-BMAD -ProjectDir . -ProjectType auto"
-```
-
 ```bash
-# macOS/Linux (coming soon)
-curl -fsSL https://raw.githubusercontent.com/YOUR-USERNAME/bmad-cc/main/bootstrap.sh | bash
+# WSL/Linux/macOS
+curl -fsSL https://raw.githubusercontent.com/YOUR-USERNAME/bmad-cc/main/bootstrap.sh | bash -s -- --project-dir . --project-type auto
+
+# Or using wget
+wget -qO- https://raw.githubusercontent.com/YOUR-USERNAME/bmad-cc/main/bootstrap.sh | bash -s -- --project-dir . --project-type auto
 ```
 
 ### Manual Installation
@@ -38,19 +36,19 @@ cd bmad-framework
 ```
 
 2. **Run Setup Script**
-```powershell
-# Windows
-.\scripts\setup.ps1 -ProjectDir "C:\path\to\your\project" -ProjectType auto
+```bash
+# WSL/Linux/macOS
+./scripts/setup.sh --project-dir "/path/to/your/project" --project-type auto
 
 # With custom parameters
-.\scripts\setup.ps1 `
-  -ProjectDir "C:\projects\my-app" `
-  -ProjectType "saas" `
-  -ProjectName "MyApp" `
-  -FrontendDir "client" `
-  -BackendDir "server" `
-  -FrontendPort 3000 `
-  -BackendPort 8080
+./scripts/setup.sh \
+  --project-dir "/projects/my-app" \
+  --project-type "saas" \
+  --project-name "MyApp" \
+  --frontend-dir "client" \
+  --backend-dir "server" \
+  --frontend-port 3000 \
+  --backend-port 8080
 ```
 
 ## Project Type Detection
@@ -179,7 +177,7 @@ docker-compose ps
 
 | Issue | Solution |
 |-------|----------|
-| PowerShell execution policy error | Run as Administrator: `Set-ExecutionPolicy Bypass -Scope Process` |
+| Permission denied | Make scripts executable: `chmod +x *.sh scripts/*.sh .claude/hooks/*.sh` |
 | Task Master not found | Install globally: `npm install -g task-master-ai` |
 | Docker not running | Start Docker Desktop manually |
 | Permission denied | Windows: Run as Administrator<br>Unix: Use `sudo` |
@@ -191,7 +189,7 @@ docker-compose ps
 ```bash
 cd bmad-framework
 git pull origin main
-.\scripts\setup.ps1 -ProjectDir "path\to\project" -ProjectType auto
+./scripts/setup.sh --project-dir "/path/to/project" --project-type auto
 ```
 
 ### Update Dependencies
@@ -203,15 +201,15 @@ docker-compose pull
 ## Uninstallation
 
 ### Remove BMAD-CC
-```powershell
+```bash
 # Remove directories
-Remove-Item -Recurse -Force .claude
-Remove-Item -Recurse -Force docs/templates
-Remove-Item -Recurse -Force docs/data
+rm -rf .claude
+rm -rf docs/templates
+rm -rf docs/data
 
 # Remove Task Master (if desired)
 npm uninstall -g task-master-ai
-Remove-Item -Recurse -Force .taskmaster
+rm -rf .taskmaster
 ```
 
 ## Next Steps

@@ -2,7 +2,7 @@
 name: sm-agent
 color: blue
 description: Scrum Master for BMAD-CC (Framework) - Story planning, task breakdown, and development workflow facilitation.
-tools: Read, Grep, Glob, Edit, Write
+tools: Read, Grep, Glob, Edit, Write, Task
 ---
 
 # Scrum Master Agent

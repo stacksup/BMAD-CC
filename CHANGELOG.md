@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## 2025-08-16 - Maintenance Workflow Enhancement
+
+### ✅ Maintenance Cycle Workflow Critical Fix
+- **COMPLETED**: Fixed workflow definition gaps that prevented automated execution
+- **ROOT CAUSE**: Workflow had descriptive text instead of prescriptive Task tool invocations
+- **FIXES IMPLEMENTED**:
+  - Added explicit Task tool triggers for each step (/task dev-agent, /task qa-agent, etc.)
+  - Added mandatory completion validation checkpoints between steps
+  - Enhanced USER APPROVAL GATE with explicit approval requirements
+  - Added agent hand-off confirmation requirements
+- **IMPACT**: Maintenance cycles now have enforced workflow execution rather than documentation-only guidance
+- **FILES MODIFIED**: `.claude/commands/bmad/maintenance-cycle.md`, `.claude/agents/sm-agent.md`
+- **TECHNICAL DEBT RESOLVED**: Framework value of "define workflows once and follow them" now properly enforced
+
+## 2025-08-16 - Documentation Updates
+
+### ✅ Workflow Invocation Guide Enhancement
+- **COMPLETED**: Added comprehensive workflow invocation examples to WORKFLOWS-GUIDE.md
+- **ENHANCEMENT**: Clear "wrong way vs right way" examples for proper BMAD workflow usage
+- **SCOPE**: Added trigger word patterns, common mistakes, and Smart Cycle usage guidance
+- **IMPACT**: Users now have clear guidance on how to properly invoke BMAD workflows
+- **MAINTENANCE**: 30-minute documentation enhancement to improve user experience
+
+### ✅ PowerShell Reference Cleanup in Documentation
+- **COMPLETED**: Updated all documentation to reflect bash scripts
+- **FILES UPDATED**: README.md, docs/INSTALLATION.md, docs/TROUBLESHOOTING.md
+- **IMPACT**: Documentation now accurately reflects the bash-based infrastructure
+- **SCOPE**: Removed outdated PowerShell references from installation and troubleshooting guides
+
 ## 2025-08-13 - Major Infrastructure Completion
 
 ### ✅ PowerShell to Bash Migration (Task #11)

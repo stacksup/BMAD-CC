@@ -16,17 +16,19 @@
 
 ## Installation Issues
 
-### PowerShell Execution Policy
+### Script Execution Permissions
 
-**Error**: `cannot be loaded because running scripts is disabled`
+**Error**: `Permission denied` when running scripts
 
 **Solution**:
-```powershell
-# Run as Administrator
-Set-ExecutionPolicy Bypass -Scope Process -Force
+```bash
+# Make all scripts executable
+chmod +x *.sh
+chmod +x scripts/*.sh
+chmod +x .claude/hooks/*.sh
 
-# Or use bypass flag
-powershell -ExecutionPolicy Bypass -File setup.ps1
+# For WSL users, ensure proper line endings
+dos2unix *.sh scripts/*.sh .claude/hooks/*.sh
 ```
 
 ### Task Master Not Found
@@ -78,7 +80,7 @@ netstat -ano | findstr :3000
 lsof -i :3000
 
 # Kill process or change port in setup
-.\scripts\setup.ps1 -FrontendPort 3001 -BackendPort 8002
+./scripts/setup.sh --frontend-port 3001 --backend-port 8002
 ```
 
 ---
@@ -126,20 +128,18 @@ head -5 .claude/agents/dev-agent.md
 **Solutions**:
 1. Check hook permissions:
 ```bash
-# Windows
-icacls .claude\hooks\*.ps1
-
-# Unix
-ls -la .claude/hooks/*.ps1
+# Check permissions
+ls -la .claude/hooks/*.sh
 ```
 2. Test hook manually:
-```powershell
-.\.claude\hooks\gate-enforcer.ps1
+```bash
+# Test hook execution
+./.claude/hooks/gate-enforcer.sh
 ```
-3. Check PowerShell version:
-```powershell
-$PSVersionTable.PSVersion
-# Need 5.1+ on Windows, 7+ on Unix
+3. Check bash version:
+```bash
+bash --version
+# Need bash 4.0+ for full compatibility
 ```
 
 ---
@@ -325,8 +325,8 @@ $env:BMAD_SKIP_VALIDATION = "1"
 
 **Solutions**:
 1. Find violations:
-```powershell
-.\.claude\hooks\quality-gate-no-dummies.ps1
+```bash
+./.claude/hooks/quality-gate-no-dummies.sh
 ```
 2. Common fixes:
 ```javascript
@@ -341,8 +341,8 @@ catch { return []; } // ❌
 catch (e) { logger.error(e); throw e; } // ✅
 ```
 3. Temporarily disable (emergency only):
-```powershell
-$env:BMAD_DISABLE_GATES = "1"
+```bash
+export BMAD_DISABLE_GATES="1"
 ```
 
 ---
@@ -414,7 +414,7 @@ git config --global user.name "Your Name"
 ```
 3. Test manually:
 ```bash
-.\.claude\hooks\github-backup.ps1
+./.claude/hooks/github-backup.sh
 ```
 
 ### Commit Linking Failed
@@ -437,12 +437,12 @@ task-master update-task --id=123 --prompt="commit: abc123"
 ### Windows-Specific
 
 **Path Issues**:
-```powershell
-# Use proper separators
-$path = Join-Path $env:USERPROFILE "projects\my-app"
+```bash
+# Use proper separators for WSL
+path="$HOME/projects/my-app"
 
-# Not
-$path = "~/projects/my-app"  # Unix style
+# Or Windows paths in WSL
+path="/mnt/c/Users/$USER/projects/my-app"
 ```
 
 **Line Endings**:
@@ -456,7 +456,7 @@ git config --global core.autocrlf true
 **Permissions**:
 ```bash
 # Fix permissions
-chmod +x .claude/hooks/*.ps1
+chmod +x .claude/hooks/*.sh
 ```
 
 **Docker Desktop**:
@@ -472,10 +472,13 @@ sudo usermod -aG docker $USER
 # Log out and back in
 ```
 
-**PowerShell Core**:
+**Bash Compatibility**:
 ```bash
-# Install PowerShell Core
-snap install powershell --classic
+# Check bash version
+bash --version
+
+# Update if needed (should be 4.0+)
+sudo apt-get update && sudo apt-get install bash
 ```
 
 ---
@@ -491,7 +494,7 @@ cp -r .taskmaster .taskmaster.backup
 
 # Remove and reinstall
 rm -rf .claude .taskmaster
-.\scripts\setup.ps1 -ProjectDir . -ProjectType auto
+./scripts/setup.sh --project-dir . --project-type auto
 
 # Restore customizations
 cp .claude.backup/settings.local.json .claude/
@@ -501,23 +504,23 @@ cp .claude.backup/settings.local.json .claude/
 
 ```bash
 # Fix specific component
-.\scripts\setup.ps1 -ComponentOnly agents
-.\scripts\setup.ps1 -ComponentOnly hooks
-.\scripts\setup.ps1 -ComponentOnly commands
+./scripts/setup.sh --component-only agents
+./scripts/setup.sh --component-only hooks
+./scripts/setup.sh --component-only commands
 ```
 
 ### Emergency Bypass
 
-```powershell
+```bash
 # Disable all gates (temporary!)
-$env:BMAD_DISABLE_GATES = "1"
-$env:BMAD_SKIP_VALIDATION = "1"
-$env:BMAD_NO_DOCKER = "1"
+export BMAD_DISABLE_GATES="1"
+export BMAD_SKIP_VALIDATION="1"
+export BMAD_NO_DOCKER="1"
 
 # Remember to re-enable!
-Remove-Item Env:BMAD_DISABLE_GATES
-Remove-Item Env:BMAD_SKIP_VALIDATION
-Remove-Item Env:BMAD_NO_DOCKER
+unset BMAD_DISABLE_GATES
+unset BMAD_SKIP_VALIDATION
+unset BMAD_NO_DOCKER
 ```
 
 ---
@@ -529,7 +532,7 @@ Remove-Item Env:BMAD_NO_DOCKER
 Collect this for support:
 ```bash
 # System info
-echo $PSVersionTable
+bash --version
 docker version
 npm version
 task-master --version
@@ -554,9 +557,9 @@ cat .taskmaster/logs/latest.log
 ### Debug Mode
 
 Enable verbose logging:
-```powershell
-$env:BMAD_DEBUG = "1"
-$env:TASK_MASTER_DEBUG = "1"
+```bash
+export BMAD_DEBUG="1"
+export TASK_MASTER_DEBUG="1"
 ```
 
 ---
