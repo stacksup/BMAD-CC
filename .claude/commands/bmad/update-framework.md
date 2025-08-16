@@ -1,6 +1,6 @@
 ---
 description: Update BMAD Framework to latest version from GitHub
-allowed-tools: Bash(powershell:*), Bash(curl:*), Read
+allowed-tools: Bash(bash:*), Bash(curl:*), Bash(git:*), Read
 ---
 
 # /bmad:update-framework
@@ -9,26 +9,24 @@ Updates your BMAD framework installation with the latest features while preservi
 
 ## Simple One-Command Update
 
-```powershell
+```bash
 # Check if update script exists locally
-if (Test-Path "scripts\update-framework.ps1") {
-    Write-Host "🔄 Running local update script..." -ForegroundColor Cyan
-    .\scripts\update-framework.ps1
-} else {
-    Write-Host "🔄 Downloading and running update from GitHub..." -ForegroundColor Cyan
+if [ -f "scripts/update-framework.sh" ]; then
+    echo "🔄 Running local update script..."
+    bash scripts/update-framework.sh
+else
+    echo "🔄 Downloading and running update from GitHub..."
     
     # Download and run update script directly from GitHub
-    try {
-        $updateScript = Invoke-RestMethod -Uri "https://raw.githubusercontent.com/stacksup/BMAD-CC/main/scripts/update-framework.ps1"
-        
+    if curl -fsSL "https://raw.githubusercontent.com/stacksup/BMAD-CC/main/scripts/update-framework.sh" -o /tmp/update-framework.sh; then
         # Execute the update script
-        Invoke-Expression $updateScript
-        
-    } catch {
-        Write-Host "❌ Failed to download update script: $($_.Exception.Message)" -ForegroundColor Red
-        Write-Host "💡 Try updating manually or check your internet connection." -ForegroundColor Yellow
-    }
-}
+        bash /tmp/update-framework.sh
+        rm -f /tmp/update-framework.sh
+    else
+        echo "❌ Failed to download update script"
+        echo "💡 Try updating manually or check your internet connection."
+    fi
+fi
 ```
 
 ## What This Command Does
@@ -51,23 +49,23 @@ if (Test-Path "scripts\update-framework.ps1") {
 
 If automatic update fails, you can also update manually:
 
-```powershell
+```bash
 # Check for updates only
-.\scripts\update-framework.ps1 -CheckOnly
+bash scripts/update-framework.sh --check-only
 
 # Force update all files
-.\scripts\update-framework.ps1 -Force
+bash scripts/update-framework.sh --force
 ```
 
 ## Auto-Update Notifications
 
 BMAD can notify you when updates are available. Add this to your project hooks or run occasionally:
 
-```powershell
+```bash
 # Quick update check (no changes made)
-if (Test-Path "scripts\update-framework.ps1") {
-    .\scripts\update-framework.ps1 -CheckOnly
-}
+if [ -f "scripts/update-framework.sh" ]; then
+    bash scripts/update-framework.sh --check-only
+fi
 ```
 
 This keeps your BMAD framework current with the latest improvements while keeping all your project-specific customizations intact.

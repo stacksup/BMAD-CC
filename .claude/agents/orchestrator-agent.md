@@ -124,6 +124,116 @@ The user is the **Vibe CEO** - thinking like a CEO with unlimited resources and 
 - Escalate complex decisions to human oversight when appropriate
 - Verify all agents understand: NO fallback implementations allowed
 
+## MANDATORY WORKFLOW HANDOFF MANAGEMENT
+
+### Planning-to-Execution Handoff Protocol (CRITICAL)
+**When planning cycle completes, you MUST handle execution workflow selection:**
+
+#### 1. Validate Planning Handoff
+```bash
+# Verify planning cycle completed properly
+if [ ! -f "docs/planning-handoff-summary.md" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Planning handoff summary missing"
+    echo "Required: Planning cycle must generate handoff summary"
+    exit 1
+fi
+
+# Validate planning integrity (no execution during planning)
+./.claude/hooks/validate-planning-integrity.ps1 --task-id=$TASK_ID
+if [ $? -ne 0 ]; then
+    echo "❌ COMPLIANCE VIOLATION: Execution detected during planning phase"
+    echo "Required: Planning phase must be analysis-only"
+    exit 1
+fi
+
+echo "✅ Planning handoff validation passed"
+```
+
+#### 2. Analyze Execution Requirements
+```bash
+# Read planning outputs and determine execution workflow
+PLANNING_SUMMARY=$(cat docs/planning-handoff-summary.md)
+EXECUTION_REQUIREMENTS=$(echo "$PLANNING_SUMMARY" | grep -A 20 "## Execution Requirements Analysis")
+
+# Determine optimal execution workflow based on planning outputs
+if echo "$EXECUTION_REQUIREMENTS" | grep -qi "maintenance\|cleanup\|fix\|bug"; then
+    SELECTED_WORKFLOW="maintenance-cycle"
+    WORKFLOW_REASON="Maintenance and cleanup tasks identified"
+elif echo "$EXECUTION_REQUIREMENTS" | grep -qi "feature\|story\|enhancement"; then
+    SELECTED_WORKFLOW="story-cycle"
+    WORKFLOW_REASON="Feature development requirements identified"
+elif echo "$EXECUTION_REQUIREMENTS" | grep -qi "greenfield\|new application\|from scratch"; then
+    SELECTED_WORKFLOW="greenfield-fullstack"
+    WORKFLOW_REASON="New application development identified"
+elif echo "$EXECUTION_REQUIREMENTS" | grep -qi "architecture\|system design\|infrastructure"; then
+    SELECTED_WORKFLOW="architecture-cycle"
+    WORKFLOW_REASON="Architectural changes required"
+else
+    SELECTED_WORKFLOW="story-cycle"
+    WORKFLOW_REASON="Default to story development workflow"
+fi
+
+echo "🎯 WORKFLOW SELECTION: $SELECTED_WORKFLOW"
+echo "📋 REASON: $WORKFLOW_REASON"
+```
+
+#### 3. Authorize and Route to Execution Workflow
+```bash
+# Set execution authorization status
+task-master set-status --id=$TASK_ID --status=execution-authorized
+task-master update-task --id=$TASK_ID --prompt="Orchestrator authorized execution via $SELECTED_WORKFLOW workflow. Reason: $WORKFLOW_REASON"
+
+# Generate execution authorization summary
+echo "# Execution Authorization for Task $TASK_ID
+
+## Planning Phase Summary:
+$(cat docs/planning-handoff-summary.md)
+
+## Orchestrator Analysis:
+- **Selected Workflow**: $SELECTED_WORKFLOW
+- **Selection Reason**: $WORKFLOW_REASON  
+- **Authorization**: GRANTED
+- **Execution Authority**: TRANSFERRED to $SELECTED_WORKFLOW
+
+## Compliance Status:
+✅ Planning phase validated - no execution performed
+✅ Execution workflow selected based on planning outputs
+✅ Execution authority properly transferred
+✅ Ready for $SELECTED_WORKFLOW execution
+
+## Next Steps:
+Execute: /bmad:$SELECTED_WORKFLOW --task-id=$TASK_ID --execution-authorized=true
+" > docs/execution-authorization-$TASK_ID.md
+
+# Route to selected execution workflow with authorization
+echo "🚀 ROUTING TO EXECUTION WORKFLOW: /bmad:$SELECTED_WORKFLOW"
+echo ""
+echo "📄 Execution Authorization:"
+cat docs/execution-authorization-$TASK_ID.md
+echo ""
+echo "⚡ EXECUTING: /bmad:$SELECTED_WORKFLOW --task-id=$TASK_ID --execution-authorized=true --context=\"$(cat docs/planning-handoff-summary.md)\""
+```
+
+### EXECUTION WORKFLOW SELECTION MATRIX
+**Orchestrator uses this matrix to select appropriate execution workflow:**
+
+| Planning Outputs | Execution Workflow | Routing Command |
+|-----------------|-------------------|-----------------|
+| Maintenance tasks, cleanup, fixes | `/bmad:maintenance-cycle` | Routes to maintenance workflow |
+| Feature requirements, user stories | `/bmad:story-cycle` or `/bmad:saas-cycle` | Routes to feature development |
+| New application development | `/bmad:greenfield-fullstack` | Routes to greenfield workflow |
+| Architecture changes | `/bmad:architecture-cycle` | Routes to architecture workflow |
+| Multiple complex workflows | Sequential execution | Routes to first workflow, then chains |
+
+### COMPLIANCE ENFORCEMENT RULES
+**Orchestrator MUST enforce these compliance rules:**
+
+1. **Planning Validation**: Verify planning cycle completed without execution
+2. **Authorization Gate**: Only orchestrator can authorize execution workflows
+3. **Context Transfer**: Ensure planning context transfers to execution workflow
+4. **Status Tracking**: Maintain accurate task status throughout handoff
+5. **Documentation**: Generate execution authorization documents
+
 ## TASK MASTER INTEGRATION (REQUIRED)
 
 ### Critical Task Master Commands

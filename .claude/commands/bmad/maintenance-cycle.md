@@ -17,13 +17,65 @@ Efficient workflow for bug fixes, small improvements, and maintenance tasks that
 - Documentation updates
 - Code refactoring and cleanup
 
-## 0) OPTIONAL: Task Master Integration
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
 
-**Task Tracking (Optional):**
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$(task-master current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Maintenance cycle requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:maintenance-cycle --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct maintenance request (not from planning):"
+    echo "1. Create task: task-master create --title='Maintenance: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for maintenance workflow"
+    echo "Required: All maintenance work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$(task-master get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+task-master set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for maintenance cycle"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 Maintenance workflow authorized to proceed"
 ```
-If using task management:
-- task-master start-maintenance --type="bug-fix|improvement|config|docs"
-- task-master set-priority --level="low|medium|high"
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    task-master update-task --id=$TASK_ID --prompt="Maintenance cycle started - execution authorized"
+else
+    # Create new maintenance task if none provided
+    TASK_ID=$(task-master create --title="Maintenance: [Auto-generated]" --type="maintenance" --status="in-progress")
+    echo "📝 Created maintenance task: $TASK_ID"
+fi
+
+# Set maintenance-specific metadata
+task-master set-field --id=$TASK_ID --field="workflow" --value="maintenance-cycle"
+task-master set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
 ```
 
 ## 1) DEVELOPER IMPLEMENTATION

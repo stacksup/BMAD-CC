@@ -1,250 +1,325 @@
-﻿# BMAD-CC Product Requirements Document (PRD)
+# BMAD-CC Framework Cleanup Initiative - Product Requirements Document (PRD)
 
-**Project Type:** other  
-**Created:** {{DATE}}  
-**Product Manager:** [Agent Generated]  
+**Project Type:** Framework  
+**Created:** 2025-08-16  
+**Product Manager:** John (PM Agent)  
 **Version:** 1.0
 
 ## Document Overview
 
 ### PRD Purpose
-[Describe the purpose and scope of this PRD - what product capabilities it defines]
+This PRD defines the strategic framework cleanup initiative for BMAD-CC, transitioning from a development repository to a clean, professional framework distribution that maximizes adoption while maintaining development capabilities.
 
 ### Related Documents
-- **Project Brief:** `docs/project-brief.md` (Business context and market analysis)
-- **Architecture Doc:** `docs/architecture-specification.md` (Technical implementation)
-- **UX Design Spec:** `docs/ux-design-specification.md` (User experience design)
+- **Business Analysis:** Market research and strategic positioning analysis
+- **Technical Assessment:** Current state analysis (7.2M size, 1,279 files)
+- **Competitive Analysis:** Framework adoption patterns and industry benchmarks
 
 ## Product Vision & Strategy
 
 ### Product Vision
-**"Transform BMAD from a development framework into a self-improving AI-powered development ecosystem that learns from every project and makes every subsequent project exponentially more intelligent."**
-
-The Contextual Lessons Learned Integration System elevates BMAD beyond workflow automation to create the first development framework with true institutional memory. Every challenge solved, pattern recognized, and decision made becomes contextual intelligence that proactively improves future development cycles.
+Transform BMAD-CC into the most accessible and professional AI-driven development framework by eliminating distribution bloat while preserving powerful development capabilities for framework maintainers.
 
 ### Strategic Objectives
-
-#### 1. **BMAD Methodology Evolution** (12-Month Transformation)
-**Objective:** Transform all 12 BMAD agents from reactive tools to proactive, context-aware intelligence partners
-- **Measurable Outcome:** 95% workflow routing accuracy (up from 75%), 60% reduction in agent handoff friction
-- **Agent Enhancement:** Each agent accumulates domain-specific lessons enabling specialized pattern recognition
-- **Cross-Agent Intelligence:** Lessons create feedback loops between agents, improving collaborative decision-making
-- **Quality Gate Innovation:** Enhanced gates validate lesson capture and trigger contextual surfacing
-
-#### 2. **Market Disruption Through Network Effects** (18-Month Market Position)
-**Objective:** Establish first-mover advantage in contextual development intelligence with exponentially growing competitive moat
-- **Measurable Outcome:** 65-75% lesson relevance rate (vs. 35% for generic AI tools), $2.6M ARR by Year 2
-- **Competitive Differentiation:** 
-  - **Accumulated Learning Moat**: Each project improves all future projects (competitors start from zero)
-  - **Workflow Integration Depth**: Lessons span entire development lifecycle vs. code-only competitors
-  - **Multi-Domain Pattern Recognition**: 8-12 specialized agent knowledge bases vs. single AI model approaches
-
-#### 3. **Self-Improving Platform Architecture** (24-Month Platform Evolution)  
-**Objective:** Create self-evolving development ecosystem that automatically improves its own capabilities
-- **Measurable Outcome:** 40% reduction in framework maintenance effort, automated generation of 80% of new framework features
-- **Platform Capabilities:**
-  - **Framework Evolution Loop**: Lessons improve BMAD itself - routing logic, agent effectiveness, quality gates
-  - **Predictive Development**: 2-3 sprint advance prediction of project challenges and resource needs
-  - **Autonomous Quality Improvement**: System suggests and implements workflow optimizations based on lesson patterns
+1. **Primary Objective:** Achieve 40-60% adoption rate increase through reduced cognitive load and professional presentation
+2. **User Value:** Enable developers to onboard in <5 minutes with clear, focused documentation and minimal file structure
+3. **Market Position:** Establish BMAD-CC as the premier enterprise-ready AI development framework with clean distribution standards
 
 ### Success Metrics & KPIs
-
-#### **BMAD Enhancement Metrics** (Framework Intelligence)
-- **Agent Effectiveness**: 60% improvement in first-attempt accuracy across all agents
-- **Workflow Efficiency**: 40% reduction in cycle completion times through lesson-powered optimization
-- **Cross-Project Learning**: 80% of lessons successfully applied to improve similar future patterns
-- **Quality Gate Evolution**: 50% reduction in quality gate failures through proactive lesson surfacing
-
-#### **Market Penetration Metrics** (Competitive Position)
-- **Enterprise Adoption**: 15,000 organizations in addressable market → 0.1% (15 orgs) Year 1 → 1.0% (150 orgs) Year 5
-- **Developer Productivity Impact**: 25-55% productivity improvements (validated through enterprise case studies)
-- **Network Effect Growth**: Lesson library grows from 0 to 10,000+ contextual patterns by Year 2
-- **Switching Cost Development**: Average 18-month payback period creates natural switching resistance
-
-#### **Platform Evolution Metrics** (Self-Improvement Capability)
-- **Framework Intelligence**: 75% of framework improvements generated automatically from lesson analysis
-- **Cross-Domain Pattern Recognition**: Identify 90% of recurring patterns across projects within 6 months
-- **Predictive Accuracy**: 80% accuracy in predicting development challenges 2-3 sprints in advance
-- **Community Network Effects**: Support 100+ BMAD installations sharing anonymized pattern intelligence
-
-### Strategic Competitive Advantages
-
-#### **Non-Replicable Network Effects**
-1. **Exponential Learning Advantage**: Each BMAD project creates compounding intelligence that competitors cannot match without equivalent project history
-2. **Multi-Agent Specialization**: Domain-specific lesson accumulation across 8-12 agents vs. competitors' single-model approaches
-3. **Workflow Integration Depth**: Contextual intelligence spans planning → development → deployment → learning lifecycle
-
-#### **Switching Costs & Lock-In Mechanisms**
-1. **Accumulated Intelligence Value**: Teams develop 100-500 lessons annually; switching loses 2-3 years of institutional memory
-2. **Team-Specific Optimization**: BMAD learns unique team patterns creating 25-40% efficiency advantages that reset with competitor switches
-3. **Cross-Project Portfolio Intelligence**: Multi-project pattern recognition provides strategic insights unavailable elsewhere
-
-#### **Platform Evolution Trajectory**
-1. **Self-Improving Architecture**: Framework automatically evolves based on usage lessons, staying ahead of static competitor offerings
-2. **Enterprise Knowledge Integration**: Lessons integrate with organizational learning systems, connecting project knowledge to business outcomes
-3. **Future AI Partnership Evolution**: Enhanced BMAD becomes true development partner with complete project history awareness
+- **Adoption:** 40-60% increase in framework adoption rate within 3 months
+- **Engagement:** <5 minute time-to-first-success for new users
+- **Business:** 70% distribution size reduction (7.2M → <2M), 1,279 → ~400 files
+- **Quality:** Maintain 100% development capability retention for maintainers
 
 ## User Requirements
 
 ### Primary User Stories
-1. **As a [user type], I want [goal] so that [benefit]**
-   - **Acceptance Criteria:**
-     - [Specific testable condition]
-     - [Additional validation requirement]
-   - **Priority:** High/Medium/Low
-   - **Complexity:** Small/Medium/Large
 
-2. **[Additional user stories following same format]**
+1. **As a new developer, I want a clean, professional framework structure so that I can evaluate and adopt BMAD-CC without cognitive overload**
+   - **Acceptance Criteria:**
+     - Framework root contains <50 visible files/folders
+     - Clear README with getting started in <5 steps
+     - No IDE-specific or development artifacts in distribution
+   - **Priority:** High
+   - **Complexity:** Large
+
+2. **As an enterprise decision maker, I want a professional, minimal framework distribution so that I can confidently recommend BMAD-CC for corporate adoption**
+   - **Acceptance Criteria:**
+     - No personal development tools or configurations visible
+     - Clear versioning and release management
+     - Professional documentation structure
+   - **Priority:** High
+   - **Complexity:** Medium
+
+3. **As a framework maintainer, I want full development capabilities preserved so that I can continue efficient development workflows**
+   - **Acceptance Criteria:**
+     - All development tools accessible via separate development repository
+     - Full workflow compliance maintained
+     - No loss of existing development efficiency
+   - **Priority:** High
+   - **Complexity:** Large
+
+4. **As a framework contributor, I want clear separation between distribution and development so that I understand what gets shipped vs what's for internal use**
+   - **Acceptance Criteria:**
+     - Clear documentation of distribution vs development assets
+     - Automated synchronization between repositories
+     - Contribution guidelines updated for new structure
+   - **Priority:** Medium
+   - **Complexity:** Medium
 
 ### User Journey Requirements
-- **Onboarding:** [How users discover and start using the product]
-- **Core Workflows:** [Primary user tasks and interactions]
-- **Advanced Features:** [Power user capabilities and extensions]
+- **Discovery:** Professional first impression with clean structure
+- **Evaluation:** Quick understanding of framework capabilities
+- **Onboarding:** <5 minute setup to working example
+- **Development:** Full access to advanced features and customization
+- **Contribution:** Clear understanding of development vs distribution assets
 
 ## Functional Requirements
 
 ### Core Features & Capabilities
 
-#### Feature 1: [Feature Name]
-- **Description:** [What the feature does and why it's needed]
-- **User Stories:** [Reference to relevant user stories above]
+#### Feature 1: Three-Tier Distribution Strategy
+- **Description:** Implement clean distribution tier, development repository tier, and enterprise package tier
+- **User Stories:** References user stories 1, 2, 3 above
 - **Acceptance Criteria:**
-  - [Specific functional requirement]
-  - [Integration or performance requirement]
-- **Dependencies:** [Technical or business dependencies]
-- **Priority:** Must Have/Should Have/Could Have
+  - Clean distribution contains only essential framework files
+  - Development repository maintains full development environment
+  - Enterprise package provides professional, supported distribution
+- **Dependencies:** Repository restructuring, automation tooling
+- **Priority:** Must Have
 
-#### Feature 2: [Feature Name]
-[Similar breakdown for each major feature]
+#### Feature 2: Automated Asset Classification
+- **Description:** Systematically identify and categorize all current assets for distribution decisions
+- **User Stories:** Supports all user stories through comprehensive cleanup
+- **Acceptance Criteria:**
+  - All 1,279 files classified as Essential/Development/Archive
+  - Automated tooling to maintain classification
+  - Clear rationale documented for each classification decision
+- **Dependencies:** Asset analysis tooling, classification criteria
+- **Priority:** Must Have
+
+#### Feature 3: Development Environment Preservation
+- **Description:** Maintain full development capabilities in separate repository with automated synchronization
+- **User Stories:** References user story 3 (framework maintainer needs)
+- **Acceptance Criteria:**
+  - All IDE configurations preserved in development repository
+  - All development scripts and tools functional
+  - Automated synchronization of code changes
+- **Dependencies:** Repository setup, CI/CD pipeline configuration
+- **Priority:** Must Have
+
+#### Feature 4: Professional Documentation Structure
+- **Description:** Create enterprise-grade documentation focused on framework adoption and usage
+- **User Stories:** References user stories 1, 2 (developer and enterprise needs)
+- **Acceptance Criteria:**
+  - Clear getting started guide (<5 steps)
+  - Professional README with value proposition
+  - API documentation focused on user needs
+- **Dependencies:** Documentation audit, content strategy
+- **Priority:** Should Have
+
+#### Feature 5: Gradual Migration Path
+- **Description:** Implement phased approach to minimize disruption to existing users
+- **User Stories:** Supports all user stories through risk mitigation
+- **Acceptance Criteria:**
+  - Clear migration timeline communicated to users
+  - Backward compatibility maintained during transition
+  - Rollback procedures documented and tested
+- **Dependencies:** Change management planning, communication strategy
+- **Priority:** Must Have
 
 ### Integration Requirements
-- **External APIs:** [Third-party services and data sources]
-- **Internal Systems:** [Existing system integrations needed]
-- **Data Sources:** [Database and content requirements]
+- **Version Control:** Maintain git history and contribution workflows
+- **CI/CD Systems:** Preserve existing automation and testing
+- **Documentation Systems:** Integrate with existing doc generation tools
 
 ## Non-Functional Requirements
 
 ### Performance Requirements
-- **Response Time:** [Maximum acceptable latency for key operations]
-- **Throughput:** [Expected concurrent users and transaction volumes]
-- **Availability:** [Uptime requirements and maintenance windows]
+- **Download Size:** Reduce distribution from 7.2M to <2M (70% reduction)
+- **File Count:** Reduce from 1,279 to ~400 files (69% reduction)
+- **Installation Time:** <2 minutes for complete framework setup
 
 ### Security & Compliance
-- **Authentication:** [User authentication and authorization requirements]
-- **Data Protection:** [Privacy and data security requirements]
-- **Compliance:** [Regulatory or industry compliance requirements]
+- **Access Control:** Maintain appropriate access to development repository
+- **Sensitive Data:** Ensure no personal or sensitive configurations in distribution
+- **Enterprise Compliance:** Meet enterprise security scanning requirements
 
 ### Usability & Accessibility
-- **Browser Support:** [Supported browsers and versions]
-- **Mobile Support:** [Mobile and responsive design requirements]
-- **Accessibility:** [WCAG compliance and accessibility standards]
+- **Framework Discovery:** New users can understand value proposition in <2 minutes
+- **Getting Started:** Complete first example in <5 minutes
+- **Documentation:** Clear navigation and searchable content
 
 ### Scalability & Reliability
-- **User Growth:** [Expected user growth and scaling requirements]
-- **Data Growth:** [Expected data volumes and storage requirements]
-- **Reliability:** [Error handling and recovery requirements]
+- **User Growth:** Support projected 40-60% adoption increase
+- **Distribution Management:** Automated publishing and version control
+- **Reliability:** Maintain 99.9% framework availability and stability
 
 ## Technical Constraints & Considerations
 
 ### Platform Requirements
-- **Frontend:** [Web, mobile, desktop platform requirements]
-- **Backend:** [Server, database, and infrastructure requirements]
-- **Integration:** [APIs, services, and data integration needs]
+- **Distribution:** Cross-platform compatibility maintained
+- **Development:** Full IDE and tool support preserved
+- **Integration:** Maintain compatibility with existing user setups
 
 ### Technology Preferences
-- **Existing Stack:** [Current technology stack to leverage]
-- **New Technologies:** [New technologies to evaluate or adopt]
-- **Architecture:** [Architectural patterns and approaches]
+- **Existing Stack:** Preserve current framework architecture
+- **New Technologies:** Introduce automation tooling for asset management
+- **Architecture:** Implement clean separation of concerns between distribution and development
 
 ## User Experience Requirements
 
 ### Interface Requirements
-- **Design System:** [Visual design and branding requirements]
-- **Navigation:** [Information architecture and navigation patterns]
-- **Responsive Design:** [Multi-device and screen size support]
+- **Directory Structure:** Intuitive, logical organization for new users
+- **Documentation:** Professional presentation with clear hierarchy
+- **Examples:** Working examples easily discoverable and executable
 
 ### Interaction Requirements
-- **User Flows:** [Critical user workflows and interactions]
-- **Error Handling:** [Error messaging and recovery flows]
-- **Feedback:** [User feedback and confirmation patterns]
+- **Setup Flow:** Linear, error-resistant getting started process
+- **Error Handling:** Clear error messages with actionable solutions
+- **Feedback:** Success confirmations at each setup step
 
 ## Content & Data Requirements
 
 ### Content Strategy
-- **Content Types:** [Types of content the system will manage]
-- **Content Sources:** [Where content comes from and how it's managed]
-- **Localization:** [Multi-language or regional requirements]
+- **Essential Content:** Core framework functionality and documentation
+- **Development Content:** Comprehensive development tools and configurations
+- **Archive Content:** Historical artifacts maintained separately
 
 ### Data Requirements
-- **Data Models:** [Key data entities and relationships]
-- **Data Sources:** [External data feeds and integrations]
-- **Data Quality:** [Data validation and quality requirements]
+- **Asset Inventory:** Complete catalog of all current files and their purposes
+- **Classification Data:** Systematic categorization of all assets
+- **Migration Tracking:** Progress monitoring and rollback capabilities
 
 ## Release Planning
 
 ### MVP Definition
-- **Core Features:** [Minimum viable features for first release]
-- **Success Criteria:** [How MVP success will be measured]
-- **Timeline:** [Target dates for MVP completion]
+- **Core Features:** 
+  - Asset classification system (1,279 files categorized)
+  - Clean distribution repository (<400 files)
+  - Development repository with full capabilities
+  - Basic documentation restructure
+- **Success Criteria:** 
+  - 70% size reduction achieved
+  - No development capability loss
+  - Professional first impression for new users
+- **Timeline:** 4-week implementation phase
 
 ### Release Roadmap
-1. **Release 1 (MVP):** [Core features and timeline]
-2. **Release 2:** [Additional features and enhancements]
-3. **Future Releases:** [Long-term feature roadmap]
+
+#### Phase 1: Foundation (Weeks 1-2)
+- Complete asset analysis and classification
+- Set up three-tier repository structure
+- Implement basic automation tooling
+- **Deliverable:** Classified asset inventory and repository structure
+
+#### Phase 2: Migration (Weeks 3-4)
+- Execute systematic file migration
+- Implement automated synchronization
+- Update documentation and examples
+- **Deliverable:** Clean distribution ready for testing
+
+#### Phase 3: Validation & Launch (Weeks 5-6)
+- User acceptance testing with existing users
+- Performance validation and optimization
+- Launch communication and marketing
+- **Deliverable:** Public release of cleaned framework
+
+#### Phase 4: Enterprise Enhancement (Weeks 7-8)
+- Enterprise package development
+- Professional support documentation
+- Partnership enablement materials
+- **Deliverable:** Enterprise-ready framework distribution
 
 ### Feature Prioritization
-- **Must Have (P0):** [Critical features for initial launch]
-- **Should Have (P1):** [Important features for competitive positioning]
-- **Could Have (P2):** [Nice-to-have features for future releases]
+- **Must Have (P0):** Asset classification, clean distribution, development preservation
+- **Should Have (P1):** Professional documentation, automated tooling, migration path
+- **Could Have (P2):** Enterprise package, advanced automation, marketing materials
 
 ## Risk Management
 
 ### Product Risks
-1. **[Risk Description]**
-   - **Impact:** High/Medium/Low
-   - **Probability:** High/Medium/Low
-   - **Mitigation Strategy:** [How to address or minimize risk]
+
+1. **User Disruption During Migration**
+   - **Impact:** High
+   - **Probability:** Medium
+   - **Mitigation Strategy:** Gradual migration with clear communication, rollback procedures, and backward compatibility
+
+2. **Development Workflow Disruption**
+   - **Impact:** High
+   - **Probability:** Low
+   - **Mitigation Strategy:** Comprehensive testing of development repository, maintain parallel workflows during transition
+
+3. **Adoption Rate Not Achieving Targets**
+   - **Impact:** Medium
+   - **Probability:** Low
+   - **Mitigation Strategy:** A/B testing with user groups, iterative improvements based on feedback
+
+4. **Asset Classification Errors**
+   - **Impact:** Medium
+   - **Probability:** Medium
+   - **Mitigation Strategy:** Multi-stage review process, automated validation, community feedback integration
 
 ### Dependencies & Assumptions
-- **External Dependencies:** [Third-party services, APIs, or partners]
-- **Internal Dependencies:** [Team resources, infrastructure, or systems]
-- **Key Assumptions:** [Assumptions that could impact product success]
+- **External Dependencies:** Git repository hosting, CI/CD infrastructure
+- **Internal Dependencies:** Development team capacity, stakeholder alignment
+- **Key Assumptions:** 
+  - Current users will adapt to new structure with proper communication
+  - Enterprise market opportunity exists for clean framework
+  - Development efficiency can be maintained with repository separation
 
 ## Success Criteria & Measurement
 
 ### Launch Criteria
 - [ ] All P0 features implemented and tested
-- [ ] Performance benchmarks met
-- [ ] Security and compliance requirements satisfied
-- [ ] User acceptance testing completed
+- [ ] 70% size reduction achieved (7.2M → <2M)
+- [ ] 69% file reduction achieved (1,279 → ~400 files)
+- [ ] Development workflow validation completed
+- [ ] User acceptance testing passed
+- [ ] Rollback procedures tested and documented
 
 ### Post-Launch Metrics
-- **Week 1:** [Initial adoption and functionality metrics]
-- **Month 1:** [User engagement and retention metrics]
-- **Quarter 1:** [Business impact and success metrics]
+
+#### Week 1: Technical Validation
+- Framework download size: <2M achieved
+- Installation success rate: >95%
+- Development workflow functionality: 100% preserved
+- User-reported issues: <5 critical bugs
+
+#### Month 1: Adoption Metrics
+- New user onboarding time: <5 minutes average
+- Framework evaluation completion rate: >80%
+- User satisfaction score: >4.5/5
+- Documentation clarity rating: >4.0/5
+
+#### Quarter 1: Business Impact
+- Framework adoption rate increase: 40-60% achieved
+- Enterprise inquiry rate: 3x baseline
+- Community contribution rate: Maintained or improved
+- Professional market position: Established
 
 ## Stakeholder Sign-Off
 
 ### Approval Requirements
-- [ ] **Business Stakeholder:** [Name/Role] - Strategic alignment approved
-- [ ] **Technical Lead:** [Name/Role] - Technical feasibility confirmed
-- [ ] **UX Lead:** [Name/Role] - User experience requirements validated
-- [ ] **Product Owner:** [Name/Role] - Requirements ready for development
+- [ ] **Business Stakeholder:** Vibe CEO - Strategic vision and market positioning approved
+- [ ] **Technical Lead:** System Architect - Technical feasibility and architecture confirmed
+- [ ] **Development Team:** Framework maintainers - Development workflow impact assessed
+- [ ] **Product Owner:** PM Agent - Requirements validated and prioritized
 
 ### Change Management
-- **Change Process:** [How requirements changes will be handled]
-- **Approval Authority:** [Who can approve requirement changes]
-- **Communication:** [How changes will be communicated to team]
+- **Change Process:** All requirement changes require business impact assessment and stakeholder review
+- **Approval Authority:** Vibe CEO for strategic changes, PM Agent for tactical adjustments
+- **Communication:** Weekly progress updates, immediate notification of scope changes
 
 ---
 
 **Document Control**
-- **Created by:** Product Manager Agent
-- **Review Cycle:** [Frequency of PRD reviews and updates]
-- **Next Phase:** Architecture Specification & UX Design
-- **Status:** [Draft/Review/Approved/In Development]
+- **Created by:** John (Product Manager Agent)
+- **Review Cycle:** Weekly during implementation, monthly post-launch
+- **Next Phase:** Technical architecture specification and implementation planning
+- **Status:** Draft - Ready for Stakeholder Review
 
 ### Document History
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | {{DATE}} | PM Agent | Initial PRD creation |
+| 1.0 | 2025-08-16 | John (PM Agent) | Initial PRD creation with comprehensive cleanup strategy |

@@ -1,5 +1,0 @@
-# lessons
-
-Each file: <STORY_ID>.md
-- Summary, Triggers (tags), Anti-pattern, Correct pattern, Snippets, References.
-- Where to surface: { when: ["SM","DEV"], contexts: [...] }

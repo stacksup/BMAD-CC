@@ -156,11 +156,22 @@
         ],
         "priority": "high",
         "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Fix smart-cycle workflow compliance by adding execution authorization validation",
+        "description": "Update smart-cycle.md with proven execution authorization patterns from maintenance-cycle.md to prevent compliance violations and ensure proper workflow handoff procedures",
+        "details": "CONTEXT: We had a compliance failure where smart-cycle allowed direct execution bypassing proper workflow handoffs. SOLUTION: Add mandatory execution authorization validation to smart-cycle.md (lines 20-80 from maintenance-cycle.md). Apply established Task tool trigger patterns. Ensure proper workflow handoff procedures. SCOPE: Small maintenance fix to prevent future compliance violations by applying already-proven compliance patterns.",
+        "testStrategy": "Verify smart-cycle.md includes execution authorization validation. Test that unauthorized access is properly blocked. Confirm Task Master integration follows established patterns. Validate proper error messages guide users to correct usage.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "execution-authorized",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-08-11T01:33:05.552Z",
-      "updated": "2025-08-14T06:33:25.122Z",
+      "updated": "2025-08-16T18:45:00.000Z",
       "description": "Tasks for master context"
     }
   }
