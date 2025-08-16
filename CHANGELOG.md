@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 2025-08-16 - Attribution and Credit Updates
+
+### ✅ Added Attribution to Original BMAD METHOD
+- **COMPLETED**: Added proper attribution section to README acknowledging the original BMAD METHOD project
+- **CHANGE TYPE**: docs - Documentation update for proper open source attribution
+- **DETAILS**: 
+  - Added Attribution section after License section in README.md
+  - Acknowledged original project at https://github.com/bmad-code-org/BMAD-METHOD
+  - Expressed gratitude to original authors for pioneering the Business Model Accelerated Development approach
+  - Clarified that BMAD-CC builds upon and adapts those concepts for Claude Code environments
+- **IMPACT**: Proper credit given to inspirational source while maintaining independent project status
+- **FILES MODIFIED**: README.md
+
 ## 2025-08-16 - Framework Integrity Improvements
 
 ### ✅ FRAMEWORK COMPLETION: Comprehensive Workflow Compliance Project

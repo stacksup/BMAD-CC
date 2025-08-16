@@ -249,6 +249,10 @@ We welcome contributions! Please see our [Contributing Guide](docs/CONTRIBUTING.
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
+## 🙏 Attribution
+
+BMAD-CC was inspired by the original [BMAD METHOD](https://github.com/bmad-code-org/BMAD-METHOD) project. We extend our gratitude to the original authors for pioneering the Business Model Accelerated Development approach. This framework builds upon those foundational concepts while adapting them specifically for Claude Code environments.
+
 ---
 
 <div align="center">
