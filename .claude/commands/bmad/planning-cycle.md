@@ -133,11 +133,13 @@ After PRD completion:
 
 ## PHASE 2: TECHNICAL PLANNING & ARCHITECTURE
 
-### 2A) System Architect â†’ Technical Architecture & Implementation Strategy
-**Load System Architect Agent:**
+### 2A) System Architect â†' Technical Architecture & Implementation Strategy
+**STEP 3 TRIGGER: Use Task tool to invoke architect-agent**
 ```
-Load the architect-agent to create comprehensive architecture specification using the architecture template with advanced elicitation.
+Use Task tool to invoke architect-agent to create comprehensive architecture specification using the architecture template with advanced elicitation.
 ```
+
+**MANDATORY: Wait for architect-agent completion confirmation before proceeding to UX Expert phase.**
 
 **Brainstorming & Elicitation Techniques:**
 The Architect will use advanced exploration methods:
@@ -170,11 +172,13 @@ After architecture completion:
 5. Save validation: docs/validation/architect-validation-[date].md
 ```
 
-### 2B) UX Expert â†’ User Experience Design & Interface Planning
-**Load UX Expert Agent:**
+### 2B) UX Expert â†' User Experience Design & Interface Planning
+**STEP 4 TRIGGER: Use Task tool to invoke ux-agent**
 ```
-Load the ux-agent to design user experience and interface specifications.
+Use Task tool to invoke ux-agent to design user experience and interface specifications.
 ```
+
+**MANDATORY: Wait for ux-agent completion confirmation before proceeding to Product Owner phase.**
 
 **Input:** Product strategy and technical architecture
 **Deliverables:**
@@ -188,11 +192,13 @@ Load the ux-agent to design user experience and interface specifications.
 
 ## PHASE 3: INTEGRATION & VALIDATION
 
-### 3A) Product Owner â†’ Requirements Integration & Validation
-**Load Product Owner Agent:**
+### 3A) Product Owner â†' Requirements Integration & Validation
+**STEP 5 TRIGGER: Use Task tool to invoke po-agent**
 ```
-Load the po-agent to validate and integrate all planning outputs.
+Use Task tool to invoke po-agent to validate and integrate all planning outputs.
 ```
+
+**MANDATORY: Wait for po-agent completion confirmation before proceeding to Master Orchestrator phase.**
 
 **Input:** All planning documents from previous phases
 **Deliverables:**
@@ -209,11 +215,13 @@ Load the po-agent to validate and integrate all planning outputs.
 - [ ] Success metrics are measurable
 - [ ] Risks are identified with mitigation plans
 
-### 3B) Master Orchestrator â†’ Planning Summary & Development Readiness
-**Load Master Orchestrator Agent:**
+### 3B) Master Orchestrator â†' Planning Summary & Development Readiness
+**STEP 6 TRIGGER: Use Task tool to invoke orchestrator-agent**
 ```
-Load the orchestrator-agent to assess planning completeness and readiness.
+Use Task tool to invoke orchestrator-agent to assess planning completeness and readiness.
 ```
+
+**MANDATORY: Wait for orchestrator-agent completion confirmation before proceeding to development preparation.**
 
 **Planning Assessment:**
 1. **Completeness Check**

@@ -107,13 +107,15 @@ if [[ -z "$CURRENT_TASK" ]]; then
 fi
 ```
 
-**Load Orchestrator Agent:**
+**STEP 1 TRIGGER: Use Task tool to invoke orchestrator-agent**
 ```
-Load the orchestrator-agent with Task Master context to determine optimal workflow routing.
+Use Task tool to invoke orchestrator-agent with Task Master context to determine optimal workflow routing.
 If no tasks exist, orchestrator will create initial tasks from user request.
 ```
 
-**Initial Project Setup (First Time Only):**
+**MANDATORY: Wait for orchestrator-agent completion confirmation before proceeding to workflow routing.**
+
+**STEP 2 COMPLETION VALIDATION - Initial Project Setup (First Time Only):**
 ```
 For new projects or major initiatives:
 1. GitHub Integration Check:
@@ -122,11 +124,13 @@ For new projects or major initiatives:
    - Auto-backup will be disabled until configured
    
 2. Project Validation:
-   - Load po-agent â†’ Use validate-project-setup capability
+   - STEP 2A TRIGGER: Use Task tool to invoke po-agent
+   - Use validate-project-setup capability
    - Auto-detect project type and characteristics
    - Validate against 6-section master checklist
    - If BLOCKED: Address critical setup issues first
    - Save validation: docs/validation/project-setup-[date].md
+   - MANDATORY: Wait for po-agent completion confirmation before proceeding
 ```
 
 **Enhanced Intelligence Layer**

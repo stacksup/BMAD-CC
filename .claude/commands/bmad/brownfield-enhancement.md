@@ -18,11 +18,13 @@ Comprehensive workflow for enhancing existing systems with new features, moderni
 
 ## PHASE 0: ENHANCEMENT CLASSIFICATION & ROUTING
 
-### 0A) Business Analyst â†’ Enhancement Scope Analysis
-**Load Business Analyst Agent:**
+### 0A) Business Analyst â†' Enhancement Scope Analysis
+**STEP 1 TRIGGER: Use Task tool to invoke analyst-agent**
 ```
-Load the analyst-agent to classify and scope the enhancement request.
+Use Task tool to invoke analyst-agent to classify and scope the enhancement request.
 ```
+
+**MANDATORY: Wait for analyst-agent completion confirmation before proceeding to routing decision.**
 
 **Classification Process:**
 Analyze enhancement complexity and route to appropriate path:
@@ -56,13 +58,17 @@ Analyze enhancement complexity and route to appropriate path:
 #### Route A: Single Story Path
 **For simple enhancements < 4 hours:**
 ```
-Load pm-agent â†’ Use brownfield-create-story task â†’ Exit to development
+STEP 2A TRIGGER: Use Task tool to invoke pm-agent
+Use brownfield-create-story task → Exit to development
+MANDATORY: Wait for pm-agent completion confirmation
 ```
 
 #### Route B: Small Feature Path  
 **For focused enhancements 1-3 stories:**
 ```
-Load pm-agent â†’ Use brownfield-create-epic task â†’ Exit to story development
+STEP 2B TRIGGER: Use Task tool to invoke pm-agent
+Use brownfield-create-epic task → Exit to story development
+MANDATORY: Wait for pm-agent completion confirmation
 ```
 
 #### Route C: Major Enhancement Path
@@ -84,9 +90,12 @@ Check if adequate project documentation exists for enhancement planning.
 - **If Inadequate**: Run comprehensive system documentation before PRD
 
 ### 1B) CONDITIONAL: System Architecture Analysis
-**System Architect â†’ Comprehensive System Documentation:**
+**System Architect â†' Comprehensive System Documentation:**
 ```
-ONLY if documentation inadequate: Load architect-agent â†’ Use document-project capability to create comprehensive brownfield documentation
+ONLY if documentation inadequate: 
+STEP 3 TRIGGER: Use Task tool to invoke architect-agent
+Use document-project capability to create comprehensive brownfield documentation
+MANDATORY: Wait for architect-agent completion confirmation before proceeding
 ```
 
 **System Analysis Deliverables:**
@@ -100,11 +109,13 @@ ONLY if documentation inadequate: Load architect-agent â†’ Use document-pro
 
 ## PHASE 2: ENHANCEMENT PLANNING
 
-### 2A) Product Manager â†’ Enhancement PRD
-**Load Product Manager Agent:**
+### 2A) Product Manager â†' Enhancement PRD
+**STEP 4 TRIGGER: Use Task tool to invoke pm-agent**
 ```
-Load the pm-agent to create comprehensive enhancement PRD.
+Use Task tool to invoke pm-agent to create comprehensive enhancement PRD.
 ```
+
+**MANDATORY: Wait for pm-agent completion confirmation before proceeding to architecture planning.**
 
 **Input:** Existing documentation or system analysis
 **Enhancement PRD Focus:**
@@ -131,9 +142,11 @@ Review PRD to determine if architectural planning needed:
 - Following existing patterns â†’ Skip to validation
 ```
 
-**System Architect â†’ Enhancement Architecture:**
+**System Architect â†' Enhancement Architecture:**
 ```
-ONLY if architectural changes needed: Load architect-agent
+ONLY if architectural changes needed: 
+STEP 5 TRIGGER: Use Task tool to invoke architect-agent
+MANDATORY: Wait for architect-agent completion confirmation before proceeding
 ```
 
 **Enhancement Architecture Focus:**
@@ -147,11 +160,13 @@ ONLY if architectural changes needed: Load architect-agent
 
 ## PHASE 3: VALIDATION & INTEGRATION
 
-### 3A) Product Owner â†’ Enhancement Validation
-**Load Product Owner Agent:**
+### 3A) Product Owner â†' Enhancement Validation
+**STEP 6 TRIGGER: Use Task tool to invoke po-agent**
 ```
-Load the po-agent to validate enhancement planning for integration safety.
+Use Task tool to invoke po-agent to validate enhancement planning for integration safety.
 ```
+
+**MANDATORY: Wait for po-agent completion confirmation before proceeding to development preparation.**
 
 **Brownfield-Specific Validation:**
 - [ ] Enhancement approach minimizes existing system disruption
@@ -176,9 +191,11 @@ Re-export updated documents to docs/ folder after fixes.
 ## PHASE 4: DEVELOPMENT PREPARATION
 
 ### 4A) Document Sharding for Development
-**Product Owner â†’ Documentation Preparation:**
+**Product Owner â†' Documentation Preparation:**
 ```
-Load po-agent to use document sharding capability to prepare enhancement documents for development consumption.
+STEP 7 TRIGGER: Use Task tool to invoke po-agent
+Use document sharding capability to prepare enhancement documents for development consumption.
+MANDATORY: Wait for po-agent completion confirmation before proceeding
 ```
 
 **Sharding Options:**
@@ -192,10 +209,12 @@ Load po-agent to use document sharding capability to prepare enhancement documen
 - Integration specifications and testing requirements
 
 ### 4B) Story Creation with Brownfield Context
-**Load Scrum Master Agent:**
+**STEP 8 TRIGGER: Use Task tool to invoke sm-agent**
 ```
-Load the sm-agent to use systematic story creation process from available documentation.
+Use Task tool to invoke sm-agent to use systematic story creation process from available documentation.
 ```
+
+**MANDATORY: Wait for sm-agent completion confirmation before proceeding to development execution.**
 
 **Story Creation Approach:**
 - **For Sharded PRD**: Use standard create-next-story task
@@ -219,10 +238,11 @@ After story creation:
 ## PHASE 5: DEVELOPMENT EXECUTION
 
 ### 5A) OPTIONAL: Story Review & Approval
-**Load Business Analyst or Product Manager:**
+**STEP 9 TRIGGER: Use Task tool to invoke analyst-agent or pm-agent**
 ```
-OPTIONAL: Review draft stories for enhancement completeness and safety.
+OPTIONAL: Use Task tool to invoke analyst-agent or pm-agent to review draft stories for enhancement completeness and safety.
 NOTE: story-review task coming in future releases.
+MANDATORY: If invoked, wait for agent completion confirmation before proceeding
 ```
 
 **Brownfield Story Review Focus:**
@@ -232,10 +252,12 @@ NOTE: story-review task coming in future releases.
 - Validate testing coverage for existing functionality
 
 ### 5B) Developer Implementation
-**Load Developer Agent (New Chat Session):**
+**STEP 10 TRIGGER: Use Task tool to invoke dev-agent (New Chat Session)**
 ```
-Load the dev-agent for enhancement implementation with brownfield considerations.
+Use Task tool to invoke dev-agent for enhancement implementation with brownfield considerations.
 ```
+
+**MANDATORY: Wait for dev-agent completion confirmation before proceeding to QA review.**
 
 **Brownfield Development Process:**
 1. **Existing Code Analysis**: Understand current implementation patterns
@@ -260,9 +282,10 @@ Before marking story complete:
 ```
 
 ### 5C) OPTIONAL: QA Engineer Review
-**Load QA Engineer Agent (New Chat Session):**
+**STEP 11 TRIGGER: Use Task tool to invoke qa-agent (New Chat Session)**
 ```
-OPTIONAL: Load the qa-agent for senior review with brownfield quality focus.
+OPTIONAL: Use Task tool to invoke qa-agent for senior review with brownfield quality focus.
+MANDATORY: If invoked, wait for qa-agent completion confirmation before proceeding
 ```
 
 **Brownfield QA Process:**
@@ -290,6 +313,17 @@ Continue until all enhancement objectives completed.
 ## PHASE 6: DEPLOYMENT & VALIDATION
 
 ### 6A) CONDITIONAL: Docker Validation (SaaS Projects)
+**USER APPROVAL GATE - Deployment Authorization:**
+```
+🛡️ SECURITY CHECKPOINT: Before proceeding with deployment operations:
+1. Confirm all QA validations passed
+2. Verify enhancement scope and safety assessment complete
+3. User authorization required for git commit and deployment operations
+4. Type "APPROVED" to proceed with Docker validation and deployment
+
+MANDATORY: Wait for explicit user approval before any git or deployment operations
+```
+
 **For SaaS/Docker-based Projects:**
 ```
 {{#if PROJECT_TYPE.saas}}
@@ -301,10 +335,11 @@ Post-commit Docker validation:
 ```
 
 ### 6B) OPTIONAL: Enhancement Retrospective
-**Load Product Owner Agent:**
+**STEP 12 TRIGGER: Use Task tool to invoke po-agent**
 ```
-OPTIONAL: After enhancement completion, conduct retrospective analysis.
+OPTIONAL: Use Task tool to invoke po-agent after enhancement completion to conduct retrospective analysis.
 NOTE: epic-retrospective task coming in future releases.
+MANDATORY: If invoked, wait for po-agent completion confirmation
 ```
 
 **Retrospective Focus:**

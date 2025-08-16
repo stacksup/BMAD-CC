@@ -18,11 +18,13 @@ Comprehensive workflow for building new full-stack applications from concept to 
 
 ## PHASE 1: STRATEGIC FOUNDATION
 
-### 1A) Business Analyst â†’ Project Brief & Market Context
-**Load Business Analyst Agent:**
+### 1A) Business Analyst â†' Project Brief & Market Context
+**STEP 1 TRIGGER: Use Task tool to invoke analyst-agent**
 ```
-Load the analyst-agent to create foundational project understanding.
+Use Task tool to invoke analyst-agent to create foundational project understanding.
 ```
+
+**MANDATORY: Wait for analyst-agent completion confirmation before proceeding to Product Manager phase.**
 
 **Deliverables:**
 - Project brief with business objectives and context
@@ -37,11 +39,13 @@ Load the analyst-agent to create foundational project understanding.
 
 **Output Location:** Save as `docs/project-brief.md`
 
-### 1B) Product Manager â†’ Product Requirements & Strategy  
-**Load Product Manager Agent:**
+### 1B) Product Manager â†' Product Requirements & Strategy  
+**STEP 2 TRIGGER: Use Task tool to invoke pm-agent**
 ```
-Load the pm-agent to define comprehensive product requirements.
+Use Task tool to invoke pm-agent to define comprehensive product requirements.
 ```
+
+**MANDATORY: Wait for pm-agent completion confirmation before proceeding to UX Expert phase.**
 
 **Input:** Project brief from Business Analyst
 **Deliverables:**
@@ -55,11 +59,13 @@ Load the pm-agent to define comprehensive product requirements.
 
 ## PHASE 2: DESIGN & ARCHITECTURE
 
-### 2A) UX Expert â†’ User Experience Design
-**Load UX Expert Agent:**
+### 2A) UX Expert â†' User Experience Design
+**STEP 3 TRIGGER: Use Task tool to invoke ux-agent**
 ```
-Load the ux-agent to design user experience and interfaces.
+Use Task tool to invoke ux-agent to design user experience and interfaces.
 ```
+
+**MANDATORY: Wait for ux-agent completion confirmation before proceeding to AI-Generated UI Foundation (if selected) or System Architect phase.**
 
 **Input:** PRD from Product Manager
 **Deliverables:**
@@ -76,10 +82,12 @@ Load the ux-agent to design user experience and interfaces.
 **Output Location:** Save as `docs/ux-design-spec.md`
 
 ### 2B) OPTIONAL: AI-Generated UI Foundation
-**Enhanced UX Agent â†’ AI UI Generation:**
+**Enhanced UX Agent â†' AI UI Generation:**
 ```
-OPTIONAL BUT RECOMMENDED: Generate AI UI prompts for external tools like v0, Lovable, etc.
-Use the ux-agent with generate-ai-frontend-prompt capability.
+OPTIONAL BUT RECOMMENDED: 
+STEP 3B TRIGGER: Use Task tool to invoke ux-agent with generate-ai-frontend-prompt capability.
+Generate AI UI prompts for external tools like v0, Lovable, etc.
+MANDATORY: If invoked, wait for ux-agent completion confirmation before proceeding
 ```
 
 **Process:**
@@ -93,11 +101,13 @@ Use the ux-agent with generate-ai-frontend-prompt capability.
 - Professional design system foundation
 - Component library starting point
 
-### 2C) System Architect â†’ Full-Stack Architecture
-**Load System Architect Agent:**
+### 2C) System Architect â†' Full-Stack Architecture
+**STEP 4 TRIGGER: Use Task tool to invoke architect-agent**
 ```
-Load the architect-agent to design comprehensive system architecture.
+Use Task tool to invoke architect-agent to design comprehensive system architecture.
 ```
+
+**MANDATORY: Wait for architect-agent completion confirmation before proceeding to validation phase.**
 
 **Input:** PRD and UX Design Specifications
 **Deliverables:**
@@ -118,11 +128,13 @@ Load the architect-agent to design comprehensive system architecture.
 
 ## PHASE 3: VALIDATION & INTEGRATION
 
-### 3A) Product Manager â†’ Architecture Integration Review
-**Load Product Manager Agent:**
+### 3A) Product Manager â†' Architecture Integration Review
+**STEP 5 TRIGGER: Use Task tool to invoke pm-agent**
 ```
-If architecture suggests changes to PRD features, update requirements.
+Use Task tool to invoke pm-agent if architecture suggests changes to PRD features, update requirements.
 ```
+
+**MANDATORY: Wait for pm-agent completion confirmation before proceeding to Product Owner validation.**
 
 **Integration Process:**
 1. Review architecture recommendations against PRD features
@@ -130,11 +142,13 @@ If architecture suggests changes to PRD features, update requirements.
 3. Update PRD with any architectural insights or constraints
 4. Re-export complete updated PRD to `docs/prd.md`
 
-### 3B) Product Owner â†’ Comprehensive Validation
-**Load Product Owner Agent:**
+### 3B) Product Owner â†' Comprehensive Validation
+**STEP 6 TRIGGER: Use Task tool to invoke po-agent**
 ```
-Load the po-agent to validate all strategic planning artifacts.
+Use Task tool to invoke po-agent to validate all strategic planning artifacts.
 ```
+
+**MANDATORY: Wait for po-agent completion confirmation before proceeding to Docker environment setup.**
 
 **Validation Process:**
 - Cross-document consistency verification
@@ -245,11 +259,13 @@ echo "âœ… Docker environment ready for development"
 - Ensure project structure aligns with planned development workflow
 - Validate tooling and build system compatibility
 
-### 5B) Product Owner â†’ Document Sharding
-**Load Product Owner Agent:**
+### 5B) Product Owner â†' Document Sharding
+**STEP 7 TRIGGER: Use Task tool to invoke po-agent**
 ```
-Shard planning documents for development team consumption.
+Use Task tool to invoke po-agent to shard planning documents for development team consumption.
 ```
+
+**MANDATORY: Wait for po-agent completion confirmation before proceeding to development execution.**
 
 **Document Sharding Options:**
 - **Option A**: Use PO agent to shard: Load po-agent â†’ ask to shard docs/prd.md
@@ -259,10 +275,12 @@ Shard planning documents for development team consumption.
 ## PHASE 6: DEVELOPMENT EXECUTION
 
 ### 6A) Story Creation Cycle
-**Load Scrum Master Agent:**
+**STEP 8 TRIGGER: Use Task tool to invoke sm-agent**
 ```
-Load the sm-agent to create development stories from sharded documentation.
+Use Task tool to invoke sm-agent to create development stories from sharded documentation.
 ```
+
+**MANDATORY: Wait for sm-agent completion confirmation before proceeding to optional story review.**
 
 **Story Creation Process:**
 1. **Epic Identification**: Identify major feature epics from sharded PRD
@@ -276,10 +294,11 @@ Load the sm-agent to create development stories from sharded documentation.
 - Ensure stories align with architecture specifications
 
 ### 6B) OPTIONAL: Story Review & Approval
-**Load Business Analyst or Product Manager:**
+**STEP 9 TRIGGER: Use Task tool to invoke analyst-agent or pm-agent**
 ```
-OPTIONAL: Review draft stories for completeness and alignment.
+OPTIONAL: Use Task tool to invoke analyst-agent or pm-agent to review draft stories for completeness and alignment.
 NOTE: story-review task coming in future releases.
+MANDATORY: If invoked, wait for agent completion confirmation before proceeding
 ```
 
 **Review Process:**
@@ -291,10 +310,12 @@ NOTE: story-review task coming in future releases.
 ## PHASE 6: DEVELOPMENT CYCLE EXECUTION
 
 ### 6C) Developer Implementation
-**Load Developer Agent (New Chat Session):**
+**STEP 10 TRIGGER: Use Task tool to invoke dev-agent (New Chat Session)**
 ```
-Load the dev-agent in a fresh session for each story implementation.
+Use Task tool to invoke dev-agent in a fresh session for each story implementation.
 ```
+
+**MANDATORY: Wait for dev-agent completion confirmation before proceeding to optional QA review.**
 
 **Development Process:**
 1. **Story Analysis**: Understand requirements and acceptance criteria
@@ -304,9 +325,10 @@ Load the dev-agent in a fresh session for each story implementation.
 5. **Status Update**: Mark story as "Review" when implementation complete
 
 ### 6D) OPTIONAL: QA Engineer Review
-**Load QA Engineer Agent (New Chat Session):**
+**STEP 11 TRIGGER: Use Task tool to invoke qa-agent (New Chat Session)**
 ```
-OPTIONAL: Load the qa-agent for senior development review and quality assurance.
+OPTIONAL: Use Task tool to invoke qa-agent for senior development review and quality assurance.
+MANDATORY: If invoked, wait for qa-agent completion confirmation before proceeding
 ```
 
 **QA Process:**
@@ -331,11 +353,23 @@ Cycle between Dev and QA until story meets quality standards.
 
 ## PHASE 7: PROJECT COMPLETION
 
-### 7A) OPTIONAL: Epic Retrospective
-**Load Product Owner Agent:**
+**USER APPROVAL GATE - Project Completion Authorization:**
 ```
-OPTIONAL: Conduct retrospective after major epic completion.
+🛡️ SECURITY CHECKPOINT: Before proceeding with project completion operations:
+1. Confirm all development cycles completed successfully
+2. Verify comprehensive testing and quality validation passed
+3. User authorization required for any git commit and deployment operations
+4. Type "APPROVED" to proceed with project completion activities
+
+MANDATORY: Wait for explicit user approval before any git or deployment operations
+```
+
+### 7A) OPTIONAL: Epic Retrospective
+**STEP 12 TRIGGER: Use Task tool to invoke po-agent**
+```
+OPTIONAL: Use Task tool to invoke po-agent to conduct retrospective after major epic completion.
 NOTE: epic-retrospective task coming in future releases.
+MANDATORY: If invoked, wait for po-agent completion confirmation
 ```
 
 **Retrospective Process:**
