@@ -508,7 +508,7 @@ docker-compose logs -f backend
 
 ```bash
 # Check health
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 
 # Container status
 docker-compose ps

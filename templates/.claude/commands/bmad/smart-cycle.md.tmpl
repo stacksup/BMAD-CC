@@ -1,6 +1,6 @@
 ---
 description: Intelligent BMAD workflow routing for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Analyzes requests and routes to optimal workflow.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, Task
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, Task
 ---
 
 # /bmad:smart-cycle
@@ -11,12 +11,73 @@ This command analyzes your request and routes it to the most appropriate BMAD wo
 
 **VIBE CEO PHILOSOPHY**: You are the strategic leader with unlimited resources. The orchestrator empowers you with advanced elicitation tools to refine your vision before committing to a workflow. Think big, challenge assumptions, maximize value.
 
-## 0) INFRASTRUCTURE CHECKS & ROUTING
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
+
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Smart cycle requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:smart-cycle --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct smart routing request:"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='Smart Route: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for smart routing workflow"
+    echo "Required: All smart routing work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+{{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for smart cycle"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 Smart routing workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="Smart cycle started - execution authorized"
+else
+    # Create new smart routing task if none provided
+    TASK_ID=$({{TASKMASTER_CLI}} create --title="Smart Route: [Auto-generated]" --type="routing" --status="in-progress")
+    echo "📝 Created smart routing task: $TASK_ID"
+fi
+
+# Set smart routing specific metadata
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="smart-cycle"
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+```
+
+## 1) INFRASTRUCTURE CHECKS & ROUTING
 
 **CRITICAL: Task Master Availability Check:**
 ```bash
 # MUST succeed or workflow cannot proceed
-./.claude/hooks/taskmaster-check.ps1 check
+./.claude/hooks/taskmaster-check.sh check
 if ($LASTEXITCODE -ne 0) { 
     Write-Error "❌ BMAD requires Task Master AI. Install with: npm install -g task-master-ai"
     exit 1
@@ -47,15 +108,15 @@ if [ $? -ne 0 ]; then
 fi
 
 # Start containers if not running
-./.claude/hooks/docker-manager.ps1 status
+./.claude/hooks/docker-manager.sh status
 if [ $? -ne 0 ]; then
     echo "🐳 Starting Docker containers..."
-    ./.claude/hooks/docker-manager.ps1 start
+    ./.claude/hooks/docker-manager.sh start
     
     # Wait for health checks
     echo "⏳ Waiting for services to be healthy..."
     sleep 5
-    ./.claude/hooks/docker-manager.ps1 health
+    ./.claude/hooks/docker-manager.sh health
 fi
 ```
 
@@ -162,7 +223,7 @@ fi
 
 # Change Request Detection
 echo "🔍 Checking for pending changes..."
-./.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"
+./.claude/hooks/change-detector.sh -EventType "check-pending-changes"
 
 if [ -f "docs/change-request.md" ] || [ -f ".bmad-change-pending" ]; then
     echo "🔄 Change request detected - Change management activated"

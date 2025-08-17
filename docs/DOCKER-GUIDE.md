@@ -293,35 +293,35 @@ CMD ["npm", "run", "dev"]
 
 ### Automatic Container Management
 
-The `docker-manager.ps1` hook provides:
+The `docker-manager.sh` hook provides:
 
-```powershell
+```bash
 # Start containers
-./.claude/hooks/docker-manager.ps1 start
+./.claude/hooks/docker-manager.sh start
 
 # Check health
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 
 # Stop containers
-./.claude/hooks/docker-manager.ps1 stop
+./.claude/hooks/docker-manager.sh stop
 
 # Restart services
-./.claude/hooks/docker-manager.ps1 restart
+./.claude/hooks/docker-manager.sh restart
 
 # View status
-./.claude/hooks/docker-manager.ps1 status
+./.claude/hooks/docker-manager.sh status
 ```
 
 ### Health Monitoring
 
 Automatic health checks before operations:
-```powershell
+```bash
 # In workflows
-./.claude/hooks/docker-manager.ps1 health
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Services unhealthy"
+./.claude/hooks/docker-manager.sh health
+if [ $? -ne 0 ]; then
+    echo "Services unhealthy" >&2
     exit 1
-}
+fi
 ```
 
 ---

@@ -1,6 +1,6 @@
 ---
 description: Brownfield enhancement workflow for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Comprehensive workflow for enhancing existing systems.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
 ---
 
 # /bmad:brownfield-enhancement
@@ -16,9 +16,70 @@ Comprehensive workflow for enhancing existing systems with new features, moderni
 - Performance improvements and scalability enhancements
 - UI/UX redesigns for existing applications
 
-## PHASE 0: ENHANCEMENT CLASSIFICATION & ROUTING
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
 
-### 0A) Business Analyst → Enhancement Scope Analysis
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Brownfield enhancement requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:brownfield-enhancement --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct enhancement request:"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='Enhancement: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for brownfield enhancement workflow"
+    echo "Required: All enhancement work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+{{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for brownfield enhancement"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 Enhancement workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="Brownfield enhancement started - execution authorized"
+else
+    # Create new enhancement task if none provided
+    TASK_ID=$({{TASKMASTER_CLI}} create --title="Enhancement: [Auto-generated]" --type="enhancement" --status="in-progress")
+    echo "📝 Created enhancement task: $TASK_ID"
+fi
+
+# Set enhancement-specific metadata
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="brownfield-enhancement"
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+```
+
+## PHASE 1: ENHANCEMENT CLASSIFICATION & ROUTING
+
+### 1A) Business Analyst → Enhancement Scope Analysis
 **Load Business Analyst Agent:**
 ```
 Load the analyst-agent to classify and scope the enhancement request.

@@ -1,6 +1,6 @@
 ---
 description: BMAD cycle for BMAD-CC (Framework) with Docker start/verify.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(docker:*), Bash(docker-compose:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*)
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(docker:*), Bash(docker-compose:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*)
 ---
 
 # /bmad:saas-cycle
@@ -30,7 +30,7 @@ Load the doc-agent to ensure comprehensive documentation updates.
 **Automatic Documentation:**
 ```bash
 # Run documentation updater
-./.claude/hooks/documentation-updater.ps1 -Action update \
+./.claude/hooks/documentation-updater.sh -Action update \
     -TaskId "$STORY_ID" \
     -TaskTitle "$STORY_TITLE" \
     -ChangeType "feature"

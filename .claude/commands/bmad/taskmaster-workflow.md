@@ -216,7 +216,7 @@ fi
 
 # Automatic GitHub backup
 echo "ðŸ”„ Backing up completed work to GitHub..."
-./.claude/hooks/github-backup.ps1 backup
+./.claude/hooks/github-backup.sh backup
 if [ $? -eq 0 ]; then
     echo "âœ… Work backed up to GitHub"
 else

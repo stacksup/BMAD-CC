@@ -139,7 +139,7 @@ if [ ! -f "docs/planning-handoff-summary.md" ]; then
 fi
 
 # Validate planning integrity (no execution during planning)
-./.claude/hooks/validate-planning-integrity.ps1 --task-id=$TASK_ID
+./.claude/hooks/validate-planning-integrity.sh --task-id=$TASK_ID
 if [ $? -ne 0 ]; then
     echo "❌ COMPLIANCE VIOLATION: Execution detected during planning phase"
     echo "Required: Planning phase must be analysis-only"

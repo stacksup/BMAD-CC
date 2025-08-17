@@ -267,7 +267,7 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ```bash
 # Start test environment
 docker-compose up -d
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 
 # Run test suite
 docker-compose exec backend npm run test:all

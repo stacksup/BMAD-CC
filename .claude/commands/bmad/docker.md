@@ -14,7 +14,7 @@ This command manages Docker containers for your project, assuming all developmen
 ### Start Development Environment
 ```bash
 # Start all services
-./.claude/hooks/docker-manager.ps1 start
+./.claude/hooks/docker-manager.sh start
 
 # Or using Docker Compose directly
 docker-compose up -d
@@ -26,7 +26,7 @@ docker-compose up -d --build
 ### Check Status
 ```bash
 # Check container status
-./.claude/hooks/docker-manager.ps1 status
+./.claude/hooks/docker-manager.sh status
 
 # Or use Docker MCP
 mcp__docker__list_containers
@@ -277,7 +277,7 @@ services:
 ### Automated Health Monitoring
 ```bash
 # Run health check
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 
 # Manual health checks
 curl http://localhost:3000
@@ -347,7 +347,7 @@ When running `/bmad:smart-cycle` or other workflows:
 # After task completion
 docker-compose exec backend npm test  # Run tests
 docker-compose restart  # Apply changes
-./.claude/hooks/docker-manager.ps1 health  # Verify health
+./.claude/hooks/docker-manager.sh health  # Verify health
 ```
 
 Remember: All development assumes Docker containers. Never install dependencies on host machine - always use containers for isolation and consistency.

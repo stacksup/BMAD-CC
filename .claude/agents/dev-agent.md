@@ -388,7 +388,7 @@ docker-compose exec backend python manage.py migrate
 1. **Start containers before coding:**
    ```bash
    docker-compose up -d
-   ./.claude/hooks/docker-manager.ps1 health
+   ./.claude/hooks/docker-manager.sh health
    ```
 
 2. **Install dependencies in container:**

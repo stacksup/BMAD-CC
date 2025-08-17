@@ -156,7 +156,7 @@ project-root/
 #### Claude Code Integration
 - **Slash Commands**: Entry points for workflows (`/bmad:*`)
 - **Agents**: Specialized personas loaded via `/agent-name`
-- **Hooks**: PowerShell scripts for automation
+- **Hooks**: Bash scripts for automation and quality gates
 - **Settings**: Local configuration for permissions
 
 #### External Tool Integration
@@ -225,7 +225,7 @@ The framework enforces no-dummy-data at multiple levels:
 
 1. **Agent Instructions**: Dev agent prohibits fallback patterns
 2. **Code Review**: QA agent searches for violations
-3. **Automated Hooks**: `quality-gate-no-dummies.ps1` scans code
+3. **Automated Hooks**: `quality-gate-no-dummies.sh` scans code
 4. **Architecture Review**: System designs require explicit failure modes
 
 ## Scalability & Extensibility
@@ -295,7 +295,7 @@ Large documents are automatically sharded for efficiency:
 - Error and retry patterns
 
 ### Logging Architecture
-- PowerShell hook logging
+- Bash hook logging and error reporting
 - Docker container logs
 - Task Master activity logs
 - Git commit history
@@ -316,11 +316,12 @@ Large documents are automatically sharded for efficiency:
 
 ## Design Decisions
 
-### Why PowerShell for Hooks?
-- Cross-platform support (PowerShell Core)
-- Rich scripting capabilities
-- Native Windows integration
-- Easy Docker/Git interaction
+### Why Bash for Hooks?
+- Universal Unix/Linux compatibility
+- Native WSL and macOS support
+- Lightweight and fast execution
+- Standard shell scripting environment
+- Better Docker and Git integration
 
 ### Why Markdown for Everything?
 - Human-readable documentation

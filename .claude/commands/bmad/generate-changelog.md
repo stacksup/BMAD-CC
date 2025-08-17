@@ -196,8 +196,8 @@ Add to `.git/hooks/post-commit`:
 ```bash
 #!/bin/bash
 # Auto-update CHANGELOG on commit
-if [ -f ".claude/hooks/documentation-updater.ps1" ]; then
-    pwsh .claude/hooks/documentation-updater.ps1 -Action update
+if [ -f ".claude/hooks/documentation-updater.sh" ]; then
+    ./.claude/hooks/documentation-updater.sh -Action update
 fi
 ```
 

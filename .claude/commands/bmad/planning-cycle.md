@@ -1,6 +1,6 @@
 ---
 description: Strategic planning workflow for BMAD-CC (Framework) - Coordinates strategic agents for comprehensive project planning.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(task-master:*), Bash(npx task-master:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
 ---
 
 # /bmad:planning-cycle
@@ -83,7 +83,7 @@ The analyst will use techniques from `docs/data/brainstorming-techniques.md` and
 **Quality Gate - Business Analysis Validation:**
 ```bash
 # Automated business analysis validation
-./.claude/hooks/validation-enforcer.ps1 -EventType "business-analysis-complete" -DocumentPath "docs/market-analysis.md"
+./.claude/hooks/validation-enforcer.sh -EventType "business-analysis-complete" -DocumentPath "docs/market-analysis.md"
 
 # Validates:
 # - Market research completeness
@@ -284,10 +284,10 @@ Integrate planning outputs with task management system:
 **MANDATORY: Validate planning completeness and no execution occurred**
 ```bash
 # Validate all planning documents are complete and meet quality standards
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-planning-handoff" -TaskId $TASK_ID
+./.claude/hooks/validation-enforcer.sh -EventType "pre-planning-handoff" -TaskId $TASK_ID
 
 # Ensure no execution has occurred during planning phase
-./.claude/hooks/validate-no-execution.ps1 --task-id=$TASK_ID --phase="planning"
+./.claude/hooks/validate-no-execution.sh --task-id=$TASK_ID --phase="planning"
 
 # Verify planning integrity
 if [ $? -ne 0 ]; then
@@ -392,7 +392,7 @@ echo "COMPLIANCE REMINDER: Only orchestrator can authorize execution workflows"
 **Quality Gate - Pre-Development Handoff:**
 ```bash
 # Comprehensive planning validation before development
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-planning-handoff"
+./.claude/hooks/validation-enforcer.sh -EventType "pre-planning-handoff"
 
 # Validates all planning documents exist and meet quality standards:
 # - docs/market-analysis.md (Business validation)

@@ -19,7 +19,7 @@ bmad-handoff --from=maintenance-cycle --to=complete --task-id=<id> --status=done
 ### Handoff Validation Gates
 ```bash
 # Pre-handoff validation (BLOCKING)
-./.claude/hooks/validate-handoff.ps1 -Source "planning-cycle" -TaskId <id>
+./.claude/hooks/validate-handoff.sh -Source "planning-cycle" -TaskId <id>
 # Validates:
 # - All planning documents exist and are complete
 # - Task status is accurate in Task Master
@@ -27,7 +27,7 @@ bmad-handoff --from=maintenance-cycle --to=complete --task-id=<id> --status=done
 # - Proper workflow sequence followed
 
 # Post-handoff validation
-./.claude/hooks/confirm-handoff.ps1 -Target "maintenance-cycle" -TaskId <id>
+./.claude/hooks/confirm-handoff.sh -Target "maintenance-cycle" -TaskId <id>
 # Validates:
 # - Target workflow received context properly
 # - Task ownership transferred correctly
@@ -154,10 +154,10 @@ Replace the ambiguous ending in planning-cycle.md:
 **Pre-Handoff Quality Gates:**
 ```bash
 # Validate all planning documents are complete
-./.claude/hooks/validate-planning-complete.ps1 --task-id=$TASK_ID
+./.claude/hooks/validate-planning-complete.sh --task-id=$TASK_ID
 
 # Ensure no execution has occurred during planning
-./.claude/hooks/validate-no-execution.ps1 --task-id=$TASK_ID
+./.claude/hooks/validate-no-execution.sh --task-id=$TASK_ID
 ```
 
 ### 4B) Mandatory Orchestrator Routing
@@ -199,7 +199,7 @@ When receiving handoff from planning cycle:
 task-master validate-planning --id=$TASK_ID --min-score=8
 
 # Confirm no execution occurred during planning
-./.claude/hooks/validate-planning-integrity.ps1 --task-id=$TASK_ID
+./.claude/hooks/validate-planning-integrity.sh --task-id=$TASK_ID
 ```
 
 2. **Analyze Execution Requirements**
@@ -284,68 +284,108 @@ function validate-workflow-transition() {
 ```
 
 ### 2. Automated Compliance Checking
-```powershell
-# .claude/hooks/compliance-enforcer.ps1
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$TaskId,
-    
-    [Parameter(Mandatory=$true)]
-    [ValidateSet("pre-handoff", "post-handoff", "execution-check")]
-    [string]$CheckType,
-    
-    [Parameter(Mandatory=$false)]
-    [string]$WorkflowPhase
-)
+```bash
+# .claude/hooks/compliance-enforcer.sh
+#!/bin/bash
 
-function Test-WorkflowCompliance {
-    param($TaskId, $CheckType, $WorkflowPhase)
+TASK_ID=""
+CHECK_TYPE=""
+WORKFLOW_PHASE=""
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --task-id)
+            TASK_ID="$2"
+            shift 2
+            ;;
+        --check-type)
+            CHECK_TYPE="$2"
+            shift 2
+            ;;
+        --workflow-phase)
+            WORKFLOW_PHASE="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Validate required parameters
+if [[ -z "$TASK_ID" || -z "$CHECK_TYPE" ]]; then
+    echo "Usage: $0 --task-id <id> --check-type <pre-handoff|post-handoff|execution-check> [--workflow-phase <phase>]"
+    exit 1
+fi
+
+function test_workflow_compliance() {
+    local task_id="$1"
+    local check_type="$2"
+    local workflow_phase="$3"
+    local violations=0
     
-    $compliance = @{
-        "task_tracking" = Test-TaskMasterIntegration $TaskId
-        "workflow_sequence" = Test-WorkflowSequence $TaskId $WorkflowPhase
-        "execution_authority" = Test-ExecutionAuthority $TaskId $WorkflowPhase
-        "documentation" = Test-DocumentationCompliance $TaskId
-    }
+    # Test task tracking integration
+    if ! test_task_master_integration "$task_id"; then
+        echo "❌ Task tracking compliance failed"
+        violations=$((violations + 1))
+    fi
     
-    $violations = $compliance.GetEnumerator() | Where-Object { -not $_.Value }
+    # Test workflow sequence
+    if ! test_workflow_sequence "$task_id" "$workflow_phase"; then
+        echo "❌ Workflow sequence compliance failed"
+        violations=$((violations + 1))
+    fi
     
-    if ($violations.Count -gt 0) {
-        Write-Host "❌ COMPLIANCE VIOLATIONS DETECTED:" -ForegroundColor Red
-        $violations | ForEach-Object {
-            Write-Host "   - $($_.Key): FAILED" -ForegroundColor Red
-        }
+    # Test execution authority
+    if ! test_execution_authority "$task_id" "$workflow_phase"; then
+        echo "❌ Execution authority compliance failed"
+        violations=$((violations + 1))
+    fi
+    
+    # Test documentation compliance
+    if ! test_documentation_compliance "$task_id"; then
+        echo "❌ Documentation compliance failed"
+        violations=$((violations + 1))
+    fi
+    
+    if [[ $violations -gt 0 ]]; then
+        echo "❌ COMPLIANCE VIOLATIONS DETECTED:"
+        echo "   Total violations: $violations"
         exit 1
-    } else {
-        Write-Host "✅ All compliance checks passed" -ForegroundColor Green
-        return $true
-    }
+    else
+        echo "✅ All compliance checks passed"
+        return 0
+    fi
 }
 
-function Test-ExecutionAuthority {
-    param($TaskId, $WorkflowPhase)
+function test_execution_authority() {
+    local task_id="$1"
+    local workflow_phase="$2"
     
     # Check if execution is authorized for current phase
-    $handoffStatus = & task-master get-handoff-status --id=$TaskId 2>$null
+    local handoff_status
+    handoff_status=$(task-master get-handoff-status --id="$task_id" 2>/dev/null)
     
-    switch ($WorkflowPhase) {
-        "planning" {
+    case "$workflow_phase" in
+        "planning")
             # Planning phase should never have execution authority
-            return ($handoffStatus -ne "execution-authorized")
-        }
-        "maintenance" {
+            [[ "$handoff_status" != "execution-authorized" ]]
+            ;;
+        "maintenance")
             # Maintenance phase requires execution authority
-            return ($handoffStatus -eq "execution-authorized")
-        }
-        "story" {
+            [[ "$handoff_status" == "execution-authorized" ]]
+            ;;
+        "story")
             # Story development requires execution authority
-            return ($handoffStatus -eq "execution-authorized")
-        }
-        default {
-            Write-Warning "Unknown workflow phase: $WorkflowPhase"
-            return $false
-        }
-    }
+            [[ "$handoff_status" == "execution-authorized" ]]
+            ;;
+        *)
+            echo "Warning: Unknown workflow phase: $workflow_phase" >&2
+            return 1
+            ;;
+    esac
 }
 ```
 

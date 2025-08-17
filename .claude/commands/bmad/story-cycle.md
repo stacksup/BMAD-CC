@@ -1,6 +1,6 @@
 ---
 description: BMAD story development cycle for BMAD-CC (Framework) - Complete story implementation with Docker container management.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), mcp__docker__list_containers, mcp__docker__get_container_logs, mcp__docker__execute_command
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), mcp__docker__list_containers, mcp__docker__get_container_logs, mcp__docker__execute_command
 ---
 
 # /bmad:story-cycle
@@ -28,7 +28,7 @@ task-master set-status --id=$STORY_ID --status=in-progress
 docker info > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "âŒ Docker not running. Starting Docker Desktop..."
-    ./.claude/hooks/docker-manager.ps1 start
+    ./.claude/hooks/docker-manager.sh start
 fi
 
 # Start development containers
@@ -37,7 +37,7 @@ echo "â³ Waiting for services to be healthy..."
 sleep 5
 
 # Verify health
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 ```
 
 ## PHASE 1: STORY CREATION & REFINEMENT
@@ -61,7 +61,7 @@ Story must reference Task Master ID: $STORY_ID
 **Quality Gate - Story Validation:**
 ```bash
 # Automated validation hook with scoring
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-development" -Context @{StoryId=$STORY_ID}
+./.claude/hooks/validation-enforcer.sh -EventType "pre-story-development" -Context @{StoryId=$STORY_ID}
 
 # Hook will:
 # - Check for existing story validation report
@@ -84,7 +84,7 @@ Use Task tool to invoke po-agent to validate story completeness and alignment.
 **Product Owner Validation Process:**
 ```bash
 # Automated PO validation with comprehensive scoring
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-development" -Context @{StoryId=$STORY_ID} -DocumentPath "docs/stories/story-$STORY_ID.md"
+./.claude/hooks/validation-enforcer.sh -EventType "pre-story-development" -Context @{StoryId=$STORY_ID} -DocumentPath "docs/stories/story-$STORY_ID.md"
 
 # Validation includes:
 # - Docker environment requirements specified
@@ -160,7 +160,7 @@ docker-compose logs -f &
 ```bash
 # Check for dummy data patterns FIRST
 echo "ðŸ” Running no-dummy-data quality gate..."
-./.claude/hooks/quality-gate-no-dummies.ps1
+./.claude/hooks/quality-gate-no-dummies.sh
 if [ $? -ne 0 ]; then
     echo "âŒ Dummy data or fallback patterns detected!"
     echo "Fix all issues before proceeding"
@@ -187,7 +187,7 @@ Use Task tool to invoke qa-agent for containerized quality assurance.
 ```bash
 # FIRST: Validate no dummy data patterns
 echo "ðŸ” QA: Checking for dummy data and fallback patterns..."
-./.claude/hooks/quality-gate-no-dummies.ps1
+./.claude/hooks/quality-gate-no-dummies.sh
 if [ $? -ne 0 ]; then
     echo "âŒ QA FAILED: Dummy data or fallback implementations found!"
     echo "Returning to developer for fixes"
@@ -219,7 +219,7 @@ docker stats --no-stream
 **Quality Gate - Definition of Done:**
 ```bash
 # Automated DoD validation before story completion
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-completion" -Context @{StoryId=$STORY_ID}
+./.claude/hooks/validation-enforcer.sh -EventType "pre-story-completion" -Context @{StoryId=$STORY_ID}
 
 # Validation enforces:
 # - All tests pass (minimum score 9/10)
@@ -310,7 +310,7 @@ docker tag BMAD-CC_frontend:latest BMAD-CC_frontend:$STORY_ID
 ### 7B) Container Health Verification
 ```bash
 # Final health check
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 
 # Verify all services responding
 curl http://localhost:3000
@@ -335,7 +335,7 @@ Load the doc-agent to update all project documentation.
 **Automated Documentation Update:**
 ```bash
 # Run documentation updater hook
-./.claude/hooks/documentation-updater.ps1 -Action update \
+./.claude/hooks/documentation-updater.sh -Action update \
     -TaskId "$STORY_ID" \
     -TaskTitle "$STORY_TITLE" \
     -ChangeType "feature"
@@ -425,7 +425,7 @@ docker system prune -a
 - `docker-compose logs -f` - Watch logs
 - `docker-compose exec [service] [command]` - Run in container
 - `docker-compose down` - Stop everything
-- `./.claude/hooks/docker-manager.ps1 health` - Check health
-- `./.claude/hooks/docker-manager.ps1 troubleshoot` - Debug issues
+- `./.claude/hooks/docker-manager.sh health` - Check health
+- `./.claude/hooks/docker-manager.sh troubleshoot` - Debug issues
 
 Remember: All development, testing, and validation happens inside Docker containers. Never install dependencies on the host machine.

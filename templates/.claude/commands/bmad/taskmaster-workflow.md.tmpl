@@ -9,9 +9,59 @@ allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash({{TASKMASTER_CLI}}:*
 
 This workflow ensures all work is tracked and managed through Task Master AI as the single source of truth.
 
-## PHASE 0: TASK MASTER INITIALIZATION
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
 
-### 0A) Verify Task Master Installation
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task Master workflow requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:taskmaster-workflow --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct Task Master workflow request:"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='TaskMaster Workflow: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked (may be optional for this workflow)
+if [ -n "$TASK_ID" ]; then
+    # Verify task status allows execution
+    TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+    if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+        echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+        echo "Current status: $TASK_STATUS"
+        echo "Required status: execution-authorized or in-progress"
+        exit 1
+    fi
+    
+    # Set task status to in-progress
+    {{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+fi
+
+echo "✅ Execution authorization validated for Task Master workflow"
+echo "📋 Task ID: ${TASK_ID:-'TBD (will be selected in workflow)'}"
+echo "🔧 Task Master workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Set workflow metadata if task exists
+if [ -n "$TASK_ID" ]; then
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="Task Master workflow started - execution authorized"
+    {{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="taskmaster-workflow"
+    {{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+fi
+```
+
+## PHASE 1: TASK MASTER INITIALIZATION
+
+### 1A) Verify Task Master Installation
 ```bash
 # Check Task Master availability (REQUIRED)
 {{TASKMASTER_CLI}} --version
@@ -23,7 +73,7 @@ if [ $? -ne 0 ]; then
 fi
 ```
 
-### 0B) Initialize Project (First Time Only)
+### 1B) Initialize Project (First Time Only)
 ```bash
 # Check if .taskmaster directory exists
 if [ ! -d ".taskmaster" ]; then
@@ -34,7 +84,7 @@ if [ ! -d ".taskmaster" ]; then
 fi
 ```
 
-### 0C) Load Task Context
+### 1C) Load Task Context
 ```bash
 # Get current task or allow selection
 CURRENT_TASK=$({{TASKMASTER_CLI}} next --json)
@@ -216,7 +266,7 @@ fi
 
 # Automatic GitHub backup
 echo "🔄 Backing up completed work to GitHub..."
-./.claude/hooks/github-backup.ps1 backup
+./.claude/hooks/github-backup.sh backup
 if [ $? -eq 0 ]; then
     echo "✅ Work backed up to GitHub"
 else

@@ -1,6 +1,6 @@
 ---
 description: Strategic planning workflow for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Coordinates strategic agents for comprehensive project planning.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
 ---
 
 # /bmad:planning-cycle
@@ -18,6 +18,67 @@ As the **Vibe CEO**, you are directing a team of specialized AI agents through s
 - **Decision**: Make key strategic choices when agents present options
 
 Remember: You think like a CEO with unlimited resources. Push agents to deliver their best work.
+
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
+
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Planning cycle requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:planning-cycle --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct planning request:"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='Planning: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for planning workflow"
+    echo "Required: All planning work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+{{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for planning cycle"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 Planning workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="Planning cycle started - execution authorized"
+else
+    # Create new planning task if none provided
+    TASK_ID=$({{TASKMASTER_CLI}} create --title="Planning: [Auto-generated]" --type="planning" --status="in-progress")
+    echo "📝 Created planning task: $TASK_ID"
+fi
+
+# Set planning-specific metadata
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="planning-cycle"
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+```
 
 ## PHASE 0: INFRASTRUCTURE READINESS
 
@@ -81,7 +142,7 @@ The analyst will use techniques from `docs/data/brainstorming-techniques.md` and
 **Quality Gate - Business Analysis Validation:**
 ```bash
 # Automated business analysis validation
-./.claude/hooks/validation-enforcer.ps1 -EventType "business-analysis-complete" -DocumentPath "docs/market-analysis.md"
+./.claude/hooks/validation-enforcer.sh -EventType "business-analysis-complete" -DocumentPath "docs/market-analysis.md"
 
 # Validates:
 # - Market research completeness
@@ -286,7 +347,7 @@ Integrate planning outputs with task management system:
 **Quality Gate - Pre-Development Handoff:**
 ```bash
 # Comprehensive planning validation before development
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-planning-handoff"
+./.claude/hooks/validation-enforcer.sh -EventType "pre-planning-handoff"
 
 # Validates all planning documents exist and meet quality standards:
 # - docs/market-analysis.md (Business validation)

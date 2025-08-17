@@ -1,6 +1,6 @@
 ---
 description: Greenfield full-stack development workflow for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Complete workflow for new application development.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, WebSearch, WebFetch, Task
 ---
 
 # /bmad:greenfield-fullstack
@@ -15,6 +15,67 @@ Comprehensive workflow for building new full-stack applications from concept to 
 - Enterprise applications requiring comprehensive documentation
 - Multi-team projects needing coordination
 - Projects with long-term maintenance expectations
+
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
+
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Greenfield fullstack requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:greenfield-fullstack --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct greenfield request:"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='Greenfield: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for greenfield fullstack workflow"
+    echo "Required: All greenfield work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+{{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for greenfield fullstack"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 Greenfield workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="Greenfield fullstack started - execution authorized"
+else
+    # Create new greenfield task if none provided
+    TASK_ID=$({{TASKMASTER_CLI}} create --title="Greenfield: [Auto-generated]" --type="greenfield" --status="in-progress")
+    echo "📝 Created greenfield task: $TASK_ID"
+fi
+
+# Set greenfield-specific metadata
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="greenfield-fullstack"
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+```
 
 ## PHASE 1: STRATEGIC FOUNDATION
 
@@ -227,7 +288,7 @@ docker-compose build
 docker-compose up -d
 
 # Validate health
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 
 echo "✅ Docker environment ready for development"
 ```

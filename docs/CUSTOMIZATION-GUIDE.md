@@ -88,11 +88,11 @@ BMAD-CC auto-detects and adapts to:
 
 To add a new project type:
 
-1. **Update Detection Logic** in `bootstrap.ps1`:
-```powershell
-if (Test-Path "$ProjectDir/your-indicator") {
-    $ProjectType = "custom-type"
-}
+1. **Update Detection Logic** in `bootstrap.sh`:
+```bash
+if [ -f "$project_dir/your-indicator" ]; then
+    project_type="custom-type"
+fi
 ```
 
 2. **Create Type-Specific Templates**:
@@ -153,15 +153,15 @@ Add routing logic to detect when to use your workflow
 ### Workflow Parameters
 
 Customize through environment variables:
-```powershell
+```bash
 # Skip certain phases
-$env:BMAD_SKIP_VALIDATION = "1"
+export BMAD_SKIP_VALIDATION="1"
 
 # Adjust timeouts
-$env:BMAD_TIMEOUT = "600"
+export BMAD_TIMEOUT="600"
 
 # Change quality thresholds
-$env:BMAD_MIN_QUALITY_SCORE = "7"
+export BMAD_MIN_QUALITY_SCORE="7"
 ```
 
 ---
@@ -245,8 +245,8 @@ git clone https://github.com/community/bmad-pack-infrastructure.git
 ```
 
 2. **Install Pack**:
-```powershell
-.\install-pack.ps1 -PackDir "bmad-pack-infrastructure"
+```bash
+./install-pack.sh --pack-dir="bmad-pack-infrastructure"
 ```
 
 3. **Verify Installation**:
@@ -348,20 +348,19 @@ services:
 
 1. **Create Hook File**:
 ```
-.claude/hooks/custom-hook.ps1
+.claude/hooks/custom-hook.sh
 ```
 
 2. **Define Hook Logic**:
-```powershell
-param(
-    [string]$Event,
-    [string]$Data
-)
+```bash
+#!/bin/bash
+event="$1"
+data="$2"
 
-if ($Event -eq "post-commit") {
+if [ "$event" = "post-commit" ]; then
     # Custom post-commit logic
-    Write-Host "Running custom hook..."
-}
+    echo "Running custom hook..."
+fi
 ```
 
 3. **Register in Settings**:
@@ -370,7 +369,7 @@ if ($Event -eq "post-commit") {
   "hooks": {
     "custom-hook": {
       "events": ["post-commit"],
-      "script": ".claude/hooks/custom-hook.ps1"
+      "script": ".claude/hooks/custom-hook.sh"
     }
   }
 }
@@ -397,9 +396,9 @@ if ($Event -eq "post-commit") {
 ```
 
 2. **Environment Override**:
-```powershell
-$env:BMAD_PRD_MIN_SCORE = "6"
-$env:BMAD_STORY_MIN_SCORE = "7"
+```bash
+export BMAD_PRD_MIN_SCORE="6"
+export BMAD_STORY_MIN_SCORE="7"
 ```
 
 ### Custom Validation Rules
@@ -412,9 +411,10 @@ $env:BMAD_STORY_MIN_SCORE = "7"
 ```
 
 2. **Create Custom Validator**:
-```powershell
-# .claude/hooks/custom-validator.ps1
-function Validate-Custom {
+```bash
+# .claude/hooks/custom-validator.sh
+#!/bin/bash
+validate_custom() {
     # Custom validation logic
     return $score
 }
@@ -537,7 +537,7 @@ cat docs/data/technical-preferences.md
 # Should acknowledge preferences
 
 # Test hooks
-./.claude/hooks/custom-hook.ps1 -Event "test"
+./.claude/hooks/custom-hook.sh "test"
 
 # Verify pack installation
 ls .claude/agents/ | grep pack-

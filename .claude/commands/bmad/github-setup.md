@@ -137,7 +137,7 @@ echo "âœ… Automatic backup hook installed"
 echo "Configuring BMAD GitHub integration..."
 
 # This will be called automatically after task completion
-./.claude/hooks/github-backup.ps1 setup
+./.claude/hooks/github-backup.sh setup
 ```
 
 ## WORKFLOW INTEGRATION
@@ -170,7 +170,7 @@ gh pr create \
 ### Manual Backup
 ```bash
 # Force backup current state
-./.claude/hooks/github-backup.ps1 backup
+./.claude/hooks/github-backup.sh backup
 
 # Or use the command
 /bmad:github-backup
@@ -179,13 +179,13 @@ gh pr create \
 ### Check Status
 ```bash
 # Check GitHub connection status
-./.claude/hooks/github-backup.ps1 status
+./.claude/hooks/github-backup.sh status
 ```
 
 ### Push All Branches
 ```bash
 # Push all local branches and tags
-./.claude/hooks/github-backup.ps1 push-all
+./.claude/hooks/github-backup.sh push-all
 ```
 
 ## VERIFICATION

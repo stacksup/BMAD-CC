@@ -1,6 +1,6 @@
 ﻿---
 description: BMAD change management workflow for BMAD-CC (other) - Systematic handling of scope, requirements, and technical changes.
-allowed-tools: Bash(git:*), Bash(powershell:*), Bash(pwsh:*), Read, Grep, Glob, Edit, Write, Task
+allowed-tools: Bash(git:*), Read, Grep, Glob, Edit, Write, Task
 ---
 
 # /bmad:change-management
@@ -15,15 +15,15 @@ Systematic process for handling scope changes, requirement evolution, and techni
 **Trigger Change Detection:**
 ```bash
 # Check for pending changes
-./.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"
+./.claude/hooks/change-detector.sh -EventType "check-pending-changes"
 
 # Detect changes in key documents
 if [ -f "docs/PRD.md" ]; then
-    ./.claude/hooks/change-detector.ps1 -EventType "prd-updated"
+    ./.claude/hooks/change-detector.sh -EventType "prd-updated"
 fi
 
 if [ -f "docs/architecture.md" ]; then
-    ./.claude/hooks/change-detector.ps1 -EventType "architecture-updated"  
+    ./.claude/hooks/change-detector.sh -EventType "architecture-updated"  
 fi
 ```
 
@@ -31,7 +31,7 @@ fi
 **For explicitly requested changes:**
 ```bash
 # Create manual change request
-./.claude/hooks/change-detector.ps1 -EventType "manual-change-request" -Context @{
+./.claude/hooks/change-detector.sh -EventType "manual-change-request" -Context @{
     Description="User requested change: $USER_CHANGE_DESCRIPTION"
     Priority="High"
     ChangeType="Requirements"
@@ -58,7 +58,7 @@ Load the po-agent to perform comprehensive change impact assessment using the ch
 **Quality Gate - Change Impact Validation:**
 ```bash
 # Enforce change impact validation
-./.claude/hooks/validation-enforcer.ps1 -EventType "change-request"
+./.claude/hooks/validation-enforcer.sh -EventType "change-request"
 
 # Validates:
 # - Change impact assessment completeness (score ≥7/10)
@@ -158,7 +158,7 @@ if [ $ACTUAL_TIME -gt $((ESTIMATED_TIME * 150 / 100)) ]; then
 fi
 
 # Monitor for new issues or scope creep
-./.claude/hooks/change-detector.ps1 -EventType "file-modified" -FilePath "docs/stories/"
+./.claude/hooks/change-detector.sh -EventType "file-modified" -FilePath "docs/stories/"
 ```
 
 ## PHASE 4: ROLLBACK & CONTINGENCY
@@ -212,7 +212,7 @@ fi
 **Quality Gate - Change Implementation Complete:**
 ```bash
 # Validate change implementation
-./.claude/hooks/validation-enforcer.ps1 -EventType "change-implementation-complete" -Context @{ChangeId=$CHANGE_ID}
+./.claude/hooks/validation-enforcer.sh -EventType "change-implementation-complete" -Context @{ChangeId=$CHANGE_ID}
 
 # Validates:
 # - All change objectives met
@@ -226,7 +226,7 @@ echo "✅ Change implementation validation passed"
 **Archive change and extract learnings:**
 ```bash
 # Archive approved change
-./.claude/hooks/change-detector.ps1 -EventType "approve-change"
+./.claude/hooks/change-detector.sh -EventType "approve-change"
 
 # Extract lessons learned
 Load the learnings-agent to extract insights from change process:
@@ -277,10 +277,10 @@ Load ux-agent for:
 ## CHANGE MANAGEMENT COMMANDS
 
 ### Quick Commands
-- `/.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"` - Check pending changes
-- `/.claude/hooks/change-detector.ps1 -EventType "manual-change-request"` - Create manual change request  
+- `/.claude/hooks/change-detector.sh -EventType "check-pending-changes"` - Check pending changes
+- `/.claude/hooks/change-detector.sh -EventType "manual-change-request"` - Create manual change request  
 - `/bmad:change-management` - Full change management workflow
-- `/.claude/hooks/validation-enforcer.ps1 -EventType "change-request"` - Validate change impact
+- `/.claude/hooks/validation-enforcer.sh -EventType "change-request"` - Validate change impact
 
 ### Environment Variables
 - `BMAD_CHANGE_MANAGEMENT=1` - Enables change management features

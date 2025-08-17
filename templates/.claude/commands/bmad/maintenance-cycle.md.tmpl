@@ -1,6 +1,6 @@
 ---
 description: Streamlined maintenance workflow for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Efficient cycle for bug fixes and small improvements.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*)
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*)
 ---
 
 # /bmad:maintenance-cycle
@@ -17,21 +17,75 @@ Efficient workflow for bug fixes, small improvements, and maintenance tasks that
 - Documentation updates
 - Code refactoring and cleanup
 
-## 0) OPTIONAL: Task Master Integration
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
 
-**Task Tracking (Optional):**
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Maintenance cycle requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:maintenance-cycle --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct maintenance request (not from planning):"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='Maintenance: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for maintenance workflow"
+    echo "Required: All maintenance work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+{{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for maintenance cycle"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 Maintenance workflow authorized to proceed"
 ```
-If using task management:
-- {{TASKMASTER_CLI}} start-maintenance --type="bug-fix|improvement|config|docs"
-- {{TASKMASTER_CLI}} set-priority --level="low|medium|high"
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="Maintenance cycle started - execution authorized"
+else
+    # Create new maintenance task if none provided
+    TASK_ID=$({{TASKMASTER_CLI}} create --title="Maintenance: [Auto-generated]" --type="maintenance" --status="in-progress")
+    echo "📝 Created maintenance task: $TASK_ID"
+fi
+
+# Set maintenance-specific metadata
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="maintenance-cycle"
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
 ```
 
 ## 1) DEVELOPER IMPLEMENTATION
 
-**Load Developer Agent:**
+**STEP 1 TRIGGER: Use Task tool to invoke dev-agent**
 ```
 /task dev-agent "Implement maintenance fix with comprehensive testing"
 ```
+
+**MANDATORY: Wait for dev-agent completion confirmation before proceeding to step 2.**
 
 **Implementation Process:**
 1. **Issue Analysis**
@@ -75,14 +129,22 @@ If using task management:
 - [ ] No regressions introduced
 - [ ] Change is minimal and focused on the specific issue
 
+**STEP 1 COMPLETION VALIDATION:**
+- ✅ Implementation completed by dev-agent
+- ✅ All tests pass
+- ✅ Quality gates met
+- ✅ Agent reports completion confirmation
+
 **After implementation complete, proceed to QA ENGINEER REVIEW (step 2) or DOCUMENTATION (step 3) if QA skipped.**
 
 ## 2) QA ENGINEER REVIEW (OPTIONAL)
 
-**Load QA Engineer Agent:**
+**STEP 2 TRIGGER: Use Task tool to invoke qa-agent (if needed)**
 ```
 /task qa-agent "Review maintenance implementation for quality and risks"
 ```
+
+**MANDATORY: Wait for qa-agent completion confirmation before proceeding to step 3.**
 Note: This step is optional for simple changes but recommended for complex or high-risk modifications.
 
 **When QA Review is Recommended:**
@@ -106,14 +168,21 @@ Note: This step is optional for simple changes but recommended for complex or hi
    - **QA_APPROVED**: Change meets quality standards, proceed to DOCUMENTATION (step 3)
    - **NEEDS_REVISION**: Issues found, return to DEVELOPER IMPLEMENTATION (step 1) with specific feedback
 
+**STEP 2 COMPLETION VALIDATION:**
+- ✅ QA review completed by qa-agent
+- ✅ Quality assessment provided (APPROVED/NEEDS_REVISION)
+- ✅ Agent reports completion confirmation
+
 **After QA review complete, proceed to DOCUMENTATION & CHANGE LOG (step 3).**
 
 ## 3) DOCUMENTATION & CHANGE LOG
 
-**Load Documentation Agent:**
+**STEP 3 TRIGGER: Use Task tool to invoke doc-agent**
 ```
 /task doc-agent "Update documentation and changelog for maintenance task completion"
 ```
+
+**MANDATORY: Wait for doc-agent completion confirmation before proceeding to step 4.**
 
 **Automatic Documentation Updates:**
 ```bash
@@ -121,7 +190,7 @@ Note: This step is optional for simple changes but recommended for complex or hi
 CHANGE_TYPE="fix"  # or "chore" for maintenance tasks
 
 # Run documentation updater
-./.claude/hooks/documentation-updater.ps1 -Action update \
+./.claude/hooks/documentation-updater.sh -Action update \
     -TaskId "$TASK_ID" \
     -TaskTitle "$TASK_TITLE" \
     -ChangeType "$CHANGE_TYPE"
@@ -147,6 +216,12 @@ CHANGE_TYPE="fix"  # or "chore" for maintenance tasks
    - If bug was tricky to diagnose, add to `docs/lessons/`
    - Document any gotchas or important context for future developers
    - Note any technical debt discovered but not addressed
+
+**STEP 3 COMPLETION VALIDATION:**
+- ✅ Documentation updated by doc-agent
+- ✅ CHANGELOG.md updated
+- ✅ All required documentation complete
+- ✅ Agent reports completion confirmation
 
 **After documentation complete, proceed to USER APPROVAL GATE (step 4).**
 
@@ -178,10 +253,12 @@ DO NOT PROCEED until user approves the changes.
 
 ## 5) GIT COMMIT & DEPLOYMENT
 
-**Load Git Agent:**
+**STEP 5 TRIGGER: Use Task tool to invoke git-agent (ONLY after user approval)**
 ```
 /task git-agent "Handle git operations for maintenance task completion"
 ```
+
+**MANDATORY: Only proceed after explicit user approval in step 4.**
 
 **Version Control Process:**
 1. **Stage Changes**

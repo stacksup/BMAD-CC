@@ -1,6 +1,6 @@
 ---
 description: Document sharding utility for BMAD-CC - Breaks large documents into manageable pieces for efficient processing.
-allowed-tools: Read, Write, Grep, Glob, Bash(powershell:*), Bash(pwsh:*), Bash(ls:*), Bash(mkdir:*)
+allowed-tools: Read, Write, Grep, Glob, Bash(ls:*), Bash(mkdir:*)
 ---
 
 # /bmad:shard-document

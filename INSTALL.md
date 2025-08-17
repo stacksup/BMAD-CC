@@ -4,14 +4,14 @@
 
 For immediate installation in your project directory:
 
-```powershell
+```bash
 # Option 1: One-liner (primary method)
-powershell -ExecutionPolicy Bypass -NoProfile -Command "iwr https://raw.githubusercontent.com/stacksup/BMAD-CC/main/bootstrap.ps1 -UseBasicParsing | iex; Install-BMAD -ProjectDir . -ProjectType auto"
+curl -sSL https://raw.githubusercontent.com/stacksup/BMAD-CC/main/bootstrap.sh | bash -s -- . auto
 
 # Option 2: Reliable manual installation (if Option 1 fails)
 git clone --depth 1 https://github.com/stacksup/BMAD-CC.git temp-bmad
 cd temp-bmad
-powershell -ExecutionPolicy Bypass -File "scripts/setup.ps1" -ProjectDir ".." -ProjectType "auto" -ProjectName "YourProject" -PRDPath "CLAUDE.md" -SecondaryPRDPath ""
+bash scripts/setup.sh --project-dir=".." --project-type="auto" --project-name="YourProject" --prd-path="CLAUDE.md"
 cd .. && rm -rf temp-bmad
 ```
 
@@ -20,45 +20,45 @@ cd .. && rm -rf temp-bmad
 If the automated scripts fail, you can install manually:
 
 ### 1. Download Framework
-```powershell
+```bash
 git clone --depth 1 https://github.com/stacksup/BMAD-CC.git bmad-temp
 ```
 
 ### 2. Copy Core Files
-```powershell
+```bash
 # Create directories
-New-Item -ItemType Directory -Force -Path .claude\agents
-New-Item -ItemType Directory -Force -Path .claude\commands\bmad
-New-Item -ItemType Directory -Force -Path .claude\hooks
-New-Item -ItemType Directory -Force -Path docs\lessons\templates
-New-Item -ItemType Directory -Force -Path docs\story-notes
+mkdir -p .claude/agents
+mkdir -p .claude/commands/bmad
+mkdir -p .claude/hooks
+mkdir -p docs/lessons/templates
+mkdir -p docs/story-notes
 
 # Copy agents
-Copy-Item bmad-temp\templates\.claude\agents\*.md .claude\agents\
-Copy-Item bmad-temp\templates\.claude\commands\bmad\*.md .claude\commands\bmad\
-Copy-Item bmad-temp\templates\.claude\hooks\*.ps1 .claude\hooks\
-Copy-Item bmad-temp\templates\.claude\settings.local.json .claude\
+cp bmad-temp/templates/.claude/agents/*.md .claude/agents/
+cp bmad-temp/templates/.claude/commands/bmad/*.md .claude/commands/bmad/
+cp bmad-temp/templates/.claude/hooks/*.sh .claude/hooks/
+cp bmad-temp/templates/.claude/settings.local.json .claude/
 
 # Copy lesson templates
-Copy-Item bmad-temp\templates\docs\lessons\templates\*.tmpl docs\lessons\templates\
+cp bmad-temp/templates/docs/lessons/templates/*.tmpl docs/lessons/templates/
 
 # Copy CLAUDE.md if you don't have one
-if (!(Test-Path CLAUDE.md)) { Copy-Item bmad-temp\templates\CLAUDE.md.tmpl CLAUDE.md }
+if [ ! -f CLAUDE.md ]; then
+    cp bmad-temp/templates/CLAUDE.md.tmpl CLAUDE.md
+fi
 ```
 
 ### 3. Customize for Your Project
-```powershell
+```bash
 # Replace tokens in copied files
-$projectName = Split-Path (Get-Location) -Leaf
-Get-ChildItem -Recurse -File | ForEach-Object {
-    (Get-Content $_.FullName) -replace '{{PROJECT_NAME}}', $projectName | Set-Content $_.FullName
-    (Get-Content $_.FullName) -replace '{{PROJECT_TYPE}}', 'auto' | Set-Content $_.FullName
-}
+project_name=$(basename "$(pwd)")
+find . -type f -name "*.md" -o -name "*.json" -o -name "*.sh" | xargs sed -i "s/{{PROJECT_NAME}}/$project_name/g"
+find . -type f -name "*.md" -o -name "*.json" -o -name "*.sh" | xargs sed -i "s/{{PROJECT_TYPE}}/auto/g"
 ```
 
 ### 4. Clean Up
-```powershell
-Remove-Item -Recurse -Force bmad-temp
+```bash
+rm -rf bmad-temp
 ```
 
 ## Verification
@@ -81,12 +81,12 @@ After installation, restart Claude Code to load the new slash commands:
 ## Troubleshooting
 
 ### Parameter Passing Issues
-If you see "Missing an argument for parameter" errors:
-```powershell
+If you see argument parsing errors:
+```bash
 # Use the manual installation method with explicit parameters
 git clone --depth 1 https://github.com/stacksup/BMAD-CC.git temp-bmad
 cd temp-bmad
-powershell -ExecutionPolicy Bypass -File "scripts/setup.ps1" -ProjectDir ".." -ProjectType "saas" -ProjectName "MyProject" -PRDPath "CLAUDE.md" -SecondaryPRDPath ""
+bash scripts/setup.sh --project-dir=".." --project-type="saas" --project-name="MyProject" --prd-path="CLAUDE.md"
 cd .. && rm -rf temp-bmad
 ```
 
@@ -97,16 +97,25 @@ If agents don't appear in Claude Code:
 3. Reinstall if BOM characters are present
 
 ### General Issues
-**PowerShell Execution Policy Errors:**
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+**Permission Errors:**
+```bash
+# Ensure you have write permissions in the project directory
+chmod +w .
+sudo chown -R $USER:$USER .
 ```
 
 **Git Clone Failures:**
 Download the ZIP from GitHub instead and extract it manually.
 
-**Permission Errors:**
-Run PowerShell as Administrator or use `-Force` flag on file operations.
+**Script Execution Errors:**
+```bash
+# Make scripts executable
+chmod +x scripts/setup.sh
+chmod +x .claude/hooks/*.sh
+```
 
 **Empty .claude/agents/ Directory:**
-The bootstrap script has parameter passing issues. Use Option 2 (manual installation) instead.
+The bootstrap script may have parameter issues. Use the manual installation method instead.
+
+**WSL/Linux Compatibility:**
+This framework is now fully compatible with WSL, Linux, and macOS. No PowerShell dependencies remain.

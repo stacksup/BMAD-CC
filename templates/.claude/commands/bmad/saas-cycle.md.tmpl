@@ -1,26 +1,87 @@
 ---
 description: BMAD cycle for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) with Docker start/verify.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(docker:*), Bash(docker-compose:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*)
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(docker:*), Bash(docker-compose:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*)
 ---
 
 # /bmad:saas-cycle
 
-## 0) Task Master (Start)
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
+
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: SaaS cycle requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:saas-cycle --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct SaaS request (not from planning):"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='SaaS: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for SaaS workflow"
+    echo "Required: All SaaS work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+{{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for SaaS cycle"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 SaaS workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="SaaS cycle started - execution authorized"
+else
+    # Create new SaaS task if none provided
+    TASK_ID=$({{TASKMASTER_CLI}} create --title="SaaS: [Auto-generated]" --type="saas" --status="in-progress")
+    echo "📝 Created SaaS task: $TASK_ID"
+fi
+
+# Set SaaS-specific metadata
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="saas-cycle"
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+```
+
+## 1) Task Master (Start)
 - {{TASKMASTER_CLI}} next (or show <ID>, list)
 Capture STORY_ID/title/desc.
 
-## 1) Docker Start
+## 2) Docker Start
 - If "{{DOCKER_COMPOSE_FILE}}": docker-compose -f {{DOCKER_COMPOSE_FILE}} up -d
   else: docker-compose up -d
 - Health:
   - backend: http://localhost:{{BACKEND_PORT}}/health (retry)
   - frontend: http://localhost:{{FRONTEND_PORT}}
 
-## 2) SM → 3) PO → 4) User → 5) Dev → 6) QA
+## 3) SM → 4) PO → 5) User → 6) Dev → 7) QA
 
 Follow standard story development flow as per story-cycle.
 
-## 7) Documentation Updates
+## 8) Documentation Updates
 
 **Load Documentation Agent:**
 ```
@@ -30,7 +91,7 @@ Load the doc-agent to ensure comprehensive documentation updates.
 **Automatic Documentation:**
 ```bash
 # Run documentation updater
-./.claude/hooks/documentation-updater.ps1 -Action update \
+./.claude/hooks/documentation-updater.sh -Action update \
     -TaskId "$STORY_ID" \
     -TaskTitle "$STORY_TITLE" \
     -ChangeType "feature"
@@ -43,11 +104,11 @@ Load the doc-agent to ensure comprehensive documentation updates.
 - [ ] API documentation updated if endpoints changed
 - [ ] Docker documentation updated if containers modified
 
-## 8) Learnings → 9) Git
+## 9) Learnings → 10) Git
 
 Capture lessons and commit changes with proper documentation.
 
-## 10) Docker Verify & Restart
+## 11) Docker Verify & Restart
 - Build:
   - if file set: docker-compose -f {{DOCKER_COMPOSE_FILE}} build
   - else: docker-compose build

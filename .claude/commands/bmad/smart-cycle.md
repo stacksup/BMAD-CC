@@ -1,6 +1,6 @@
 ---
 description: Intelligent BMAD workflow routing for BMAD-CC (Framework) - Analyzes requests and routes to optimal workflow.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, Task
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), Read, Grep, Glob, Edit, Write, Task
 ---
 
 # /bmad:smart-cycle
@@ -77,11 +77,11 @@ task-master set-field --id=$TASK_ID --field="execution-start" --value="$(date -I
 **CRITICAL: Task Master Availability Check:**
 ```bash
 # MUST succeed or workflow cannot proceed
-./.claude/hooks/taskmaster-check.ps1 check
-if ($LASTEXITCODE -ne 0) { 
-    Write-Error "âŒ BMAD requires Task Master AI. Install with: npm install -g task-master-ai"
+./.claude/hooks/taskmaster-check.sh check
+if [ $? -ne 0 ]; then 
+    echo "âŒ BMAD requires Task Master AI. Install with: npm install -g task-master-ai"
     exit 1
-}
+fi
 ```
 
 **Docker Environment Check:**
@@ -108,15 +108,15 @@ if [ $? -ne 0 ]; then
 fi
 
 # Start containers if not running
-./.claude/hooks/docker-manager.ps1 status
+./.claude/hooks/docker-manager.sh status
 if [ $? -ne 0 ]; then
     echo "ðŸ³ Starting Docker containers..."
-    ./.claude/hooks/docker-manager.ps1 start
+    ./.claude/hooks/docker-manager.sh start
     
     # Wait for health checks
     echo "â³ Waiting for services to be healthy..."
     sleep 5
-    ./.claude/hooks/docker-manager.ps1 health
+    ./.claude/hooks/docker-manager.sh health
 fi
 ```
 
@@ -235,7 +235,7 @@ fi
 
 # Change Request Detection
 echo "ðŸ” Checking for pending changes..."
-./.claude/hooks/change-detector.ps1 -EventType "check-pending-changes"
+./.claude/hooks/change-detector.sh -EventType "check-pending-changes"
 
 if [ -f "docs/change-request.md" ] || [ -f ".bmad-change-pending" ]; then
     echo "ðŸ”„ Change request detected - Change management activated"

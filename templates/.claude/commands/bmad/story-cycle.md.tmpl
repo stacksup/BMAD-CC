@@ -1,6 +1,6 @@
 ---
 description: BMAD story development cycle for {{PROJECT_NAME}} ({{PROJECT_TYPE}}) - Complete story implementation with Docker container management.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), mcp__docker__list_containers, mcp__docker__get_container_logs, mcp__docker__execute_command
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash({{TASKMASTER_CLI}}:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*), mcp__docker__list_containers, mcp__docker__get_container_logs, mcp__docker__execute_command
 ---
 
 # /bmad:story-cycle
@@ -8,6 +8,67 @@ allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(
 ## DOCKER-BASED STORY DEVELOPMENT WORKFLOW
 
 Complete story implementation from task assignment to deployment, with all development happening in Docker containers.
+
+## 0) MANDATORY: EXECUTION AUTHORIZATION VALIDATION
+
+**COMPLIANCE ENFORCEMENT: Validate execution authority before proceeding**
+```bash
+# CRITICAL: Validate this workflow has execution authorization
+TASK_ID=${1:-$({{TASKMASTER_CLI}} current-task-id 2>/dev/null)}
+EXECUTION_AUTHORIZED=${2:-false}
+
+if [ "$EXECUTION_AUTHORIZED" != "true" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Story cycle requires execution authorization"
+    echo "Required: Must be routed from orchestrator with --execution-authorized=true"
+    echo ""
+    echo "Proper usage: /bmad:story-cycle --task-id=<id> --execution-authorized=true"
+    echo ""
+    echo "If this is a direct story request (not from planning):"
+    echo "1. Create task: {{TASKMASTER_CLI}} create --title='Story: [description]'"
+    echo "2. Route through orchestrator for authorization"
+    exit 1
+fi
+
+# Validate task exists and is properly tracked
+if [ -z "$TASK_ID" ]; then
+    echo "❌ COMPLIANCE VIOLATION: Task ID required for story workflow"
+    echo "Required: All story work must be tracked in Task Master"
+    exit 1
+fi
+
+# Verify task status allows execution
+TASK_STATUS=$({{TASKMASTER_CLI}} get-status --id=$TASK_ID 2>/dev/null)
+if [[ "$TASK_STATUS" != "execution-authorized" && "$TASK_STATUS" != "in-progress" ]]; then
+    echo "❌ COMPLIANCE VIOLATION: Task $TASK_ID not authorized for execution"
+    echo "Current status: $TASK_STATUS"
+    echo "Required status: execution-authorized or in-progress"
+    exit 1
+fi
+
+# Set task status to in-progress
+{{TASKMASTER_CLI}} set-status --id=$TASK_ID --status=in-progress
+
+echo "✅ Execution authorization validated for story cycle"
+echo "📋 Task ID: $TASK_ID"
+echo "🔧 Story workflow authorized to proceed"
+```
+
+**Task Master Integration (MANDATORY):**
+```bash
+# Initialize or update task tracking
+if [ -n "$TASK_ID" ]; then
+    # Update existing task
+    {{TASKMASTER_CLI}} update-task --id=$TASK_ID --prompt="Story cycle started - execution authorized"
+else
+    # Create new story task if none provided
+    TASK_ID=$({{TASKMASTER_CLI}} create --title="Story: [Auto-generated]" --type="story" --status="in-progress")
+    echo "📝 Created story task: $TASK_ID"
+fi
+
+# Set story-specific metadata
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="workflow" --value="story-cycle"
+{{TASKMASTER_CLI}} set-field --id=$TASK_ID --field="execution-start" --value="$(date -Iseconds)"
+```
 
 ## PHASE 0: INFRASTRUCTURE SETUP
 
@@ -28,7 +89,7 @@ echo "📋 Working on: $STORY_TITLE (ID: $STORY_ID)"
 docker info > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "❌ Docker not running. Starting Docker Desktop..."
-    ./.claude/hooks/docker-manager.ps1 start
+    ./.claude/hooks/docker-manager.sh start
 fi
 
 # Start development containers
@@ -37,7 +98,7 @@ echo "⏳ Waiting for services to be healthy..."
 sleep 5
 
 # Verify health
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 ```
 
 ## PHASE 1: STORY CREATION & REFINEMENT
@@ -59,7 +120,7 @@ Story must reference Task Master ID: $STORY_ID
 **Quality Gate - Story Validation:**
 ```bash
 # Automated validation hook with scoring
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-development" -Context @{StoryId=$STORY_ID}
+./.claude/hooks/validation-enforcer.sh -EventType "pre-story-development" -Context @{StoryId=$STORY_ID}
 
 # Hook will:
 # - Check for existing story validation report
@@ -80,7 +141,7 @@ Load the po-agent to validate story completeness and alignment.
 **Product Owner Validation Process:**
 ```bash
 # Automated PO validation with comprehensive scoring
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-development" -Context @{StoryId=$STORY_ID} -DocumentPath "docs/stories/story-$STORY_ID.md"
+./.claude/hooks/validation-enforcer.sh -EventType "pre-story-development" -Context @{StoryId=$STORY_ID} -DocumentPath "docs/stories/story-$STORY_ID.md"
 
 # Validation includes:
 # - Docker environment requirements specified
@@ -154,7 +215,7 @@ docker-compose logs -f &
 ```bash
 # Check for dummy data patterns FIRST
 echo "🔍 Running no-dummy-data quality gate..."
-./.claude/hooks/quality-gate-no-dummies.ps1
+./.claude/hooks/quality-gate-no-dummies.sh
 if [ $? -ne 0 ]; then
     echo "❌ Dummy data or fallback patterns detected!"
     echo "Fix all issues before proceeding"
@@ -179,7 +240,7 @@ Load the qa-agent for containerized quality assurance.
 ```bash
 # FIRST: Validate no dummy data patterns
 echo "🔍 QA: Checking for dummy data and fallback patterns..."
-./.claude/hooks/quality-gate-no-dummies.ps1
+./.claude/hooks/quality-gate-no-dummies.sh
 if [ $? -ne 0 ]; then
     echo "❌ QA FAILED: Dummy data or fallback implementations found!"
     echo "Returning to developer for fixes"
@@ -211,7 +272,7 @@ docker stats --no-stream
 **Quality Gate - Definition of Done:**
 ```bash
 # Automated DoD validation before story completion
-./.claude/hooks/validation-enforcer.ps1 -EventType "pre-story-completion" -Context @{StoryId=$STORY_ID}
+./.claude/hooks/validation-enforcer.sh -EventType "pre-story-completion" -Context @{StoryId=$STORY_ID}
 
 # Validation enforces:
 # - All tests pass (minimum score 9/10)
@@ -297,7 +358,7 @@ docker tag {{PROJECT_NAME}}_frontend:latest {{PROJECT_NAME}}_frontend:$STORY_ID
 ### 7B) Container Health Verification
 ```bash
 # Final health check
-./.claude/hooks/docker-manager.ps1 health
+./.claude/hooks/docker-manager.sh health
 
 # Verify all services responding
 curl http://localhost:{{FRONTEND_PORT}}
@@ -322,7 +383,7 @@ Load the doc-agent to update all project documentation.
 **Automated Documentation Update:**
 ```bash
 # Run documentation updater hook
-./.claude/hooks/documentation-updater.ps1 -Action update \
+./.claude/hooks/documentation-updater.sh -Action update \
     -TaskId "$STORY_ID" \
     -TaskTitle "$STORY_TITLE" \
     -ChangeType "feature"
@@ -412,7 +473,7 @@ docker system prune -a
 - `docker-compose logs -f` - Watch logs
 - `docker-compose exec [service] [command]` - Run in container
 - `docker-compose down` - Stop everything
-- `./.claude/hooks/docker-manager.ps1 health` - Check health
-- `./.claude/hooks/docker-manager.ps1 troubleshoot` - Debug issues
+- `./.claude/hooks/docker-manager.sh health` - Check health
+- `./.claude/hooks/docker-manager.sh troubleshoot` - Debug issues
 
 Remember: All development, testing, and validation happens inside Docker containers. Never install dependencies on the host machine.

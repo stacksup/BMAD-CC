@@ -1,6 +1,6 @@
 ---
 description: Streamlined maintenance workflow for BMAD-CC (Framework) - Efficient cycle for bug fixes and small improvements.
-allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(powershell:*), Bash(pwsh:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*)
+allowed-tools: Bash(git:*), Bash(node:*), Bash(npm:*), Bash(task-master:*), Bash(npx task-master:*), Bash(pytest:*), Bash(docker:*), Bash(docker-compose:*)
 ---
 
 # /bmad:maintenance-cycle
@@ -191,7 +191,7 @@ Note: This step is optional for simple changes but recommended for complex or hi
 CHANGE_TYPE="fix"  # or "chore" for maintenance tasks
 
 # Run documentation updater
-./.claude/hooks/documentation-updater.ps1 -Action update \
+./.claude/hooks/documentation-updater.sh -Action update \
     -TaskId "$TASK_ID" \
     -TaskTitle "$TASK_TITLE" \
     -ChangeType "$CHANGE_TYPE"
