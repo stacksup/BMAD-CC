@@ -12,6 +12,7 @@ $RECYCLE.BIN/
 # IDE
 .idea/
 .vscode/
+.zed/
 *.swp
 *.swo
 *~

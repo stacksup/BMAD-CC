@@ -1,5 +1,38 @@
 # CHANGELOG
 
+## 2025-08-17 - Additional Repository Cleanup
+
+### [Maintenance] - 2025-08-17
+- **Fixed**: Removed editor-specific and local development directories from repository
+- **Files Removed**: 
+  - Deleted `.zed/` directory (Zed editor configuration, previously tracked)
+  - Deleted `.vscode/` directory (VS Code editor configuration, not tracked)
+  - Deleted `.bmad/` directory (local BMAD framework testing directory with hook-test.txt)
+  - Added `.zed/` to .gitignore to prevent future tracking
+- **Impact**: Cleaner repository without editor-specific or local test files
+- **Note**: `.bmad-version` file retained as it tracks framework version (commit hash)
+- **Verification**: Confirmed all local development directories are removed and properly ignored
+
+## 2025-08-17 - Repository Maintenance and Platform Migration
+
+### [Bug Fix] - 2025-08-17
+- **COMPLETED**: Excluded local development files from public repository to prevent conflicts with other projects
+- **ISSUE**: Local taskmaster and BMAD development files were being pushed to public repo, causing conflicts when other projects cloned BMAD-CC
+- **SOLUTION**: Updated .gitignore with comprehensive exclusions for local development environment
+- **FILES REMOVED FROM TRACKING**: 7 files (1,108 lines total)
+  - `.taskmaster/` directory (local task manager instance with 6 files)
+  - `.bmad/hook-test.txt` (local development test file)
+- **GITIGNORE ADDITIONS**: 22 new exclusion patterns including:
+  - Local taskmaster installations (`.taskmaster/`, `task-master-local/`, `taskmaster-local/`)
+  - BMAD backup directories (`*.bmad-backup-*/`, `.bmad-cleanup-backup-*`)
+  - Development shell scripts (`quick-*.sh`, `setup-*.sh`, `rewrite-*.sh`)
+  - IDE workspace files (`*.code-workspace`, `.vscode/settings.json`, `.vscode/launch.json`)
+  - Local environment configs (`.env.local`, `.env.development.local`)
+- **IMPACT**: Other projects can now clone BMAD-CC framework without local development file conflicts
+- **FRAMEWORK PRESERVATION**: Core BMAD framework components (`.claude/`, `templates/`, `scripts/`) remain available for other projects
+- **DEVELOPMENT CONTINUITY**: Local development continues normally with excluded files remaining functional locally
+- **COMMIT**: b8a2543 - Remove local development files from repository tracking
+
 ## 2025-08-17 - PowerShell to Bash Migration Completion
 
 ### ✅ MAJOR PLATFORM ENHANCEMENT: Complete PowerShell to Bash Migration
