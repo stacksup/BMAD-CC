@@ -58,3 +58,25 @@ dev-debug.log
 # tasks.json
 # tasks/ 
 .bmad-cleanup-backup-*
+
+# Local development files (project-specific)
+.taskmaster/
+.bmad/
+*.bmad-backup-*/
+quick-*.sh
+setup-*.sh
+rewrite-*.sh
+
+# Local development scripts and configs
+dev-debug.log
+.env.local
+.env.development.local
+
+# IDE workspace files
+*.code-workspace
+.vscode/settings.json
+.vscode/launch.json
+
+# Local task manager instances (other projects will install their own)
+task-master-local/
+taskmaster-local/
