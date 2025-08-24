@@ -5,14 +5,11 @@
 For immediate installation in your project directory:
 
 ```bash
-# Option 1: One-liner (primary method)
-curl -sSL https://raw.githubusercontent.com/stacksup/BMAD-CC/main/bootstrap.sh | bash -s -- . auto
+# Option 1: Simple one-liner (primary method)
+git clone --depth 1 https://github.com/stacksup/BMAD-CC.git temp-bmad && cd temp-bmad && bash simple-install.sh .. && cd .. && rm -rf temp-bmad
 
-# Option 2: Reliable manual installation (if Option 1 fails)
-git clone --depth 1 https://github.com/stacksup/BMAD-CC.git temp-bmad
-cd temp-bmad
-bash scripts/setup.sh --project-dir=".." --project-type="auto" --project-name="YourProject" --prd-path="CLAUDE.md"
-cd .. && rm -rf temp-bmad
+# Option 2: Bootstrap script (if you prefer)
+curl -sSL https://raw.githubusercontent.com/stacksup/BMAD-CC/main/bootstrap.sh | bash -s -- . auto
 ```
 
 ## Manual Installation Steps
