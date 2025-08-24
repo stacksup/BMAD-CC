@@ -138,39 +138,56 @@ process_templates() {
     local processed_count=0
     local copied_count=0
     
-    # Process .tmpl files
-    find "$templates_dir" -name "*.tmpl" -type f | while read -r template_file; do
+    # Process .tmpl files using a simpler, more reliable approach
+    find "$templates_dir" -name "*.tmpl" -type f | while IFS= read -r template_file; do
         # Calculate target path (remove templates/ prefix and .tmpl suffix)
         local relative_path="${template_file#$templates_dir/}"
         local target_file="$target_dir/${relative_path%.tmpl}"
         
+        echo -e "${GRAY}  Processing: ${relative_path%.tmpl}${NC}"
+        
         # Create target directory
-        mkdir -p "$(dirname "$target_file")"
+        if ! mkdir -p "$(dirname "$target_file")" 2>/dev/null; then
+            echo -e "${YELLOW}  ⚠ Failed to create directory for: ${relative_path%.tmpl}${NC}"
+            continue
+        fi
         
         # Read and process template
-        local content=$(cat "$template_file")
-        local processed_content=$(replace_template_vars "$content")
-        
-        # Write processed content
-        echo "$processed_content" > "$target_file"
-        
-        echo -e "${GRAY}  ✓ Processed: ${relative_path%.tmpl}${NC}"
-        ((processed_count++))
+        if content=$(cat "$template_file" 2>/dev/null); then
+            processed_content=$(replace_template_vars "$content")
+            
+            # Write processed content
+            if echo "$processed_content" > "$target_file" 2>/dev/null; then
+                echo -e "${GRAY}  ✓ Processed: ${relative_path%.tmpl}${NC}"
+                processed_count=$((processed_count + 1)) || true
+            else
+                echo -e "${YELLOW}  ⚠ Failed to write: ${relative_path%.tmpl}${NC}"
+            fi
+        else
+            echo -e "${YELLOW}  ⚠ Failed to read: $template_file${NC}"
+        fi
     done
     
     # Copy non-template files
-    find "$templates_dir" -type f ! -name "*.tmpl" | while read -r source_file; do
+    find "$templates_dir" -type f ! -name "*.tmpl" | while IFS= read -r source_file; do
         local relative_path="${source_file#$templates_dir/}"
         local target_file="$target_dir/$relative_path"
         
+        echo -e "${GRAY}  Copying: $relative_path${NC}"
+        
         # Create target directory
-        mkdir -p "$(dirname "$target_file")"
+        if ! mkdir -p "$(dirname "$target_file")" 2>/dev/null; then
+            echo -e "${YELLOW}  ⚠ Failed to create directory for: $relative_path${NC}"
+            continue
+        fi
         
         # Copy file
-        cp "$source_file" "$target_file"
-        
-        echo -e "${GRAY}  ✓ Copied: $relative_path${NC}"
-        ((copied_count++))
+        if cp "$source_file" "$target_file" 2>/dev/null; then
+            echo -e "${GRAY}  ✓ Copied: $relative_path${NC}"
+            copied_count=$((copied_count + 1)) || true
+        else
+            echo -e "${YELLOW}  ⚠ Failed to copy: $relative_path${NC}"
+        fi
     done
     
     echo -e "${GREEN}✅ Template processing complete${NC}"
